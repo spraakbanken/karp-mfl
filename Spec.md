@@ -119,8 +119,12 @@ böjningsregel +om, men olika taggning fem/mask)?"
   "Kan ordledsinformation ingå i variabeltilldelningen (behövs för avstavningssystemet)?"
 
 
+Bild 1: Förslag på hur nysvenska "erfarer" böjs, automatiskt genererat utifrån kända böjningsmönster och korpusinformation:
 
-![Förslag på hur nysvenska "erfarer" böjs, automatiskt genererat utifrån kända böjningsmönster och korpusinformation](mfl.png "Förslag på nya böjningar")
+![Förslag](mfl.png "Förslag på nya böjningar")
+
+
+Bild 2: Jämförelse av nysvenska paradigmet "egendom":
 
 ![Jämförelse av nysvenska paradigmet "egendom"](mfllabb.png "Paradigmjämförelse")
 
