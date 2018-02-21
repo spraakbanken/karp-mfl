@@ -1,0 +1,15 @@
+{% extends "search.html" %}
+{% block content %}
+<h1>
+  Sök {{searchfield}} {{q}}
+</h1>
+
+ <p>
+ Resultat: {{ count }}
+ </p>
+ <ul>
+   {% for r in results %}
+   <li>{{r.key}} {{r.doc_count}} ord, {{r["FormRepresentations.bklass"]["value"]}} bklasser</li>
+   {% endfor %}
+ </ul>
+{% endblock %}

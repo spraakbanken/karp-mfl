@@ -1,0 +1,15 @@
+{% extends "search.html" %}
+{% block content %}
+<h1>
+  Sök {{searchfield}} {{q}}, kompilera på {{compilefield}}
+</h1>
+
+ <p>
+ Resultat: {{ count }}
+ </p>
+ <div>
+   {% for r in results %}
+     {{ r.w}} {{   r.c }}<br/>
+   {% endfor %}
+ </div>
+{% endblock %}
