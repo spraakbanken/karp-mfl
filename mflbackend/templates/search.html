@@ -1,0 +1,59 @@
+<!doctype html>
+<html>
+  <head>
+
+   <style>
+   .dropdown {
+       position: relative;
+       display: inline-block;
+   }
+
+   .dropdown-content {
+       display: none;
+       position: absolute;
+       background-color: #f9f9f9;
+       min-width: 160px;
+       box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+       padding: 12px 16px;
+       z-index: 1;
+   }
+
+   .dropdown:hover .dropdown-content {
+       display: block;
+   }
+   </style>
+  </head>
+
+  <body>
+    <div display="inline">
+      <h3><span>{{infotext}}</span></h3>
+      <div>
+        <a class="search">Sök</a>
+      </div>
+
+       <form id="search" action="{{ url_for('compile') }}">
+         <div>
+             <select name="s">
+               <option value="wf">ord</option>
+               <option value="paradigm">ord böjs som</option>
+               <option value="bklass">bklass</option>
+             </select>
+         </div>
+
+            <div class="input-group stylish-input-group">
+              <input name="q" type="search" class="form-control"  placeholder="" value="{{request.args.get('q', '')}}" >
+              <span class="input-group-addon">
+                <button type="submit">
+                  <span class="glyphicon glyphicon-search">OK</span>
+                </button>
+              </span>
+            </div>
+       </form>
+
+    </div>
+
+      <div class="row">
+        {% block content %}{% endblock %}
+      </div>
+    </body>
+    </html>

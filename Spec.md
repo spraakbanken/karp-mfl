@@ -9,10 +9,10 @@
 
 
 - Vid ändring av ett böjningsmönster påverkas alla ord som "pekar" på detta.
-  Vid en sådan ändring behövs därför kontroller, se nedan (B.5).
+  Vid en sådan ändring behövs därför kontroller, se nedan (B.4).
 
-- Fullformstabellerna genereras vid behov, tex automatiskt en gång om dygnet, eller via
-  en knapp i gränssnittet.
+- Fullformstabellerna genereras vid behov, tex automatiskt en gång om dygnet,
+  vid varje uppdatering, eller via en knapp i gränssnittet.
 
 - Böjningsmönstret innefattar ordformer och dess taggar (tex msd).
 
@@ -26,17 +26,23 @@
   Resultat: en ny böjningsangivelse i ordets ingång och därmed kan en ny
   fullformstabell genereras. Eventuellt också ett nytt böjningsmönster.
 
-2. Lägg till nytt ord genom att mata in dess böjningsformer (och taggar).
+2. Lägg till nytt ord genom att mata in (en eller flera av dess) dess böjningsformer (och eventuellt dess taggar).
     Om böjningsmönstret redan finns ges information om detta,
     i annat fall skapas och sparas det nya mönstret.
   Resultat: en ny böjningsangivelse i ordets ingång, och eventuellt ett nytt böjningsmönster.
+
 3. Se fördelning av ord över böjningsmönster, dvs simpel statistik:
   hur många ord böjs enligt varje mönster
+
 4. För varje böjningsmönster: vilka ord hör hit?
+
 5. För varje ord: vilka ord böjs lika?
+
 6. Få förslag på hur ord (de som saknar böjningsangivelse) böjs, se bild 1 nedan.
-  Förslagen tas fram mha metoden beskriven i [Forsberg, M; Hulden, M. (2016)](http://anthology.aclweb.org/W16-2405)
+   Förslagen tas fram mha metoden beskriven i [Forsberg, M; Hulden, M. (2016)](http://anthology.aclweb.org/W16-2405)
+
 7. Frekvensinformation för varje ordform, både existerande och föreslagna.
+
 8. Ändra ett paradigm och därmed på de resulterande tabellerna för alla tillhörande ord.
 
 
@@ -119,9 +125,10 @@ böjningsregel +om, men olika taggning fem/mask)?"
   "Kan ordledsinformation ingå i variabeltilldelningen (behövs för avstavningssystemet)?"
 
 
-
+Bild 1: Förslag på hur nysvenska "erfarer" böjs, automatiskt genererat utifrån kända böjningsmönster och korpusinformation
 ![Förslag på hur nysvenska "erfarer" böjs, automatiskt genererat utifrån kända böjningsmönster och korpusinformation](mfl.png "Förslag på nya böjningar")
 
+Bild 2: Jämförelse av nysvenska paradigmet "egendom"
 ![Jämförelse av nysvenska paradigmet "egendom"](mfllabb.png "Paradigmjämförelse")
 
 

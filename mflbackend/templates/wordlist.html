@@ -1,0 +1,15 @@
+{% extends "search.html" %}
+{% block content %}
+<h1>
+  Sök {{searchfield}} {{q}}
+</h1>
+
+ <p>
+ Resultat: {{ count }}
+ </p>
+ <ul>
+   {% for r in results %}
+   <li>{{r.lemgram}} {{r.partOfSpeech}} {{r.inherent}}. Deklination {{r.bklass}}, böjs som {{r.paradigm}}</li>
+   {% endfor %}
+ </ul>
+{% endblock %}
