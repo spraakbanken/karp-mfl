@@ -102,6 +102,32 @@ def searchtab():
     return render_template('search.html', infotext="mfl")
 
 
+@app.route('/paradigms')
+def paradigms():
+    karp_q = 'extended||and|pos|startswith|nn'
+    res = helpers.karp_query('statistics',
+                             {'q': karp_q,
+                              'cardinality': True,
+                              'buckets': 'paradigm.bucket,bklass.bucket'})
+    stats = res['aggregations']['q_statistics']
+    buckets = stats['FormRepresentations.paradigm.raw']['buckets']
+    count = 'X'
+    return render_template('paralist.html', count=count, results=buckets)
+
+
+@app.route('/bklasser')
+def bklasser():
+    karp_q = 'extended||and|pos|startswith|nn'
+    res = helpers.karp_query('statistics',
+                             {'q': karp_q,
+                              'cardinality': True,
+                              'buckets':'bklass.bucket.bucket,paradigm.bucket'})
+    stats = res['aggregations']['q_statistics']
+    buckets = stats['FormRepresentations.bklass']['buckets']
+    count = 'X'  # TODO this is not the correct count
+    return render_template('bklasslist.html', count=count, results=buckets)
+
+
 @app.route('/compile')
 def compile():
     q = request.args.get('q', '')  # querystring
@@ -122,7 +148,11 @@ def compile():
         karp_q = 'extended||and|pos|startswith|nn'
         if q:
             logging.debug('q is %s' % q)
-            karp_q += '||and|paradigm.search|equals|%s' % q
+            karp_q += '||and|lemgram.search|equals|%s' % q
+            res = helpers.karp_query('minientry', {'q': karp_q, 'show': 'paradigm'})
+            ps = [hit['_source'].get('FormRepresentations', [{}])[0].get('paradigm', '') for hit in res['hits']['hits']]
+            karp_q = 'extended||and|pos|startswith|nn||and|paradigm.search|equals|%s' % '|'.join(set(ps))
+
         res = helpers.karp_query('statistics',
                                  {'q': karp_q,
                                   'cardinality': True,
