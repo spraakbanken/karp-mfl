@@ -1,61 +1,109 @@
-from flask import Flask, jsonify, render_template, request
-import logging
-import sys
-sys.path.append('pextract')
-import pextract.generate as generate
-import pextract.morphparser as mp
-
-import handleparadigms as handle
-import helpers
-
-app = Flask(__name__)
-
-# TODO handle tags
-
-@app.route('/')
-@app.route('/index')
-def doc():
-    return render_template('doc.html', url=request.url_root)
+<head>
+<meta charset="UTF-8">
+</head>
+<h1>Documentation (<code>backend.py</code>)</h1>
+<p>
 
 
-@app.route('/inflectbklass')
-def inflectbklass():
-    lexicon = request.args.get('lexicon', 'saldomp')
-    word = request.args.get('word', '')
-    bklass = request.args.get('bklass', '')
-    pos = request.args.get('pos', 'nn')
-    res = helpers.karp_query('statlist', {'q': 'extended||and|bklass.search|equals|%s||and|pos|startswith|nn' % bklass,
-                                  'buckets': 'paradigm.bucket'})
-    possible_p = [line[0] for line in res['stat_table']]
-    res = generate.test_paradigms(['%s\t%s' % (word, '|'.join(possible_p))],
-                                  paradigms, debug=True, kbest=10)
-    ans = {"WordForms": helpers.format_simple_inflection(res)}
-    print('ans', ans)
-    return jsonify(ans)
+<p>
+
+<h2>Available calls to the backend</h2>
+<table>
+  <tr><td><b>Public calls:</b></td></tr>
+  <tr><td> <a href="inflect">inflect </a></td> <td> </td></tr>
+  <tr><td> <a href="inflectbklass">inflectbklass </a></td> <td> </td></tr>
+
+</table>
+
+<a name="inflect"/>
+<h3>inflect</h3>
+<p>
+Available query parameters:
+<table>
+  <tr><td>'lexicon': </td><td> the lexicon</td></tr>
+  <tr><td>'table':</td><td> the baseform </td></tr>
+  <tr><td>'bklass':</td><td> the declination to use</td></tr>
+  <tr><td>'pos':</td><td> the part of speech </td></tr>
+  <tr><td>'pprior':</td><td> the pprior value to pextract: how much weight to give the frequency of the paradigms. Default: </td></tr>
+</table>
+
+<p>
+Examples:
+<ul>
+  <li><pre>URL/inflect/?table=(word(|tag)?)*</pre>
+  <li><a href="URL/inflect/?table=apa,apan"><pre>URL/inflect/?table=apa,apan</pre></a>
+  <li><a href="URL/inflect/?table=apa,apan|pl indef nom"><pre>URL/inflect/?table=apa,apan|pl indef nom</pre></a>
+  <li><a href="URL/inflect/?table=apa,apan|pl indef nom,apor"><pre>URL/inflect/?table=apa,apan|pl indef nom,apor</pre></a>
+</ul>
+
+<p>
+Result:
+<pre>
+{
+  "Results": [
+    {
+      "WordForms": [
+        {
+          "msd": "sg indef nom",
+          "writtenForm": "apa"
+        },
+        ...
+      ],
+      "paradigm": "paradigm_name"
+    }
+  ],
+  "analyzes": "1::msd=tag#1+iten::msd=tag\t0=apa,,1=apa" // shows variable instantiations and paradigm pattern for new paradigms
+  "new": false/true
+}
+</pre>
+
+<a name="inflectbklass"/>
+<h3>inflectbklass</h3>
+<p>
+Available query parameters:
+<table>
+  <tr><td>'lexicon': </td><td> the lexicon</td></tr>
+  <tr><td>'word':</td><td> the baseform </td></tr>
+  <tr><td>'bklass':</td><td> the declination to use</td></tr>
+  <tr><td>'pos':</td><td> the part of speech </td></tr>
+</table>
+
+<p>
+Examples:
+<ul>
+  <li><a href="URL/inflectbklass/?word=apa&bklass=3"><pre>URL/inflectbklass/?word=apa&bklass=3</pre></a>
+</ul>
+
+<p>
+Result:
+<pre>
+{
+  "Results": [
+    {
+      "WordForms": [
+        {
+          "msd": "sg indef nom", 
+          "writtenForm": "apa"
+        }, 
+        {
+          "msd": "sg indef gen", 
+          "writtenForm": "apas"
+        }, 
+        ...
+        {
+          "msd": "pl def gen", 
+          "writtenForm": "apornas"
+        }
+      ], 
+      "paradigm": "p6_br\u00e4nn\u00e4ssla"
+    }, 
+    {
+      "WordForms": [...]
+      }
+}
+</pre>
 
 
-@app.route('/inflect')
-def inflect():
-    lexicon = request.args.get('lexicon', 'saldomp')
-    table = request.args.get('table', '')
-    pos = request.args.get('pos', 'nn')
-    ppriorv = float(request.args.get('pprior', pprior))
-    ans = handle.inflect_table(table,
-                               [paradigms, numexamples, lms, print_tables,
-                               debug, ppriorv, choose])
-    if 'paradigm' in ans:
-        print('made new', ans)
-        ans['paradigm'] = str(ans['paradigm'])
-    else:
-        print('found it', ans)
-        ans['analyzes'] = ''  # TODO can't string encode this
-    # print('res', res)
-    # ans = {"WordForms": helpers.format_inflection(res, kbest, debug=debug)}
-    # if not res:
-    #     ans = {'new': True, 'pattern': '%s' % generate.make_new_paradigm(table),
-    #            'WordForms': helpers.tableize(table)}
-    # print('ans', ans)
-    return jsonify(ans)
 
 
 @app.route('/inflectlike')
@@ -66,7 +114,7 @@ def inflectlike():
     like = request.args.get('like')
     res = generate.test_paradigms(['%s\t%s' % (word, like)], paradigms, debug=True)
     print('res', res)
-    ans = {"Results": helpers.format_simple_inflection(res)}
+    ans = {"WordForms": helpers.format_simple_inflection(res)}
     print('ans', ans)
     return jsonify(ans)
 
