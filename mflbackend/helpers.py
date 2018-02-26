@@ -40,8 +40,6 @@ def format_simple_inflection(ans):
                     for tag in msd:
                         infl['WordForms'].append({'writtenForm': form,
                                                   'msd': tag[1]})
-                    infl['writtenForm'] = form
-                    infl['msd'] = msd
                 out.append(infl)
             except Exception as e:
                 # fails if the inflection does not work (instantiation fails)
