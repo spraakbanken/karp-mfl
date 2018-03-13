@@ -9,7 +9,7 @@
  </p>
  <ul>
    {% for r in results %}
-   <li>Böjningsklass {{r.key}}, {{r.doc_count}} ord, {{r["FormRepresentations.paradigm.raw"]["value"]}} paridgm</li>
+   <li>Böjningsklass {{r.key}}, {{r.doc_count}} ord, {{r["FormRepresentations.paradigm.raw"]["value"]}} paradigm</li>
    {% endfor %}
  </ul>
 {% endblock %}
