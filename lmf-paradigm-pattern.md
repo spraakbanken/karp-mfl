@@ -18,6 +18,7 @@ The data (should) reflects this:
     {"first-attest": "solvärmefångare..nn.1" ,"1": "solvärmefångar"},
     {"first-attest": "socialmedicinare..nn.1", "1": "socialmedicinar"}
   ],
+  "TransformCategory": [{}], // this is for higher-order categories like conjugation classes, stem groups etc -- made it a list
   "TransformSet": [
     {"Process": [
        {
