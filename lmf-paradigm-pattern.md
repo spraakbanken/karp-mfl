@@ -13,17 +13,17 @@ The data (should) reflects this:
 ```javascript
 {
   "MorphologicalPatternID": "id-string", // or a list of IDs?
-  "VariableInstances": [ // this information could be moved under 'Affix'-information in LMF standard, but that seems too far fetched
-    {0: "sopsäckshållare..nn.1", 1: "sopsäckshållar"}, // use 'id' instead of 0?
-    {0: "solvärmefångare..nn.1" ,1: "solvärmefångar"},
-    {0: "socialmedicinare..nn.1", 1: "socialmedicinar"}
+  "VariableInstances": [
+    {"first-attest": "sopsäckshållare..nn.1", "1": "sopsäckshållar"},
+    {"first-attest": "solvärmefångare..nn.1" ,"1": "solvärmefångar"},
+    {"first-attest": "socialmedicinare..nn.1", "1": "socialmedicinar"}
   ],
   "TransformSet": [
     {"Process": [
        {
 	 "operator": "addAfter", // this should be standard 'addAfter' for concatenating
-	 "processType": "pextractAddVariable", // this is pextract specific, rename?
-	 "variableNum": "1" // could be 'stringValue', but now matches use of integers in VariableInstances
+	 "processType": "pextractAddVariable", // this is pextract specific, but need not be prefixed with 'pextract', rename?
+	 "variableNum": "1" 
        },
        {
 	 "operator": "addAfter",
@@ -31,11 +31,11 @@ The data (should) reflects this:
 	 "stringValue": "e"
        }
      ],
-     "GrammaticalFeatures": [
-       {"msd": "sg indef nom"}
-     ],
-     "TransformCategory": {},
-     "feat": [{}] // just in case?
+     "GrammaticalFeatures": {
+         "msd": "sg indef nom"
+       },
+     "TransformCategory": [{}], // this is for higher-order categories like conjugation classes, stem groups etc -- made it a list
+     "feat": [{}] // placeholder just in case
     },
     {
       "Process": [
@@ -47,12 +47,15 @@ The data (should) reflects this:
 	{
 	  "operator": "addAfter",
 	  "processType": "pextractAddConstant",
-	  "variableNum": "es"
+	  "stringValue": "es"
 	}
       ],
-      "GrammaticalFeatures": [
-	{"msd": "sg indef gen"}
-      ]
+      "GrammaticalFeatures":
+	{
+	  "msd": "sg indef gen"
+	},
+      "TransformCategory": [{}],
+      "feat": [{}]
     }
   ]
 }
