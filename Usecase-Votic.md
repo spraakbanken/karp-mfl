@@ -27,4 +27,23 @@ från Korp
       * paradigmprediktionen uppdateras
 
 
+## Mer information
 
+Votiskan är väl ett ypperligt exempel på möjligheter att faktiskt länka samman
+de få ressurser man faktiskt har tillgång till, genom Karp och Korp.
+
+Dock finns endast det lilla korpuset redan tillgängligt i Korp.
+
+
+### Tillgängliga ressurser
+
+Ordböcker:
+* fem-språkig ordlista (1k ord, skriftspråk)
+* dialektordbok (~30k ord, fonetisk skrift)
+* ordlista av attesterade ordformer från fältarbete (fonetisk skrift)
+
+Korpus:
+* tekster (~10k token, skriftspråk)
+* exempeltekster från dialektordboken (~340k token, fonetisk skrift)
+  * parallelkorpus: översättningar av exempelteksterna (est, rus)
+* transkriberade intervjuer från fältarbete
