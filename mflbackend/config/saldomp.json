@@ -1,0 +1,16 @@
+{
+"lexiconName": "saldomp",
+"mode": "karp",
+"inflectionalclass": {"bklass": "FormRepresentations.bklass", "fm_paradigm": "FormRepresentations.fm_paradigms"},
+"paradigmbucketpath": "FormRepresentations.paradigm.raw",
+"extractparadigm": "paradigm",
+"corpus": "suc3",
+"pos": "pos",
+"defaultpos": "nn",
+"baseform": "baseformC",
+"lemgram": "lemgram",
+"show": "lemgram,bklass,paradigm,pos,inherent",
+"ngramorder": 3,
+"ngramprior": 0.01,
+"pprior": 5.0
+}
