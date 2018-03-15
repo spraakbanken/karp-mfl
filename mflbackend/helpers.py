@@ -7,6 +7,12 @@ import urllib
 KARP_BACKEND = 'http://localhost:8081/app/'
 
 
+
+def get_lexiconconf(lexicon):
+    # TODO
+    return json.load(open('config/saldomp.json'))
+
+
 def karp_query(action, query, mode='external', resource='saldomp'):
     query['mode'] = mode
     query['resource'] = resource

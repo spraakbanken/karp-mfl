@@ -14,7 +14,7 @@ Pilotversion av morfologilabbet
   <tr><td><b>Public calls:</b></td></tr>
   <tr><td> <a href="#inflect">inflect</a></td><td> Ge mig förslag på hur ordet X kan böjas<td> </td></tr>
   <tr><td> <a href="#inflectlike">inflectlike</a></td><td> Böj ordet X på samma sätt som ordet Z böjs </td></tr>
-  <tr><td> <a href="#inflectbklass">inflectbklass</a></td><td> Böj ordet X enligt deklination Y  </td></tr>
+  <tr><td> <a href="#inflectclass">inflectclass</a></td><td> Böj ordet X enligt deklination Y  </td></tr>
   <tr><td> <a href="#addtable">addtable</a></td><td>  Spara tabell </td></tr>
   <tr><td> <a href="#compile">compile</a></td><td>  Visa information om ord, böjningsklasser...</td></tr>
 
@@ -61,21 +61,21 @@ Result:
 }
 </pre>
 
-<a name="inflectbklass"/>
-<h3>inflectbklass</h3>
+<a name="inflectclass"/>
+<h3>inflectclass</h3>
 <p>
 Available query parameters:
 <table>
   <tr><td>'lexicon': </td><td> the lexicon</td></tr>
   <tr><td>'word':</td><td> the baseform </td></tr>
-  <tr><td>'bklass':</td><td> the declination to use</td></tr>
   <tr><td>'pos':</td><td> the part of speech </td></tr>
+  <tr><td>'class':</td><td> TODO give any class that the lexicon accepts? the declination to use</td></tr>
 </table>
 
 <p>
 Examples:
 <ul>
-  <li><a href="{{url}}inflectbklass/?word=apa&bklass=3"><pre>{{url}}inflectbklass/?word=apa&bklass=3</pre></a>
+  <li><a href="{{url}}inflectclass?word=apa&bklass=3"><pre>{{url}}inflectclass?word=apa&bklass=3</pre></a>
 </ul>
 
 <p>
@@ -123,7 +123,7 @@ Available query parameters:
 <p>
 Examples:
 <ul>
-  <li><a href="{{url}}inflectlike/?word=apa&like=katt..nn.1"><pre>{{url}}inflectlike/?word=apa&like=katt..nn.13</pre></a>
+  <li><a href="{{url}}inflectlike?word=apa&like=katt..nn.1"><pre>{{url}}inflectlike?word=apa&like=katt..nn.13</pre></a>
 </ul>
 
 <p>
@@ -164,15 +164,15 @@ Available query parameters:
   <tr><td>'lexicon': </td><td> the lexicon</td></tr>
   <tr><td>'table':</td><td> the inflection table </td></tr>
   <tr><td>'pos':</td><td> the part of speech </td></tr>
-  <tr><td>'bklass':</td><td> the part of speech </td></tr>
+  <tr><td>'class':</td><td> inflectional class  </td></tr>
 </table>
 
 <p>
 Examples:
 <ul>
   <li><pre>{{url}}addtable/?table=word(|tag)[word(|tag)]*"</pre></a>
-  <li><a href="{{url}}addtable/?table=apa,apan,apor"><pre>{{url}}addtable/?table=apa,apan,apor"</pre></a>
-  <li><a href="{{url}}addtable/?table=apa|identifier,apan|sg def nom,apor|pl indef nom"><pre>{{url}}addtable/?table=apa|identifier,apan|sg def nom,apor|pl indef nom</pre></a>
+  <li><a href="{{url}}addtable?table=apa,apan,apor"><pre>{{url}}addtable?table=apa,apan,apor"</pre></a>
+  <li><a href="{{url}}addtable?table=apa|identifier,apan|sg def nom,apor|pl indef nom"><pre>{{url}}addtable?table=apa|identifier,apan|sg def nom,apor|pl indef nom</pre></a>
 </ul>
 
 <p>
@@ -198,5 +198,5 @@ Examples:
 <ul>
   <li><a href="{{url}}compile?s=wf&q=katt"><pre>{{url}}compile?s=wf&q=katt</pre></a>
   <li><a href="{{url}}compile?s=paradigm&q=katt..nn.1"><pre>{{url}}compile?s=paradigm&q=katt..nn.1</pre></a>
-  <li><a href="{{url}}compile?s=bklass&q=3"><pre>{{url}}compile?s=bklass&q=3</pre></a>
+  <li><a href="{{url}}compile?s=class&q=3"><pre>{{url}}compile?s=class&q=3</pre></a>
 </ul>

@@ -18,31 +18,39 @@ def doc():
     return render_template('doc.html', url=request.url_root)
 
 
-@app.route('/inflectbklass')
+@app.route('/inflectclass')
 def inflectbklass():
     lexicon = request.args.get('lexicon', 'saldomp')
+    lexconf = helpers.get_lexiconconf(lexicon)
     word = request.args.get('word', '')
-    bklass = request.args.get('bklass', '')
-    pos = request.args.get('pos', 'nn')
-    res = helpers.karp_query('statlist', {'q': 'extended||and|bklass.search|equals|%s||and|pos|startswith|nn' % bklass,
-                                  'buckets': 'paradigm.bucket'})
+    for d in lexconf['inflectionalclass'].keys():
+        if d in request.args:
+            bklasskey = d
+            bklassval = request.args.get(bklasskey)
+    pos = request.args.get('pos', lexconf['defaultpos'])
+    res = helpers.karp_query('statlist',
+                             {'q': 'extended||and|%s.search|equals|%s||and|%s|startswith|%s' % (bklasskey, bklassval, lexconf["pos"], pos),
+                              'mode': lexconf['mode'],
+                              'buckets': 'paradigm.bucket'}
+                             )
     possible_p = [line[0] for line in res['stat_table']]
     res = generate.test_paradigms(['%s\t%s' % (word, '|'.join(possible_p))],
                                   paradigms, debug=True, kbest=10)
     ans = {"WordForms": helpers.format_simple_inflection(res)}
-    print('ans', ans)
     return jsonify(ans)
 
 
 @app.route('/inflect')
 def inflect():
     lexicon = request.args.get('lexicon', 'saldomp')
+    lexconf = helpers.get_lexiconconf(lexicon)
     table = request.args.get('table', '')
-    pos = request.args.get('pos', 'nn')
-    ppriorv = float(request.args.get('pprior', pprior))
+    pos = request.args.get('pos', lexconf['defaultpos'])
+    ppriorv = float(request.args.get('pprior', lexconf["pprior"]))
+    # TODO where to use pos? the paradigms should depend on the pos
     ans = handle.inflect_table(table,
-                               [paradigms, numexamples, lms, print_tables,
-                               debug, ppriorv, choose])
+                               [paradigms, numexamples, lms, lexconf["print_tables"],
+                                config["debug"], ppriorv, config["choose"]])
     if 'paradigm' in ans:
         print('made new', ans)
         ans['paradigm'] = str(ans['paradigm'])
@@ -61,11 +69,12 @@ def inflect():
 @app.route('/inflectlike')
 def inflectlike():
     lexicon = request.args.get('lexicon', 'saldomp')
+    lexconf = helpers.get_lexiconconf(lexicon)
     word = request.args.get('word', '')
-    pos = request.args.get('pos', 'nn')
+    pos = request.args.get('pos', lexconf['defaultpos'])
     like = request.args.get('like')
+    # TODO send paradigms beloning to lexicon+pos
     res = generate.test_paradigms(['%s\t%s' % (word, like)], paradigms, debug=True)
-    print('res', res)
     ans = {"Results": helpers.format_simple_inflection(res)}
     print('ans', ans)
     return jsonify(ans)
@@ -75,14 +84,16 @@ def inflectlike():
 @app.route('/addtable')
 def add_table():
     lexicon = request.args.get('lexicon', 'saldomp')
+    lexconf = helpers.get_lexiconconf(lexicon)
     table = request.args.get('table', '')
-    pos = request.args.get('pos', 'nn')
-    bklass = request.args.get('bklass')
-    # get the paradigm
+    pos = request.args.get('pos', lexconf['defaultpos'])
+    bklass = request.args.get('class') # TODO go through all classes and see if any matching are in there
+    # TODO handle pos, class, lexicon etc
+    # get the paradigm, ?and tell where the paradigm is found?
     lemgram = table[0].split('|')[0]
     ans = handle.inflect_table(table,
-                               [paradigms, numexamples, lms, print_tables,
-                                debug, pprior, choose])
+                               [paradigms, numexamples, lms, config["print_tables"],
+                                config["debug"], lexconf["pprior"], config["choose"]])
     if ans['new']:
         print('add %s with paradigm %s' % (lemgram, ans['paradigm']))
         para = ans['paradigm']
@@ -104,26 +115,43 @@ def searchtab():
 
 @app.route('/paradigms')
 def paradigms():
-    karp_q = 'extended||and|pos|startswith|nn'
+    lexicon = request.args.get('lexicon', 'saldomp')
+    lexconf = helpers.get_lexiconconf(lexicon)
+    pos = request.args.get('pos', lexconf['defaultpos'])
+    karp_q = 'extended||and|%s|startswith|%s||and|lexiconName|equals|%s' % (lexconf['pos'], pos, lexicon)
+    buckets = lexconf['paradigm'] + lexconf['inflectionalclass'].keys()
     res = helpers.karp_query('statistics',
                              {'q': karp_q,
                               'cardinality': True,
-                              'buckets': 'paradigm.bucket,bklass.bucket'})
+                              'mode': lexconf['mode'],
+                              'buckets': ','.join(['%s.bucket' % b for b in buckets])})
     stats = res['aggregations']['q_statistics']
-    buckets = stats['FormRepresentations.paradigm.raw']['buckets']
+    buckets = stats[lexconf["paradigmpath"]]['buckets']
     count = 'X'
     return render_template('paralist.html', count=count, results=buckets)
 
 
-@app.route('/bklasser')
-def bklasser():
-    karp_q = 'extended||and|pos|startswith|nn'
+# TODO add to doc
+@app.route('/inflectionalclass')
+def inflectionalclass():
+    lexicon = request.args.get('lexicon', 'saldomp')
+    lexconf = helpers.get_lexiconconf(lexicon)
+    iclass = request.args.get('class')
+    pos = request.args.get('pos', lexconf['defaultpos'])
+    karp_q = 'extended||and|%s|startswith|%s' % (lexconf["pos"], pos)
+    buckets = [iclass, lexconf['paradigm']]
+    for c in lexconf['inflectionalclass'].keys():
+        if c != iclass:
+             buckets.append(c)
     res = helpers.karp_query('statistics',
                              {'q': karp_q,
                               'cardinality': True,
-                              'buckets':'bklass.bucket.bucket,paradigm.bucket'})
+                              'mode': lexconf['mode'],
+                              'buckets': ','.join(['%s.bucket' % b for b in buckets])})
+                              #'buckets':'bklass.bucket.bucket,paradigm.bucket'})
     stats = res['aggregations']['q_statistics']
-    buckets = stats['FormRepresentations.bklass']['buckets']
+    buckets = stats[lexconf["inflectionalclass"][iclass]]['buckets']
+    #buckets = stats['FormRepresentations.bklass']['buckets']
     count = 'X'  # TODO this is not the correct count
     return render_template('bklasslist.html', count=count, results=buckets)
 
@@ -132,12 +160,17 @@ def bklasser():
 def compile():
     q = request.args.get('q', '')  # querystring
     s = request.args.get('s', '*')  # searchfield
+    lexicon = request.args.get('lexicon', 'saldomp')
+    lexconf = helpers.get_lexiconconf(lexicon)
+    pos = request.args.get('pos', lexconf['defaultpos'])
     count, results = 0, []
     if s == "wf":
         res = helpers.karp_query('minientry',
-                                 {'q': 'extended||and|baseformC|equals|%s||and|pos|startswith|nn' % q,
-                                  'show': 'lemgram,bklass,paradigm,pos,inherent'})
+                                 {'q': 'extended||and|%s|equals|%s||and|%s|startswith|%s' % (lexconf["baseform"], lexconf["pos"], q, pos),
+                                  'mode': lexconf['mode'],
+                                  'show': lexconf["show"]})
         count = res['hits']['total']
+        # TODO how to show??
         for r in res['hits']['hits']:
             results.append(r['_source'].get('FormRepresentations', [{}])[0])
 
@@ -145,38 +178,52 @@ def compile():
                                count=count, results=results)
 
     elif s == "paradigm":
-        karp_q = 'extended||and|pos|startswith|nn'
+        karp_q = 'extended||and|%s|startswith|%s' % (lexconf["pos"], pos)
         if q:
             logging.debug('q is %s' % q)
-            karp_q += '||and|lemgram.search|equals|%s' % q
-            res = helpers.karp_query('minientry', {'q': karp_q, 'show': 'paradigm'})
+            karp_q += '||and|%s.search|equals|%s' % (lexconf["lemgram"], q)
+            res = helpers.karp_query('minientry',
+                                     {'q': karp_q,
+                                      'mode': lexconf['mode'],
+                                      'show': lexconf['paradigm']})
+            # TODO how to get the path?
             ps = [hit['_source'].get('FormRepresentations', [{}])[0].get('paradigm', '') for hit in res['hits']['hits']]
-            karp_q = 'extended||and|pos|startswith|nn||and|paradigm.search|equals|%s' % '|'.join(set(ps))
+            karp_q = 'extended||and|%s|startswith|%s||and|%s.search|equals|%s' % (lexconf['pos'], pos, lexconf['paradigm'], '|'.join(set(ps)))
 
+        buckets = lexconf['paradigm'] + lexconf['inflectionalclass'].keys()
         res = helpers.karp_query('statistics',
                                  {'q': karp_q,
                                   'cardinality': True,
-                                  'buckets': 'paradigm.bucket,bklass.bucket'})
+                                  'mode': lexconf['mode'],
+                                  'buckets': ','.join(['%s.bucket' % b for b in buckets])})
         stats = res['aggregations']['q_statistics']
-        buckets = stats['FormRepresentations.paradigm.raw']['buckets']
+        buckets = stats[lexconf['paradigmbucketpath']]['buckets']
         count = 'X'  # TODO this is not the correct count
 
         return render_template('paralist.html', q=q, searchfield=s, count=count, results=buckets)
 
-    elif s == "bklass":
-        karp_q = 'extended||and|pos|startswith|nn'
+    elif s in lexconf["inflectionalclass"].keys():
+        karp_q = 'extended||and|%s|startswith|%s' % (lexconf['pos'], pos)
         if q:
-            karp_q += '||and|bklass|equals|%s' % q
+            karp_q += '||and|%s|equals|%s' % (s, q)
+
+        buckets = [s, lexconf['paradigm']]
+        for c in lexconf['inflectionalclass'].keys():
+            if c != s:
+                buckets.append(c)
         res = helpers.karp_query('statistics',
                                  {'q': karp_q,
                                   'cardinality': True,
-                                  'buckets':'bklass.bucket.bucket,paradigm.bucket'})
+                                  'mode': lexconf['mode'],
+                                  'buckets': ','.join(['%s.bucket' % b for b in buckets])})
         stats = res['aggregations']['q_statistics']
-        buckets = stats['FormRepresentations.bklass']['buckets']
+        buckets = stats[lexconf['paradigmbucketpath']]['buckets']
         count = 'X'  # TODO this is not the correct count
 
         return render_template('bklasslist.html', q=q, searchfield=s,
                                count=count, results=buckets)
+    else:
+        return "Don't know what to do"
 
 
 logging.basicConfig(stream=sys.stderr, level='DEBUG')
@@ -193,11 +240,20 @@ def handle_invalid_usage(error):
     except Exception:
         return "Oops, something went wrong\n", 500
 
+# TODO how to set these?? for saldomp, i have increased pprior a lot, from 1.0 to 5.0
+config = {"print_tables": False,
+          "kbest": 10,
+          "debug": False,
+          "choose": False
+          }
+
+
 if __name__ == '__main__':
     # sys.setdefaultencoding('utf8')
+    # TODO how to handle the paradigms? In memory? On disk?
+    # TODO when to read the paradigms? Now: only saldomp
     parafile = sys.argv[1]
-    # TODO how to set these?? i have increased pprior a lot, from 1.0 to 5.0
-    print_tables, kbest, ngramorder, ngramprior, debug, pprior,choose = False, 10, 3, 0.01, False, 5.0, False
-    paradigms, numexamples, lms = mp.build(parafile, ngramorder, ngramprior)
+    lexconf = helpers.get_lexiconconf("saldomp")
+    paradigms, numexamples, lms = mp.build(parafile, lexconf["ngramorder"], lexconf["ngramprior"])
     parafile = open(parafile, encoding='utf8').readlines()
     app.run()
