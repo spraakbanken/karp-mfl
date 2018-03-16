@@ -35,20 +35,22 @@
 **TODO** lexicon, pos
 
 ### 1
-inflect/?table=apa,apan
+inflect?table=apa,apan
 
 ### 2
-**TODO**
+inflectlike?word=oste&like=pojke..nn.1
 
 ### 3
- inflectbklass/?word=apa&bklass=3
+ inflectclass?word=apa&class=3
 
 ### 5
-inflect/?table=apa,apan
-inflect/?table=apa,apan|pl indef nom
-inflect/?table=apa,apan|pl indef nom,apor
+inflect?table=apa,apan
+inflect?table=apa,apan|pl indef nom
+inflect?table=apa,apan|pl indef nom,apor
 
 
+# Annat
+ - Generalisera så att det inte är saldospecifikt
 
 
 
