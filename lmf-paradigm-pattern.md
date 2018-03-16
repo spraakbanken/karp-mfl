@@ -18,7 +18,10 @@ The data (should) reflects this:
     {"first-attest": "solvärmefångare..nn.1" ,"1": "solvärmefångar"},
     {"first-attest": "socialmedicinare..nn.1", "1": "socialmedicinar"}
   ],
-  "TransformCategory": [{}], // this is for higher-order categories like conjugation classes, stem groups etc -- made it a list
+  "TransformCategory": [ // paradigm specific categories
+    {"name": "fm_paradigm", "classes": ["p_apa", "p_bepa"]},
+    {"name": "deklination", "classes": ["1", "8"]}
+  ],
   "TransformSet": [
     {"Process": [
        {
@@ -35,7 +38,7 @@ The data (should) reflects this:
      "GrammaticalFeatures": {
          "msd": "sg indef nom"
        },
-     "TransformCategory": [{}], // this is for higher-order categories like conjugation classes, stem groups etc -- made it a list
+     "TransformCategory": [{}], // wordform specific categories
      "feat": [{}] // placeholder just in case
     },
     {
