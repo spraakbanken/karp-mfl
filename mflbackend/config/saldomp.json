@@ -1,7 +1,7 @@
 {
 "lexiconName": "saldomp",
 "mode": "karp",
-"inflectionalclass": {"bklass": "FormRepresentations.bklass", "fm_paradigm": "FormRepresentations.fm_paradigms"},
+"inflectionalclass": {"bklass": "FormRepresentations.bklass", "fm_paradigm": "FormRepresentations.fm_paradigm.raw"},
 "paradigmbucketpath": "FormRepresentations.paradigm.raw",
 "extractparadigm": "paradigm",
 "corpus": "suc3",

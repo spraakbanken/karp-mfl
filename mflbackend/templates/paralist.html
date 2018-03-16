@@ -5,11 +5,15 @@
 </h1>
 
  <p>
+ paths {{paths}}
  Resultat: {{ count }}
  </p>
  <ul>
-   {% for r in results %}
-   <li>{{r.key}} {{r.doc_count}} ord, {{r["FormRepresentations.bklass"]["value"]}} bklasser</li>
+   {% for class, r in results.items() %}
+     <li>{{r.key}} {{r.doc_count}} ord,
+     {% for (name, path) in paths %}
+         hej {{current}} PATH {{current[path]}} DOC_COUNT{{current[path]["doc_count"]}} VALUE {{current[path]["value"]}} NAME {{name}}</li>
+     {% endfor %}
    {% endfor %}
  </ul>
 {% endblock %}
