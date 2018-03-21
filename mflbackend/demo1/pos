@@ -1,0 +1,13 @@
+url: /partofspeech?lexicon=saldomp
+     /pos?lexicon=saldomp
+
+Visar vilka ordklasser som finns för ett lexikon
+
+parametrar:
+  lexicon - vilket lexikon
+
+{
+  "pos": [
+    "vbm"
+  ]
+}

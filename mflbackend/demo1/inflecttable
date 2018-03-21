@@ -1,0 +1,448 @@
+url: /inflect?table=apa|sg+indef+nom,apan|sg+def+nom
+
+Böjer ett ord.
+parametrar:
+  lexicon = vilket lexikon
+  table = en komma-separerard lista av ord. '|' separerar ordform och msg
+  pos = vilket ordklass
+  ppriorv = möjlighet att sätta egna inställningar till oraklet (för testning)
+
+{
+  "Results": [
+    {
+      "WordForms": [
+        {
+          "msd": "sg indef nom", 
+          "writtenForm": "apa"
+        }, 
+        {
+          "msd": "sg indef gen", 
+          "writtenForm": "apas"
+        }, 
+        {
+          "msd": "sg def nom", 
+          "writtenForm": "apan"
+        }, 
+        {
+          "msd": "sg def gen", 
+          "writtenForm": "apans"
+        }, 
+        {
+          "msd": "pl indef nom", 
+          "writtenForm": "apor"
+        }, 
+        {
+          "msd": "pl indef gen", 
+          "writtenForm": "apors"
+        }, 
+        {
+          "msd": "pl def nom", 
+          "writtenForm": "aporna"
+        }, 
+        {
+          "msd": "pl def gen", 
+          "writtenForm": "apornas"
+        }
+      ], 
+      "paradigm": "p6_br\u00e4nn\u00e4ssla..nn.1", 
+      "score": -58.266228053094125, 
+      "variables": {
+        "1": "ap"
+      }
+    }, 
+    {
+      "WordForms": [
+        {
+          "msd": "sg indef nom", 
+          "writtenForm": "apa"
+        }, 
+        {
+          "msd": "sg indef gen", 
+          "writtenForm": "apas"
+        }, 
+        {
+          "msd": "sg def nom", 
+          "writtenForm": "apan"
+        }, 
+        {
+          "msd": "sg def gen", 
+          "writtenForm": "apans"
+        }, 
+        {
+          "msd": "pl indef nom", 
+          "writtenForm": "apar"
+        }, 
+        {
+          "msd": "pl indef gen", 
+          "writtenForm": "apars"
+        }, 
+        {
+          "msd": "pl def nom", 
+          "writtenForm": "aparna"
+        }, 
+        {
+          "msd": "pl def gen", 
+          "writtenForm": "aparnas"
+        }
+      ], 
+      "paradigm": "p13_besv\u00e4rjelse..nn.1", 
+      "score": -66.00203498962797, 
+      "variables": {
+        "1": "apa"
+      }
+    }, 
+    {
+      "WordForms": [
+        {
+          "msd": "sg indef nom", 
+          "writtenForm": "apa"
+        }, 
+        {
+          "msd": "sg indef gen", 
+          "writtenForm": "apas"
+        }, 
+        {
+          "msd": "sg def nom", 
+          "writtenForm": "apan"
+        }, 
+        {
+          "msd": "sg def nom", 
+          "writtenForm": "apaen"
+        }, 
+        {
+          "msd": "sg def gen", 
+          "writtenForm": "apans"
+        }, 
+        {
+          "msd": "sg def gen", 
+          "writtenForm": "apaens"
+        }, 
+        {
+          "msd": "pl indef nom", 
+          "writtenForm": "apaer"
+        }, 
+        {
+          "msd": "pl indef gen", 
+          "writtenForm": "apaers"
+        }, 
+        {
+          "msd": "pl def nom", 
+          "writtenForm": "apaerna"
+        }, 
+        {
+          "msd": "pl def gen", 
+          "writtenForm": "apaernas"
+        }
+      ], 
+      "paradigm": "p20_\u00e4lsklingsid\u00e9..nn.1", 
+      "score": -66.2242733997592, 
+      "variables": {
+        "1": "apa"
+      }
+    }, 
+    {
+      "WordForms": [
+        {
+          "msd": "sg indef nom", 
+          "writtenForm": "apa"
+        }, 
+        {
+          "msd": "sg indef gen", 
+          "writtenForm": "apas"
+        }, 
+        {
+          "msd": "sg def nom", 
+          "writtenForm": "apan"
+        }, 
+        {
+          "msd": "sg def gen", 
+          "writtenForm": "apans"
+        }
+      ], 
+      "paradigm": "p8_v\u00e4rldshandel..nn.1", 
+      "score": -67.22244125553473, 
+      "variables": {
+        "1": "apa"
+      }
+    }, 
+    {
+      "WordForms": [
+        {
+          "msd": "sg indef nom", 
+          "writtenForm": "apa"
+        }, 
+        {
+          "msd": "sg indef gen", 
+          "writtenForm": "apas"
+        }, 
+        {
+          "msd": "sg def nom", 
+          "writtenForm": "apan"
+        }, 
+        {
+          "msd": "sg def nom", 
+          "writtenForm": "apaen"
+        }, 
+        {
+          "msd": "sg def gen", 
+          "writtenForm": "apans"
+        }, 
+        {
+          "msd": "sg def gen", 
+          "writtenForm": "apaens"
+        }
+      ], 
+      "paradigm": "p18_v\u00e4xtfysiologi..nn.1", 
+      "score": -71.48045146779126, 
+      "variables": {
+        "1": "apa"
+      }
+    }, 
+    {
+      "WordForms": [
+        {
+          "msd": "sg indef nom", 
+          "writtenForm": "apa"
+        }, 
+        {
+          "msd": "sg indef gen", 
+          "writtenForm": "apas"
+        }, 
+        {
+          "msd": "sg def nom", 
+          "writtenForm": "apan"
+        }, 
+        {
+          "msd": "sg def gen", 
+          "writtenForm": "apans"
+        }, 
+        {
+          "msd": "pl indef nom", 
+          "writtenForm": "aper"
+        }, 
+        {
+          "msd": "pl indef nom", 
+          "writtenForm": "apor"
+        }, 
+        {
+          "msd": "pl indef gen", 
+          "writtenForm": "apers"
+        }, 
+        {
+          "msd": "pl indef gen", 
+          "writtenForm": "apors"
+        }, 
+        {
+          "msd": "pl def nom", 
+          "writtenForm": "aperna"
+        }, 
+        {
+          "msd": "pl def nom", 
+          "writtenForm": "aporna"
+        }, 
+        {
+          "msd": "pl def gen", 
+          "writtenForm": "apernas"
+        }, 
+        {
+          "msd": "pl def gen", 
+          "writtenForm": "apornas"
+        }
+      ], 
+      "paradigm": "p124_yrkeskollega..nn.1", 
+      "score": -71.67266814264951, 
+      "variables": {
+        "1": "ap"
+      }
+    }, 
+    {
+      "WordForms": [
+        {
+          "msd": "sg indef nom", 
+          "writtenForm": "apa"
+        }, 
+        {
+          "msd": "sg indef gen", 
+          "writtenForm": "apas"
+        }, 
+        {
+          "msd": "sg def nom", 
+          "writtenForm": "apan"
+        }, 
+        {
+          "msd": "sg def nom", 
+          "writtenForm": "apaen"
+        }, 
+        {
+          "msd": "sg def gen", 
+          "writtenForm": "apans"
+        }, 
+        {
+          "msd": "sg def gen", 
+          "writtenForm": "apaens"
+        }, 
+        {
+          "msd": "pl indef nom", 
+          "writtenForm": "apaar"
+        }, 
+        {
+          "msd": "pl indef gen", 
+          "writtenForm": "apaars"
+        }, 
+        {
+          "msd": "pl def nom", 
+          "writtenForm": "apaarna"
+        }, 
+        {
+          "msd": "pl def gen", 
+          "writtenForm": "apaarnas"
+        }
+      ], 
+      "paradigm": "p95_sommarfj\u00e4ril..nn.1", 
+      "score": -71.98296102577542, 
+      "variables": {
+        "1": "apa"
+      }
+    }, 
+    {
+      "WordForms": [
+        {
+          "msd": "sg indef nom", 
+          "writtenForm": "apa"
+        }, 
+        {
+          "msd": "sg indef gen", 
+          "writtenForm": "apas"
+        }, 
+        {
+          "msd": "sg def nom", 
+          "writtenForm": "apa"
+        }, 
+        {
+          "msd": "sg def nom", 
+          "writtenForm": "apan"
+        }, 
+        {
+          "msd": "sg def gen", 
+          "writtenForm": "apas"
+        }, 
+        {
+          "msd": "sg def gen", 
+          "writtenForm": "apans"
+        }, 
+        {
+          "msd": "pl indef nom", 
+          "writtenForm": "apor"
+        }, 
+        {
+          "msd": "pl indef gen", 
+          "writtenForm": "apors"
+        }, 
+        {
+          "msd": "pl def nom", 
+          "writtenForm": "aporna"
+        }, 
+        {
+          "msd": "pl def gen", 
+          "writtenForm": "apornas"
+        }
+      ], 
+      "paradigm": "p197_penultima..nn.1", 
+      "score": -73.2232004781055, 
+      "variables": {
+        "1": "ap"
+      }
+    }, 
+    {
+      "WordForms": [
+        {
+          "msd": "sg indef nom", 
+          "writtenForm": "apa"
+        }, 
+        {
+          "msd": "sg indef gen", 
+          "writtenForm": "apas"
+        }, 
+        {
+          "msd": "sg def nom", 
+          "writtenForm": "apan"
+        }, 
+        {
+          "msd": "sg def nom", 
+          "writtenForm": "apen"
+        }, 
+        {
+          "msd": "sg def gen", 
+          "writtenForm": "apans"
+        }, 
+        {
+          "msd": "sg def gen", 
+          "writtenForm": "apens"
+        }
+      ], 
+      "paradigm": "p111_litteraturhistoria..nn.1", 
+      "score": -73.64923496547783, 
+      "variables": {
+        "1": "ap"
+      }
+    }, 
+    {
+      "WordForms": [
+        {
+          "msd": "sg indef nom", 
+          "writtenForm": "apa"
+        }, 
+        {
+          "msd": "sg indef gen", 
+          "writtenForm": "apas"
+        }, 
+        {
+          "msd": "sg def nom", 
+          "writtenForm": "apan"
+        }, 
+        {
+          "msd": "sg def nom", 
+          "writtenForm": "apat"
+        }, 
+        {
+          "msd": "sg def nom", 
+          "writtenForm": "apaet"
+        }, 
+        {
+          "msd": "sg def gen", 
+          "writtenForm": "apans"
+        }, 
+        {
+          "msd": "sg def gen", 
+          "writtenForm": "apats"
+        }, 
+        {
+          "msd": "sg def gen", 
+          "writtenForm": "apaets"
+        }, 
+        {
+          "msd": "pl indef nom", 
+          "writtenForm": "apaer"
+        }, 
+        {
+          "msd": "pl indef gen", 
+          "writtenForm": "apaers"
+        }, 
+        {
+          "msd": "pl def nom", 
+          "writtenForm": "apaerna"
+        }, 
+        {
+          "msd": "pl def gen", 
+          "writtenForm": "apaernas"
+        }
+      ], 
+      "paradigm": "p228_frisyrgel\u00e9..nn.1", 
+      "score": -75.42485462624916, 
+      "variables": {
+        "1": "apa"
+      }
+    }
+  ], 
+  "new": false
+}

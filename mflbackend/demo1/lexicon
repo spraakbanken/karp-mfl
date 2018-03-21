@@ -1,0 +1,9 @@
+url: 'lexicon'
+
+Visar en lista över tillgängliga lexikon
+
+{
+  "lexicons": [
+    "saldomp"
+  ]
+}

@@ -1,0 +1,56 @@
+url: /inflectclass?word=katta&like=flicka..nn.1&pos=nn
+
+Böjer ett ord på samma sätt som ett annat ord
+parametrar:
+  lexicon = vilket lexikon
+  word = ord att böja
+  like = lemgram (eller dylikt) vars böjnnig vi vill imitera
+  pos = vilket ordklass
+  ppriorv = möjlighet att sätta egna inställningar till oraklet (för testning)
+
+{
+  "Results": [
+    {
+      "WordForms": [
+        {
+          "msd": "sg indef nom", 
+          "writtenForm": "katta"
+        }, 
+        {
+          "msd": "sg indef gen", 
+          "writtenForm": "kattas"
+        }, 
+        {
+          "msd": "sg def nom", 
+          "writtenForm": "kattan"
+        }, 
+        {
+          "msd": "sg def gen", 
+          "writtenForm": "kattans"
+        }, 
+        {
+          "msd": "pl indef nom", 
+          "writtenForm": "kattor"
+        }, 
+        {
+          "msd": "pl indef gen", 
+          "writtenForm": "kattors"
+        }, 
+        {
+          "msd": "pl def nom", 
+          "writtenForm": "kattorna"
+        }, 
+        {
+          "msd": "pl def gen", 
+          "writtenForm": "kattornas"
+        }
+      ], 
+      "paradigm": "p6_br\u00e4nn\u00e4ssla..nn.1", 
+      "score": -8.070754473814171, 
+      "variables": {
+        "1": "katt"
+      }
+    }
+  ], 
+  "new": false
+}

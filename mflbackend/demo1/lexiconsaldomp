@@ -1,0 +1,26 @@
+url: 'lexicon/lexiconname'
+     'lexicon?lexicon=name'
+
+Visar en lista över tillgängliga lexikon
+
+{
+  "baseform": "baseformC", 
+  "corpus": "suc3", 
+  "defaultpos": "nn", 
+  "extractparadigm": "paradigm", 
+  "inflectionalclass": {
+    "bklass": "FormRepresentations.bklass", 
+    "fm_paradigm": "FormRepresentations.fm_paradigm.raw"
+  }, 
+  "lemgram": "lemgram", 
+  "lexiconMode": "external", 
+  "lexiconName": "saldomp", 
+  "ngramorder": 3, 
+  "ngramprior": 0.01, 
+  "paradigmMode": "saldompparadigms", 
+  "paradigmbucketpath": "FormRepresentations.paradigm.raw", 
+  "paradigmlexiconName": "saldompparadigms", 
+  "pos": "pos", 
+  "pprior": 4.0, 
+  "show": "lemgram,bklass,paradigm,pos,inherent"
+}

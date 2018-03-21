@@ -1,0 +1,793 @@
+url: /paradigminfo?paradigm=p15_pryd..av.1
+
+Visar information om ett paradigm
+
+parametrar:
+  paradigm - paradigmnamnet
+  lexicon - vilket lexikon
+
+[
+  {
+    "_id": "KNV3R2IBzl5vI3XYRhgX", 
+    "_index": "saldompparadigms_test", 
+    "_score": null, 
+    "_source": {
+      "MorphologicalPatternID": "p15_pryd..av.1", 
+      "TransformCategory": [], 
+      "TransformSet": [
+        {
+          "GrammaticalFeatures": {
+            "msd": "pos indef sg u nom"
+          }, 
+          "Process": [
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddVariable", 
+              "variableNum": "1"
+            }, 
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddConstant", 
+              "stringValue": "d"
+            }
+          ], 
+          "TransformCategory": [], 
+          "feat": []
+        }, 
+        {
+          "GrammaticalFeatures": {
+            "msd": "pos indef sg u gen"
+          }, 
+          "Process": [
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddVariable", 
+              "variableNum": "1"
+            }, 
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddConstant", 
+              "stringValue": "ds"
+            }
+          ], 
+          "TransformCategory": [], 
+          "feat": []
+        }, 
+        {
+          "GrammaticalFeatures": {
+            "msd": "pos indef sg n nom"
+          }, 
+          "Process": [
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddVariable", 
+              "variableNum": "1"
+            }, 
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddConstant", 
+              "stringValue": "tt"
+            }
+          ], 
+          "TransformCategory": [], 
+          "feat": []
+        }, 
+        {
+          "GrammaticalFeatures": {
+            "msd": "pos indef sg n gen"
+          }, 
+          "Process": [
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddVariable", 
+              "variableNum": "1"
+            }, 
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddConstant", 
+              "stringValue": "tts"
+            }
+          ], 
+          "TransformCategory": [], 
+          "feat": []
+        }, 
+        {
+          "GrammaticalFeatures": {
+            "msd": "pos indef pl nom"
+          }, 
+          "Process": [
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddVariable", 
+              "variableNum": "1"
+            }, 
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddConstant", 
+              "stringValue": "da"
+            }
+          ], 
+          "TransformCategory": [], 
+          "feat": []
+        }, 
+        {
+          "GrammaticalFeatures": {
+            "msd": "pos indef pl gen"
+          }, 
+          "Process": [
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddVariable", 
+              "variableNum": "1"
+            }, 
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddConstant", 
+              "stringValue": "das"
+            }
+          ], 
+          "TransformCategory": [], 
+          "feat": []
+        }, 
+        {
+          "GrammaticalFeatures": {
+            "msd": "pos def sg no_masc nom"
+          }, 
+          "Process": [
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddVariable", 
+              "variableNum": "1"
+            }, 
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddConstant", 
+              "stringValue": "da"
+            }
+          ], 
+          "TransformCategory": [], 
+          "feat": []
+        }, 
+        {
+          "GrammaticalFeatures": {
+            "msd": "pos def sg no_masc gen"
+          }, 
+          "Process": [
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddVariable", 
+              "variableNum": "1"
+            }, 
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddConstant", 
+              "stringValue": "das"
+            }
+          ], 
+          "TransformCategory": [], 
+          "feat": []
+        }, 
+        {
+          "GrammaticalFeatures": {
+            "msd": "pos def sg masc nom"
+          }, 
+          "Process": [
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddVariable", 
+              "variableNum": "1"
+            }, 
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddConstant", 
+              "stringValue": "de"
+            }
+          ], 
+          "TransformCategory": [], 
+          "feat": []
+        }, 
+        {
+          "GrammaticalFeatures": {
+            "msd": "pos def sg masc gen"
+          }, 
+          "Process": [
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddVariable", 
+              "variableNum": "1"
+            }, 
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddConstant", 
+              "stringValue": "des"
+            }
+          ], 
+          "TransformCategory": [], 
+          "feat": []
+        }, 
+        {
+          "GrammaticalFeatures": {
+            "msd": "pos def pl nom"
+          }, 
+          "Process": [
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddVariable", 
+              "variableNum": "1"
+            }, 
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddConstant", 
+              "stringValue": "da"
+            }
+          ], 
+          "TransformCategory": [], 
+          "feat": []
+        }, 
+        {
+          "GrammaticalFeatures": {
+            "msd": "pos def pl gen"
+          }, 
+          "Process": [
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddVariable", 
+              "variableNum": "1"
+            }, 
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddConstant", 
+              "stringValue": "das"
+            }
+          ], 
+          "TransformCategory": [], 
+          "feat": []
+        }, 
+        {
+          "GrammaticalFeatures": {
+            "msd": "komp nom"
+          }, 
+          "Process": [
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddVariable", 
+              "variableNum": "1"
+            }, 
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddConstant", 
+              "stringValue": "dare"
+            }
+          ], 
+          "TransformCategory": [], 
+          "feat": []
+        }, 
+        {
+          "GrammaticalFeatures": {
+            "msd": "komp gen"
+          }, 
+          "Process": [
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddVariable", 
+              "variableNum": "1"
+            }, 
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddConstant", 
+              "stringValue": "dares"
+            }
+          ], 
+          "TransformCategory": [], 
+          "feat": []
+        }, 
+        {
+          "GrammaticalFeatures": {
+            "msd": "super indef nom"
+          }, 
+          "Process": [
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddVariable", 
+              "variableNum": "1"
+            }, 
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddConstant", 
+              "stringValue": "dast"
+            }
+          ], 
+          "TransformCategory": [], 
+          "feat": []
+        }, 
+        {
+          "GrammaticalFeatures": {
+            "msd": "super indef gen"
+          }, 
+          "Process": [
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddVariable", 
+              "variableNum": "1"
+            }, 
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddConstant", 
+              "stringValue": "dasts"
+            }
+          ], 
+          "TransformCategory": [], 
+          "feat": []
+        }, 
+        {
+          "GrammaticalFeatures": {
+            "msd": "super def no_masc nom"
+          }, 
+          "Process": [
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddVariable", 
+              "variableNum": "1"
+            }, 
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddConstant", 
+              "stringValue": "daste"
+            }
+          ], 
+          "TransformCategory": [], 
+          "feat": []
+        }, 
+        {
+          "GrammaticalFeatures": {
+            "msd": "super def no_masc gen"
+          }, 
+          "Process": [
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddVariable", 
+              "variableNum": "1"
+            }, 
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddConstant", 
+              "stringValue": "dastes"
+            }
+          ], 
+          "TransformCategory": [], 
+          "feat": []
+        }, 
+        {
+          "GrammaticalFeatures": {
+            "msd": "super def masc nom"
+          }, 
+          "Process": [
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddVariable", 
+              "variableNum": "1"
+            }, 
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddConstant", 
+              "stringValue": "daste"
+            }
+          ], 
+          "TransformCategory": [], 
+          "feat": []
+        }, 
+        {
+          "GrammaticalFeatures": {
+            "msd": "super def masc gen"
+          }, 
+          "Process": [
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddVariable", 
+              "variableNum": "1"
+            }, 
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddConstant", 
+              "stringValue": "dastes"
+            }
+          ], 
+          "TransformCategory": [], 
+          "feat": []
+        }
+      ], 
+      "VariableInstances": [
+        {
+          "1": "pry", 
+          "first-attest": "pryd..av.1"
+        }, 
+        {
+          "1": "vinr\u00f6", 
+          "first-attest": "vinr\u00f6d..av.1"
+        }, 
+        {
+          "1": "ultrar\u00f6", 
+          "first-attest": "ultrar\u00f6d..av.1"
+        }, 
+        {
+          "1": "tegelr\u00f6", 
+          "first-attest": "tegelr\u00f6d..av.1"
+        }, 
+        {
+          "1": "spr\u00f6", 
+          "first-attest": "spr\u00f6d..av.1"
+        }, 
+        {
+          "1": "soli", 
+          "first-attest": "solid..av.1"
+        }, 
+        {
+          "1": "skjutgla", 
+          "first-attest": "skjutglad..av.1"
+        }, 
+        {
+          "1": "skend\u00f6", 
+          "first-attest": "skend\u00f6d..av.1"
+        }, 
+        {
+          "1": "le", 
+          "first-attest": "led..av.1"
+        }, 
+        {
+          "1": "k\u00f6rsb\u00e4rsr\u00f6", 
+          "first-attest": "k\u00f6rsb\u00e4rsr\u00f6d..av.1"
+        }, 
+        {
+          "1": "korallr\u00f6", 
+          "first-attest": "korallr\u00f6d..av.1"
+        }, 
+        {
+          "1": "hj\u00e4rtego", 
+          "first-attest": "hj\u00e4rtegod..av.1"
+        }, 
+        {
+          "1": "djupr\u00f6", 
+          "first-attest": "djupr\u00f6d..av.1"
+        }, 
+        {
+          "1": "br\u00e5", 
+          "first-attest": "br\u00e5d..av.1"
+        }, 
+        {
+          "1": "bli", 
+          "first-attest": "blid..av.1"
+        }, 
+        {
+          "1": "utd\u00f6", 
+          "first-attest": "utd\u00f6d..av.1"
+        }, 
+        {
+          "1": "supergo", 
+          "first-attest": "supergod..av.1"
+        }, 
+        {
+          "1": "sne", 
+          "first-attest": "sned..av.1"
+        }, 
+        {
+          "1": "skadegla", 
+          "first-attest": "skadeglad..av.1"
+        }, 
+        {
+          "1": "sj\u00e4lagla", 
+          "first-attest": "sj\u00e4laglad..av.1"
+        }, 
+        {
+          "1": "r\u00f6", 
+          "first-attest": "r\u00f6d..av.1"
+        }, 
+        {
+          "1": "rosenr\u00f6", 
+          "first-attest": "rosenr\u00f6d..av.1"
+        }, 
+        {
+          "1": "pratgla", 
+          "first-attest": "pratglad..av.1"
+        }, 
+        {
+          "1": "m\u00f6rkr\u00f6", 
+          "first-attest": "m\u00f6rkr\u00f6d..av.1"
+        }, 
+        {
+          "1": "medelgo", 
+          "first-attest": "medelgod..av.1"
+        }, 
+        {
+          "1": "h\u00e4ktesd\u00f6", 
+          "first-attest": "h\u00e4ktesd\u00f6d..av.1"
+        }, 
+        {
+          "1": "hj\u00e4rnd\u00f6", 
+          "first-attest": "hj\u00e4rnd\u00f6d..av.1"
+        }, 
+        {
+          "1": "brunr\u00f6", 
+          "first-attest": "brunr\u00f6d..av.1"
+        }, 
+        {
+          "1": "bl\u00e5r\u00f6", 
+          "first-attest": "bl\u00e5r\u00f6d..av.1"
+        }, 
+        {
+          "1": "blekr\u00f6", 
+          "first-attest": "blekr\u00f6d..av.1"
+        }, 
+        {
+          "1": "axelbre", 
+          "first-attest": "axelbred..av.1"
+        }, 
+        {
+          "1": "vi", 
+          "first-attest": "vid..av.1"
+        }, 
+        {
+          "1": "si", 
+          "first-attest": "sid..av.1"
+        }, 
+        {
+          "1": "rubinr\u00f6", 
+          "first-attest": "rubinr\u00f6d..av.1"
+        }, 
+        {
+          "1": "oranger\u00f6", 
+          "first-attest": "oranger\u00f6d..av.1"
+        }, 
+        {
+          "1": "obli", 
+          "first-attest": "oblid..av.1"
+        }, 
+        {
+          "1": "milsvi", 
+          "first-attest": "milsvid..av.1"
+        }, 
+        {
+          "1": "matgla", 
+          "first-attest": "matglad..av.1"
+        }, 
+        {
+          "1": "ljusr\u00f6", 
+          "first-attest": "ljusr\u00f6d..av.1"
+        }, 
+        {
+          "1": "lingonr\u00f6", 
+          "first-attest": "lingonr\u00f6d..av.1"
+        }, 
+        {
+          "1": "kopparr\u00f6", 
+          "first-attest": "kopparr\u00f6d..av.1"
+        }, 
+        {
+          "1": "j\u00e4ttegla", 
+          "first-attest": "j\u00e4tteglad..av.1"
+        }, 
+        {
+          "1": "j\u00e4mbre", 
+          "first-attest": "j\u00e4mbred..av.1"
+        }, 
+        {
+          "1": "infrar\u00f6", 
+          "first-attest": "infrar\u00f6d..av.1"
+        }, 
+        {
+          "1": "illr\u00f6", 
+          "first-attest": "illr\u00f6d..av.1"
+        }, 
+        {
+          "1": "halvmeterbre", 
+          "first-attest": "halvmeterbred..av.1"
+        }, 
+        {
+          "1": "halvd\u00f6", 
+          "first-attest": "halvd\u00f6d..av.1"
+        }, 
+        {
+          "1": "gulr\u00f6", 
+          "first-attest": "gulr\u00f6d..av.1"
+        }, 
+        {
+          "1": "glittergla", 
+          "first-attest": "glitterglad..av.1"
+        }, 
+        {
+          "1": "gla", 
+          "first-attest": "glad..av.1"
+        }, 
+        {
+          "1": "f\u00e4rggla", 
+          "first-attest": "f\u00e4rgglad..av.1"
+        }, 
+        {
+          "1": "fingerbre", 
+          "first-attest": "fingerbred..av.1"
+        }, 
+        {
+          "1": "falur\u00f6", 
+          "first-attest": "falur\u00f6d..av.1"
+        }, 
+        {
+          "1": "ekorr\u00f6", 
+          "first-attest": "ekorr\u00f6d..av.1"
+        }, 
+        {
+          "1": "cinnoberr\u00f6", 
+          "first-attest": "cinnoberr\u00f6d..av.1"
+        }, 
+        {
+          "1": "blodr\u00f6", 
+          "first-attest": "blodr\u00f6d..av.1"
+        }, 
+        {
+          "1": "supergla", 
+          "first-attest": "superglad..av.1"
+        }, 
+        {
+          "1": "sotd\u00f6", 
+          "first-attest": "sotd\u00f6d..av.1"
+        }, 
+        {
+          "1": "skitgla", 
+          "first-attest": "skitglad..av.1"
+        }, 
+        {
+          "1": "sj\u00e4lvd\u00f6", 
+          "first-attest": "sj\u00e4lvd\u00f6d..av.1"
+        }, 
+        {
+          "1": "rostr\u00f6", 
+          "first-attest": "rostr\u00f6d..av.1"
+        }, 
+        {
+          "1": "purpurr\u00f6", 
+          "first-attest": "purpurr\u00f6d..av.1"
+        }, 
+        {
+          "1": "pionr\u00f6", 
+          "first-attest": "pionr\u00f6d..av.1"
+        }, 
+        {
+          "1": "partygla", 
+          "first-attest": "partyglad..av.1"
+        }, 
+        {
+          "1": "minnesgo", 
+          "first-attest": "minnesgod..av.1"
+        }, 
+        {
+          "1": "levnadsgla", 
+          "first-attest": "levnadsglad..av.1"
+        }, 
+        {
+          "1": "knallr\u00f6", 
+          "first-attest": "knallr\u00f6d..av.1"
+        }, 
+        {
+          "1": "karmosinr\u00f6", 
+          "first-attest": "karmosinr\u00f6d..av.1"
+        }, 
+        {
+          "1": "j\u00e4mngo", 
+          "first-attest": "j\u00e4mngod..av.1"
+        }, 
+        {
+          "1": "h\u00f6gr\u00f6", 
+          "first-attest": "h\u00f6gr\u00f6d..av.1"
+        }, 
+        {
+          "1": "himmelsvi", 
+          "first-attest": "himmelsvid..av.1"
+        }, 
+        {
+          "1": "helr\u00f6", 
+          "first-attest": "helr\u00f6d..av.1"
+        }, 
+        {
+          "1": "genomgo", 
+          "first-attest": "genomgod..av.1"
+        }, 
+        {
+          "1": "bre", 
+          "first-attest": "bred..av.1"
+        }, 
+        {
+          "1": "anilinr\u00f6", 
+          "first-attest": "anilinr\u00f6d..av.1"
+        }, 
+        {
+          "1": "utle", 
+          "first-attest": "utled..av.1"
+        }, 
+        {
+          "1": "stri", 
+          "first-attest": "strid..av.1"
+        }, 
+        {
+          "1": "stend\u00f6", 
+          "first-attest": "stend\u00f6d..av.1"
+        }, 
+        {
+          "1": "sj\u00e4lvgo", 
+          "first-attest": "sj\u00e4lvgod..av.1"
+        }, 
+        {
+          "1": "scharlakansr\u00f6", 
+          "first-attest": "scharlakansr\u00f6d..av.1"
+        }, 
+        {
+          "1": "oxblodsr\u00f6", 
+          "first-attest": "oxblodsr\u00f6d..av.1"
+        }, 
+        {
+          "1": "klarr\u00f6", 
+          "first-attest": "klarr\u00f6d..av.1"
+        }, 
+        {
+          "1": "karminr\u00f6", 
+          "first-attest": "karminr\u00f6d..av.1"
+        }, 
+        {
+          "1": "j\u00e4ttego", 
+          "first-attest": "j\u00e4ttegod..av.1"
+        }, 
+        {
+          "1": "j\u00e4mnbre", 
+          "first-attest": "j\u00e4mnbred..av.1"
+        }, 
+        {
+          "1": "j\u00e4mgo", 
+          "first-attest": "j\u00e4mgod..av.1"
+        }, 
+        {
+          "1": "handsbre", 
+          "first-attest": "handsbred..av.1"
+        }, 
+        {
+          "1": "fullgo", 
+          "first-attest": "fullgod..av.1"
+        }, 
+        {
+          "1": "fotsi", 
+          "first-attest": "fotsid..av.1"
+        }, 
+        {
+          "1": "eldr\u00f6", 
+          "first-attest": "eldr\u00f6d..av.1"
+        }, 
+        {
+          "1": "d\u00f6", 
+          "first-attest": "d\u00f6d..av.1"
+        }, 
+        {
+          "1": "avd\u00f6", 
+          "first-attest": "avd\u00f6d..av.1"
+        }, 
+        {
+          "1": "avdragsgla", 
+          "first-attest": "avdragsglad..av.1"
+        }, 
+        {
+          "1": "alnsbre", 
+          "first-attest": "alnsbred..av.1"
+        }, 
+        {
+          "1": "sp\u00e4", 
+          "first-attest": "sp\u00e4d..av.1"
+        }
+      ], 
+      "_lexiconName": "saldompparadigms", 
+      "_members": 95, 
+      "_partOfSpeech": "av"
+    }, 
+    "_type": "lexicalentry", 
+    "_version": 1, 
+    "sort": [
+      9223372036854775807, 
+      "av", 
+      "p15_pryd..av.1"
+    ]
+  }
+]
