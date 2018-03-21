@@ -10,6 +10,9 @@ The data (should) reflects this:
 
 `1+e::msd=sg indef nom#1+es::msd=sg indef gen	0=sopsäckshållare..nn.1,,1=sopsäckshållar#0=solvärmefångare..nn.1,,1=solvärmefångar#0=socialmedicinare..nn.1,,1=socialmedicinar`
 
+Only for Karp:
+    _partofspeech, _lexiconName, _members
+
 ```javascript
 {
   "MorphologicalPatternID": "id-string", // or a list of IDs?

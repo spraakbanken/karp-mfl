@@ -1,21 +1,50 @@
 # Generellt
-- Visa alla lexikon **TODO**
-- Visa lexikonconfig **TODO**
+- Visa alla lexikon
+  '/lexicon'  output/lexicon
+- Visa lexikonconfig
+  '/lexicon?lexicon=saldomp'
+  '/lexicon/saldomp' output/lexiconsaldomp
+
 
 # Generellt - för ett lexikon
-- Ge alla pos **TODO**
-- Ge alla deklinationer / deklinationslista **?**
-- Ge alla paradigm / paradigmlista **?**
-- Ge alla ord / ordlista **?**
-- Ge alla ord i kandidatlista **?**
-- Autocomplete på ord som vi vet hur de böjs **TODO**
-- Autocomplete på paradigm **TODO**
-- Autocomplete på deklination **TODO**
-- För ett pardaigm - visa tabell+info **?**
+- Ge alla pos output/pos
+    '/pos/'
+    '/partofspeech'
+- Ge alla deklinationer / deklinationslista
+   '/compile?s=bklass' # beror på vad som finns
+    otuput/compilebklass
+- Ge alla paradigm / paradigmlista
+    otuput/compilefmparadigms
+   '/compile?s=paradigm'
+    otuput/compileparadigm
+- Ge alla ord / ordlista
+   '/compile?s=wf'
+    otuput/compilewf
+- För ett pardaigm - visa tabell+info
+    '/paradigminfo' output/paradigminfo
 - För en ordklass - ge defaulttabell **TODO**
+- Ge alla ord i kandidatlista **?**
+- Autocomplete på ord (som vi vet hur de böjs?)
+    anropa karp, med bra conf (mflkarpens)
+    '/autocompleteq=sig&mode=mflsaldom' output/autocompletew
+
+(- Autocomplete på paradigm (frontend hämtar alla))
+(- Autocomplete på deklination (frontend hämtar alla)
+   Börja med: skicka alla)
 
 
 # Böj
+'inflect?table=apa|sg+indef+nom,apan|sg+def+nom&pos=nn'
+output/inflecttable
+'inflect?table=apa&pos=nn'
+output/inflect
+'/inflectlike?word=katta&like=flicka..nn.1&pos=nn'
+output/inflectlike
+'inflectclass?word=apa&bklass=3&pos=nn'
+output/inflectclass
+
+
+
 ## Ger tillbaka:
 **TODO**
 
@@ -23,6 +52,8 @@
 - lemgram
 - paradigm
 - deklination
+- variabler
+- poäng
 
 
 ## Input
@@ -51,8 +82,3 @@ inflect?table=apa,apan|pl indef nom,apor
 
 # Annat
  - Generalisera så att det inte är saldospecifikt
-
-
-
-
-

@@ -1,6 +1,8 @@
 {
 "lexiconName": "saldomp",
-"mode": "karp",
+"lexiconMode": "external",
+"paradigmlexiconName": "saldompparadigms",
+"paradigmMode": "saldompparadigms",
 "inflectionalclass": {"bklass": "FormRepresentations.bklass", "fm_paradigm": "FormRepresentations.fm_paradigm.raw"},
 "paradigmbucketpath": "FormRepresentations.paradigm.raw",
 "extractparadigm": "paradigm",
@@ -12,5 +14,5 @@
 "show": "lemgram,bklass,paradigm,pos,inherent",
 "ngramorder": 3,
 "ngramprior": 0.01,
-"pprior": 5.0
+"pprior": 4.0
 }
