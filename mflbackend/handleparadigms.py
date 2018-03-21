@@ -52,12 +52,10 @@ def inflect_table(table, settings):
     print('inflect table %s, tags %s' % (pex_table[0], pex_table[1]))
     print('res', res)
     if res:
-        ans = {"Results": helpers.format_inflection(res, 1), 'new': False,
+        ans = {"Results": helpers.format_inflection(res, kbest=10), 'new': False,
                'analyzes': res[0][1][0]}
     else:
         pex_table = helpers.tableize(table, add_tags=True)
         paradigm = pex.learnparadigms([pex_table])[0]
-        ans = {'new': True,
-               'paradigm': paradigm,
-               'Results': helpers.lmf_tableize(table)}
+        ans = {'Results': helpers.lmf_tableize(table, paradigm=paradigm)}
     return ans

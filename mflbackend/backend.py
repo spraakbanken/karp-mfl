@@ -11,6 +11,7 @@ import helpers
 app = Flask(__name__)
 
 # TODO handle tags
+# TODO first check if given forms and restriction already exists in karp?
 
 
 @app.route('/')
@@ -19,11 +20,58 @@ def doc():
     return render_template('doc.html', url=request.url_root)
 
 
+@app.route('/lexicon')
+@app.route('/lexicon/<lex>')
+def lexiconinfo(lex=''):
+    lex = request.args.get('lexicon', lex)
+    if not lex:
+        return jsonify({"lexicons": [lex['name'] for lex in json.load(open('config/lexicons.json'))]})
+    else:
+        lexconf = helpers.get_lexiconconf(lex)
+        return jsonify(lexconf)
+
+
+# TODO Probably not do ??
+@app.route('/autocomplete')
+def autocomplete():
+    return render_template('doc.html', url=request.url_root)
+
+
+# TODO Probably not do ??
+@app.route('/autocompleteparadigm')
+def autocompleteparadigm():
+    lexicon = request.args.get('q', '')
+    return render_template('doc.html', url=request.url_root)
+
+
+@app.route('/paradigminfo')
+def paradigminfo():
+    lexicon = request.args.get('lexicon', '')
+    paradigm = request.args.get('paradigm', '')
+    lexconf = helpers.get_lexiconconf(lexicon)
+    q = 'extended||and|%s.search|equals|%s' % (lexconf['extractparadigm'], paradigm)
+    res = helpers.karp_query('query', {'q': q}, mode=lexconf['paradigmMode'], resource=lexconf["paradigmlexiconName"])
+    return jsonify(res['hits']['hits'])
+
+
+
+@app.route('/pos')
+@app.route('/partofspeech')
+def all_pos():
+    lexicon = request.args.get('lexicon', 'saldomp')
+    # TODO also check in lexicon? give combined info about
+    # which exist and which that have paradigms?
+    print(dir(paradigmdict[lexicon]))
+    print('ok',list(paradigmdict[lexicon].keys()))
+    return jsonify({"pos": list(paradigmdict[lexicon].keys())})
+
+
 @app.route('/inflectclass')
-def inflectbklass():
+def inflectclass():
     lexicon = request.args.get('lexicon', 'saldomp')
     lexconf = helpers.get_lexiconconf(lexicon)
     word = request.args.get('word', '')
+    ppriorv = float(request.args.get('pprior', lexconf["pprior"]))
     for d in lexconf['inflectionalclass'].keys():
         if d in request.args:
             bklasskey = d
@@ -33,14 +81,15 @@ def inflectbklass():
         % (bklasskey, bklassval, lexconf["pos"], pos)
     res = helpers.karp_query('statlist',
                              {'q': q,
-                              'mode': lexconf['mode'],
+                              'mode': lexconf['lexiconMode'],
                               # TODO from config!
                               'buckets': 'paradigm.bucket'}
                              )
     possible_p = [line[0] for line in res['stat_table']]
-    paradigms, numex, lms = paradigmdict[lexicon][pos]
+    paradigms, numex, lms = helpers.relevant_paradigms(paradigmdict, lexicon, pos)
     res = generate.test_paradigms(['%s\t%s' % (word, '|'.join(possible_p))],
-                                  paradigms, debug=True, kbest=10)
+                                  paradigms, debug=True, kbest=10, pprior=ppriorv,
+                                  lms=lms, numexamples=len(paradigms))
     ans = {"WordForms": helpers.format_simple_inflection(res)}
     return jsonify(ans)
 
@@ -52,16 +101,16 @@ def inflect():
     table = request.args.get('table', '')
     pos = request.args.get('pos', lexconf['defaultpos'])
     ppriorv = float(request.args.get('pprior', lexconf["pprior"]))
-    paradigms, numex, lms = paradigmdict[lexicon][pos]
+    paradigms, numex, lms = helpers.relevant_paradigms(paradigmdict, lexicon, pos)
     ans = handle.inflect_table(table,
                                [paradigms, numex, lms, config["print_tables"],
                                 config["debug"], ppriorv, config["choose"]])
     if 'paradigm' in ans:
         # print('made new', ans)
         ans['paradigm'] = str(ans['paradigm'])
-    else:
+    elif 'analyzes' in ans:
         # print('found it', ans)
-        ans['analyzes'] = ''  # TODO can't string encode this
+        del ans['analyzes']  # don't return this
     # print('res', res)
     # ans = {"WordForms": helpers.format_inflection(res, kbest, debug=debug)}
     # if not res:
@@ -76,13 +125,21 @@ def inflectlike():
     lexicon = request.args.get('lexicon', 'saldomp')
     lexconf = helpers.get_lexiconconf(lexicon)
     word = request.args.get('word', '')
+    # TODO remove, should be the lemgrams pos?
     pos = request.args.get('pos', lexconf['defaultpos'])
     like = request.args.get('like')
-    print(paradigmdict[lexicon][pos])
-    paradigms, numex, lms = paradigmdict[lexicon][pos]
+    ppriorv = float(request.args.get('pprior', lexconf["pprior"]))
+    # TODO ask karp for the right paradigms?
+    #q = 'extended||and|%s.search|equals|%s' % (lexconf['lemgram'], lemgram)
+    #res = helpers.karp_query('minientry',
+    #                         {'q': query, 'show': lexconf["show"],
+    #                           'size': size, 'start': start},
+    #                         mode=lexconf['lexiconmode'])
+    paradigms, numex, lms = helpers.relevant_paradigms(paradigmdict, lexicon, pos)
+    print('test %s paradigms' % len(paradigms))
     res = generate.test_paradigms(['%s\t%s' % (word, like)], paradigms,
-                                  debug=True)
-    ans = {"Results": helpers.format_simple_inflection(res)}
+                                  debug=True, pprior=ppriorv, lms=lms, numexamples=len(paradigms))
+    ans = {"Results": helpers.format_simple_inflection(res), 'new': False}
     # print('ans', ans)
     return jsonify(ans)
 
@@ -97,7 +154,7 @@ def add_table():
     # TODO handle class
     # TODO get the paradigm, ?and tell where the paradigm is found?
     lemgram = table[0].split('|')[0]
-    paradigms, numex, lms = paradigmdict[lexicon][pos]
+    paradigms, numex, lms = helpers.relevant_paradigms(paradigmdict, lexicon, pos)
     ans = handle.inflect_table(table,
                                [paradigms, numex, lms,
                                 config["print_tables"],
@@ -134,7 +191,7 @@ def paradigms():
     res = helpers.karp_query('statistics',
                              {'q': karp_q,
                               'cardinality': True,
-                              'mode': lexconf['mode'],
+                              'mode': lexconf['lexiconMode'],
                               'buckets': ','.join(['%s.bucket' % b for b in buckets])})
     stats = res['aggregations']['q_statistics']
     buckets = stats[lexconf["paradigmpath"]]['buckets']
@@ -157,7 +214,7 @@ def inflectionalclass():
     res = helpers.karp_query('statistics',
                              {'q': karp_q,
                               'cardinality': True,
-                              'mode': lexconf['mode'],
+                              'mode': lexconf['lexiconMode'],
                               'buckets': ','.join(['%s.bucket' % b for b in buckets])})
                               # 'buckets':'bklass.bucket.bucket,paradigm.bucket'})
     stats = res['aggregations']['q_statistics']
@@ -173,67 +230,83 @@ def compile():
     s = request.args.get('s', '*')  # searchfield
     lexicon = request.args.get('lexicon', 'saldomp')
     lexconf = helpers.get_lexiconconf(lexicon)
-    pos = request.args.get('pos', lexconf['defaultpos'])
+    pos = request.args.get('pos', '')
+    size = request.args.get('size', '100')
+    start = request.args.get('start', '0')
     count, results = 0, []
+    query = []
+    if pos:
+        query.append('and|%s|startswith|%s' % (lexconf["pos"], pos))
 
     if s == "wf":
-        q = 'extended||and|%s|equals|%s||and|%s|startswith|%s'\
-            % (lexconf["baseform"], lexconf["pos"], q, pos),
-        res = helpers.karp_query('minientry',
-                                 {'q': q,
-                                  'mode': lexconf['mode'],
-                                  'show': lexconf["show"]})
-        count = res['hits']['total']
-        # TODO how to show??
-        for r in res['hits']['hits']:
-            results.append(r['_source'].get('FormRepresentations', [{}])[0])
+        if q:
+            query.append('and|%s|equals|%s' % (lexconf["baseform"], q))
+        if query:
+            query = 'extended||' + '||'.join(query)
+        else:
+            query = 'extended||and|lexiconName|equals|%s' % lexicon
 
-        return render_template('wordlist.html', q=q, searchfield=s,
-                               count=count, results=results)
+        res = helpers.karp_query('minientry',
+                                 {'q': query, 'show': lexconf["show"],
+                                   'size': size, 'start': start},
+                                 mode=lexconf['lexiconMode'])
+        return jsonify(res)
 
     elif s == "paradigm":
-        # TODO implement when we know if we will have an index
-        # with paradigms and what information that will be there
-        karp_q = 'extended||and|%s|startswith|%s' % (lexconf["pos"], pos)
         if q:
             logging.debug('q is %s' % q)
-            karp_q += '||and|%s.search|equals|%s' % (lexconf["lemgram"], q)
-            res = helpers.karp_query('minientry',
-                                     {'q': karp_q,
-                                      'mode': lexconf['mode'],
-                                      'show': lexconf['extractparadigm']})
+            query.append('and|%s.search|equals|%s' % (lexconf["paradigm"], q))
+        if query:
+            query = 'extended||' + '||'.join(query)
+        else:
+            query = 'extended||and|lexiconName|equals|%s' % lexconf['paradigmlexiconName']
+        res = helpers.karp_query('minientry',
+                                 {'q': query,
+                                  # TODO show members and classes, once they are there
+                                  'show': ','.join([lexconf['extractparadigm']]),
+                                  'size': size, 'start': start},
+                                 mode=lexconf['paradigmMode'],
+                                 resource=lexconf['paradigmlexiconName'])
+        return jsonify(res)
             # TODO how to get the path?
-            ps = [hit['_source'].get('FormRepresentations', [{}])[0].get('paradigm', '') for hit in res['hits']['hits']]
-            karp_q = 'extended||and|%s|startswith|%s||and|%s.search|equals|%s'\
-                     % (lexconf['pos'], pos, lexconf['extractparadigm'], '|'.join(set(ps)))
+        #     ps = [hit['_source'].get('FormRepresentations', [{}])[0].get('paradigm', '') for hit in res['hits']['hits']]
+        #     karp_q = 'extended||and|%s|startswith|%s||and|%s.search|equals|%s'\
+        #              % (lexconf['pos'], pos, lexconf['extractparadigm'], '|'.join(set(ps)))
 
-        buckets = [lexconf['extractparadigm']] + list(lexconf['inflectionalclass'].keys())
-        res = helpers.karp_query('statistics',
-                                 {'q': karp_q,
-                                  'cardinality': True,
-                                  'mode': lexconf['mode'],
-                                  'buckets': ','.join(['%s.bucket' % b for b in buckets])})
-        stats = res['aggregations']['q_statistics']
-        buckets = stats[lexconf['paradigmbucketpath']]['buckets']
-        count = stats["doc_count"]
+        # buckets = [lexconf['extractparadigm']] + list(lexconf['inflectionalclass'].keys())
+        # res = helpers.karp_query('statistics',
+        #                          {'q': karp_q,
+        #                           'cardinality': True,
+        #                           'mode': lexconf['lexiconMode'],
+        #                           'buckets': ','.join(['%s.bucket' % b for b in buckets])})
+        # stats = res['aggregations']['q_statistics']
+        # buckets = stats[lexconf['paradigmbucketpath']]['buckets']
+        # count = stats["doc_count"]
 
-        return render_template('paralist.html', q=q, searchfield=s,
-                               count=count, results=buckets)
+        # return render_template('paralist.html', q=q, searchfield=s,
+        #                      count=count, results=buckets)
 
     elif s in lexconf["inflectionalclass"].keys():
-        karp_q = 'extended||and|%s|startswith|%s' % (lexconf['pos'], pos)
+        #karp_q = 'extended||and|%s|startswith|%s' % (lexconf['pos'], pos)
         if q:
-            karp_q += '||and|%s|equals|%s' % (s, q)
+            #karp_q += '||and|%s|equals|%s' % (s, q)
+            query.append('||and|%s|equals|%s' % (s, q))
+        if query:
+            query = 'extended||' + '||'.join(query)
+        else:
+            query = 'extended||and|lexiconName|equals|%s' % lexconf['lexiconName']
 
         buckets = [s, lexconf['extractparadigm']]
-        for c in lexconf['inflectionalclass'].keys():
-            if c != s:
-                buckets.append(c)
+        #for c in lexconf['inflectionalclass'].keys():
+        #    if c != s:
+        #        buckets.append(c)
         res = helpers.karp_query('statistics',
-                                 {'q': karp_q,
-                                  'cardinality': True,
-                                  'mode': lexconf['mode'],
-                                  'buckets': ','.join(['%s.bucket' % b for b in buckets])})
+                                 {'q': query,
+                                  #'cardinality': True,
+                                  'buckets': ','.join(['%s.bucket' % b for b in buckets])},
+                                 mode=lexconf['lexiconMode'])
+        return jsonify(res['aggregations']['q_statistics'])
+
         stats = res['aggregations']['q_statistics']
         buckets = stats[lexconf['paradigmbucketpath']]['buckets']
         count = stats["doc_count"]
@@ -250,13 +323,16 @@ logging.basicConfig(stream=sys.stderr, level='DEBUG')
 @app.errorhandler(Exception)
 def handle_invalid_usage(error):
     try:
+        print(error)
+        print(dir(error))
         request.get_data()
         logging.debug('Error on url %s' % request.full_path)
         logging.exception(error)
 
-        return error.message, 400
+        return "Error!!\n%s" % error.message, 400
     except Exception:
         return "Oops, something went wrong\n", 500
+
 
 # TODO how to set these?? for saldomp, i have increased pprior a lot, from 1.0 to 5.0
 config = {"print_tables": False,
@@ -267,7 +343,6 @@ config = {"print_tables": False,
 
 
 if __name__ == '__main__':
-    import collections
     import json
     import os.path
     # sys.setdefaultencoding('utf8')
@@ -285,8 +360,11 @@ if __name__ == '__main__':
             print("reading %s" % pfile)
             parafile = open(pfile, encoding='utf8').readlines()
             para, numex, lms = mp.build(pfile, lexconf["ngramorder"],
-                                        lexconf["ngramprior"])
+            # TODO small should be true
+                                        lexconf["ngramprior"]) #, small=True)
             paradigmdict[lex['name']][pos] = ((para, numex, lms))
+    #from pympler import asizeof
+    #print('p big size', asizeof.asizeof(paradigmdict))
 
     # parafile = sys.argv[1]
     # lexconf = helpers.get_lexiconconf("saldomp")
