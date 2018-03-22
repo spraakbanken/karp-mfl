@@ -4,6 +4,7 @@
 "paradigmlexiconName": "saldompparadigms",
 "paradigmMode": "saldompparadigms",
 "inflectionalclass": {"bklass": "FormRepresentations.bklass", "fm_paradigm": "FormRepresentations.fm_paradigm.raw"},
+"inflectionalclass": {"bklass": "FormRepresentations.bklass", "fm_paradigm": "FormRepresentations.fm_paradigm.raw", "fm_paradgm": "FormRepresentations.fm_paradigm.raw"},
 "paradigmbucketpath": "FormRepresentations.paradigm.raw",
 "extractparadigm": "paradigm",
 "corpus": "suc3",

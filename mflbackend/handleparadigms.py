@@ -1,6 +1,6 @@
 import helpers
+import logging
 
-import pextract.generate as generate
 import pextract.morphparser as mp
 import pextract.pextract as pex
 
@@ -20,13 +20,13 @@ def add_paradigm(pid, paradigm, paradigms):
 
 
 def add_word_to_paradigm(lemgram, inst, paradigm):
-    print('old count', paradigm.count)
+    logging.debug('old count %s' % paradigm.count)
     var_inst = list(enumerate([lemgram]+list(inst)))
-    print('old var inst', paradigm.var_insts[-1])
+    logging.debug('old var inst %s' % paradigm.var_insts[-1])
     paradigm.var_insts.append(var_inst)
     paradigm.count += 1
-    print('new var inst', paradigm.var_insts[-1])
-    print('new count', paradigm.count)
+    logging.debug('new var inst %s' % paradigm.var_insts[-1])
+    logging.debug('new count %s' % paradigm.count)
     # send_to_karp()
 
 
@@ -45,17 +45,20 @@ def remove_paradigm(pid, paradigms):
     # send_to_karp()
 
 
-def inflect_table(table, settings):
-     # TODO also send thesetags (table[1]) to test_paradigms
+def inflect_table(table, settings, kbest=10):
     pex_table = helpers.tableize(table, add_tags=False)
+    logging.debug('inflect forms %s msd %s' % pex_table)
     res = mp.test_paradigms([pex_table], *settings, returnempty=False)
-    print('inflect table %s, tags %s' % (pex_table[0], pex_table[1]))
-    print('res', res)
+    logging.debug('inflect table %s, tags %s' % (pex_table[0], pex_table[1]))
+    logging.debug('res %s' % res)
     if res:
-        ans = {"Results": helpers.format_inflection(res, kbest=10), 'new': False,
-               'analyzes': res[0][1][0]}
+        ans = {"Results": helpers.format_inflection(res, kbest=kbest),
+               'new': False, 'analyzes': res[0][1][0]}
     else:
+        # TODO  will this be the correct output?
         pex_table = helpers.tableize(table, add_tags=True)
         paradigm = pex.learnparadigms([pex_table])[0]
-        ans = {'Results': helpers.lmf_tableize(table, paradigm=paradigm)}
+        logging.debug('learned %s' % paradigm)
+        ans = {'Results': helpers.lmf_tableize(table, paradigm=paradigm),
+               'new': True, 'analyses': res}
     return ans
