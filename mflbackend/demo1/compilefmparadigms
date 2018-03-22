@@ -1,4 +1,4 @@
-url: '/compile?s=fmparadigms'
+url: '/compile?s=class&classname=fmparadigms'
 
 Visar alla klasser i en kategori.
 parametrar:
@@ -10,67 +10,36 @@ parametrar:
   'q' - en restriktiv sökning
 
 {
-  "FormRepresentations.fm_paradigm.raw": {
-    "buckets": [
-      {
-        "FormRepresentations.paradigm.raw": {
-          "buckets": [
-            {
-              "doc_count": 10175, 
-              "key": "namnskylt..nn.1"
-            }, 
-            {
-              "doc_count": 2, 
-              "key": "yrkeskodex..nn.1"
-            }
-          ], 
-          "doc_count_error_upper_bound": 0, 
-          "sum_other_doc_count": 0
-        }, 
-        "FormRepresentations.paradigm.raw_missing": {
-          "doc_count": 0
-        }, 
-        "doc_count": 10177, 
-        "key": "nn_2u_mening"
-      }, 
-      {
-        "FormRepresentations.paradigm.raw": {
-          "buckets": [
-            {
-              "doc_count": 9183, 
-              "key": "\u00f6versk\u00e5dlig..av.1"
-            }, 
-            {
-              "doc_count": 355, 
-              "key": "v\u00e4rnl\u00f6s..av.1"
-            }
-          ], 
-          "doc_count_error_upper_bound": 0, 
-          "sum_other_doc_count": 0
-        }, 
-        "FormRepresentations.paradigm.raw_missing": {
-          "doc_count": 0
-        }, 
-        "doc_count": 9538, 
-        "key": "av_1_gul"
-      }, 
-      {
-        "FormRepresentations.paradigm.raw": {
-          "buckets": [
-            {
-              "doc_count": 9079, 
-              "key": "\u00f6verlevnads\u00e5ngest..nn.1"
-            }
-          ], 
-          "doc_count_error_upper_bound": 0, 
-          "sum_other_doc_count": 0
-        }, 
-        "FormRepresentations.paradigm.raw_missing": {
-          "doc_count": 0
-        }, 
-        "doc_count": 9079, 
-        "key": "nn_0u_boskap"
-      }, 
-      ...
-  "doc_count": 128036
+  "compiled_on": "fm_paradigm", 
+  "fields": [
+    "paradigm", 
+    "entries"
+  ], 
+  "stats": [
+    [
+      "nn_2u_mening", 
+      2, 
+      10177
+    ], 
+    [
+      "nn_0u_boskap", 
+      1, 
+      9079
+    ], 
+    [
+      "nn_5n_saldo", 
+      1, 
+      7565
+    ], 
+    [
+      "nn_3u_salong", 
+      1, 
+      5973
+    ], 
+    [
+      "nn_3u_karbid", 
+      2, 
+      5230
+    ], 
+  ]
 }

@@ -1,6 +1,6 @@
 url: '/compile?s=paradigm'
 
-Visar alla paradigm.
+Visar alla paradigm, med information om på antal klasser och ord.
 parametrar:
   's' - ska vara paradigm
   'lexicon' - vilket lexikon
@@ -9,43 +9,32 @@ parametrar:
   'start' - börja lista träffarna från denna position
   'q' - en restriktiv sökning
 
+
 {
-  "_shards": {
-    "failed": 0, 
-    "skipped": 0, 
-    "successful": 5, 
-    "total": 5
-  }, 
-  "hits": {
-    "hits": [
-      {
-        "_id": "-tV3R2IBzl5vI3XYRhcX", 
-        "_index": "saldompparadigms_test", 
-        "_score": null, 
-        "_source": {
-          "MorphologicalPatternID": "p10_l\u00e4nge..ab.1"
-        }, 
-        "_type": "lexicalentry", 
-        "sort": [
-          9223372036854775807, 
-          "ab", 
-          "p10_l\u00e4nge..ab.1"
-        ]
-      }, 
-      {
-        "_id": "-9V3R2IBzl5vI3XYRhcX", 
-        "_index": "saldompparadigms_test", 
-        "_score": null, 
-        "_source": {
-          "MorphologicalPatternID": "p11_n\u00e4ra..ab.1"
-        }, 
-        "_type": "lexicalentry", 
-        "sort": [
-          9223372036854775807, 
-          "ab", 
-          "p11_n\u00e4ra..ab.1"
-        ]
-      }, 
-  "timed_out": false, 
-  "took": 70
+  "compiled_on": "paradigm", 
+  "fields": [
+    "bklass", 
+    "fm_paradgm", 
+    "entries"
+  ], 
+  "stats": [
+    [
+      "p100_rallarros..nn.1", 
+      1, 
+      1, 
+      22
+    ], 
+    [
+      "p101_odalbonde..nn.1", 
+      1, 
+      1, 
+      21
+    ], 
+    [
+      "p102_otrohetsdrama..nn.1", 
+      1, 
+      1, 
+      21
+    ]
+   ]
 }

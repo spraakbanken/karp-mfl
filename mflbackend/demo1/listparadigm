@@ -1,0 +1,30 @@
+url: '/list?s=paradigm'
+
+Visar alla paradigm och hur många ord de har var.
+parametrar:
+  's' - ska vara paradigm
+  'lexicon' - vilket lexikon
+  'pos' - vilket ordklass
+  'q' - en restriktiv sökning
+
+{
+  "compiled_on": "wf", 
+  "list": [
+    [
+      "p1_\u00f6verfart..nn.1", 
+      13565
+    ], 
+    [
+      "p2_namnskylt..nn.1", 
+      13038
+    ], 
+    [
+      "p3_\u00f6verlevnads\u00e5ngest..nn.1", 
+      10979
+    ], 
+    [
+      "p4_storfurstend\u00f6me..nn.1", 
+      8791
+    ]
+  ]
+}

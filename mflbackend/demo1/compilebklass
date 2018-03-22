@@ -1,4 +1,4 @@
-url: '/compile?s=bklass'
+url: '/compile?s=class&classname=bklass'
 
 Visar alla klasser i en kategori.
 parametrar:
@@ -10,131 +10,26 @@ parametrar:
   'q' - en restriktiv sökning
 
 {
-  "FormRepresentations.bklass": {
-    "buckets": [
-      {
-        "FormRepresentations.paradigm.raw": {
-          "buckets": [
-            {
-              "doc_count": 10979, 
-              "key": "\u00f6verlevnads\u00e5ngest..nn.1"
-            }, 
-            {
-              "doc_count": 1842, 
-              "key": "v\u00e4rldshandel..nn.1"
-            }, 
-            ...
-          ], 
-          "doc_count_error_upper_bound": 0, 
-          "sum_other_doc_count": 0
-        }, 
-        "FormRepresentations.paradigm.raw_missing": {
-          "doc_count": 0
-        }, 
-        "doc_count": 18888, 
-        "key": "0"
-      }, 
-      {
-        "FormRepresentations.paradigm.raw": {
-          "buckets": [
-            {
-              "doc_count": 13565, 
-              "key": "\u00f6verfart..nn.1"
-            }, 
-            {
-              "doc_count": 1231, 
-              "key": "brisans..nn.1"
-            }, 
-          ], 
-          ccc
-          "doc_count_error_upper_bound": 0, 
-          "sum_other_doc_count": 0
-        }, 
-        "FormRepresentations.paradigm.raw_missing": {
-          "doc_count": 0
-        }, 
-        "doc_count": 17276, 
-        "key": "3"
-      }, 
-      {
-        "FormRepresentations.paradigm.raw": {
-          "buckets": [
-            {
-              "doc_count": 13038, 
-              "key": "namnskylt..nn.1"
-            }, 
-            ...
-                      ], 
-          "doc_count_error_upper_bound": 0, 
-          "sum_other_doc_count": 0
-        }, 
-        "FormRepresentations.paradigm.raw_missing": {
-          "doc_count": 0
-        }, 
-        "doc_count": 16784, 
-        "key": "2"
-      }, 
-      {
-        "FormRepresentations.paradigm.raw": {
-          "buckets": [
-            {
-              "doc_count": 6807, 
-              "key": "\u00f6verskott..nn.1"
-            }, 
-            ...
-                      ], 
-          "doc_count_error_upper_bound": 0, 
-          "sum_other_doc_count": 0
-        }, 
-        "FormRepresentations.paradigm.raw_missing": {
-          "doc_count": 0
-        }, 
-        "doc_count": 11959, 
-        "key": "5"
-      }, 
-      {
-        "FormRepresentations.paradigm.raw": {
-          "buckets": [
-            {
-              "doc_count": 8791, 
-              "key": "storfurstend\u00f6me..nn.1"
-            }, 
-            ...
-          ], 
-          "doc_count_error_upper_bound": 0, 
-          "sum_other_doc_count": 0
-        }, 
-        "FormRepresentations.paradigm.raw_missing": {
-          "doc_count": 0
-        }, 
-        "doc_count": 9986, 
-        "key": "4"
-      }, 
-      {
-        "FormRepresentations.paradigm.raw": {
-          "buckets": [
-            {
-              "doc_count": 5573, 
-              "key": "br\u00e4nn\u00e4ssla..nn.1"
-            }, 
-            {
-              "doc_count": 37, 
-              "key": "tidvattenv\u00e5g..nn.1"
-            }, 
-                      ], 
-                      ...
-          "doc_count_error_upper_bound": 0, 
-          "sum_other_doc_count": 0
-        }, 
-        "FormRepresentations.paradigm.raw_missing": {
-          "doc_count": 0
-        }, 
-        "doc_count": 5685, 
-        "key": "1"
-      }, 
-        }, 
-  "FormRepresentations.bklass_missing": {
-     ... 
-  }, 
-  "doc_count": 128036
+  "compiled_on": "bklass", 
+  "fields": [
+    "paradigm", 
+    "entries"
+  ], 
+  "stats": [
+    [
+      "0", 
+      87, 
+      18888
+    ], 
+    [
+      "3", 
+      57, 
+      17276
+    ], 
+    [
+      "2", 
+      57, 
+      16784
+    ]
+ ]
 }
