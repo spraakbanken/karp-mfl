@@ -1,11 +1,11 @@
 import json
 import logging
-import urllib
+import urllib.parse
+import urllib.request
 
 
 # KARP_BACKEND = 'https://ws.spraakbanken.gu.se/ws/karp/v4/'
 KARP_BACKEND = 'http://localhost:8081/app/'
-
 
 
 def get_lexiconconf(lexicon):
@@ -14,9 +14,13 @@ def get_lexiconconf(lexicon):
 
 
 def karp_query(action, query, mode='external', resource='saldomp'):
-    query['mode'] = mode
-    query['resource'] = resource
-    query['size'] = 1000
+    if 'mode' not in query:
+        query['mode'] = mode
+    if 'resource' not in query and 'lexiconName' not in query:
+        query['resource'] = resource
+    if 'size' not in query:
+        query['size'] = 1000
+    logging.debug('query %s %s' % (query, type(query)))
     logging.debug('query %s %s' % (query, type(query)))
     params = urllib.parse.urlencode(query)
     logging.debug('ask karp %s %s' % (action, params))
@@ -25,6 +29,7 @@ def karp_query(action, query, mode='external', resource='saldomp'):
 
 def karp_request(action):
     q = "%s/%s" % (KARP_BACKEND, action)
+    logging.debug('send %s' % q)
     logging.debug('send %s' % q)
     response = urllib.request.urlopen(q).read().decode('utf8')
     logging.debug('response %s' % response)
@@ -38,12 +43,12 @@ def format_simple_inflection(ans):
     for lemgram, words, analyses in ans:
         for aindex, (score, p, v) in enumerate(analyses):
             try:
-                print('v %s %s' % (v, type(v)))
+                logging.debug('v %s %s' % (v, type(v)))
                 infl = {'paradigm': p.name, 'WordForms': [],
                         'variables': dict(zip(range(1, len(v)+1), v)),
                         'score': score}
-                print(lemgram + ':')
-                print('hej %s %s' % (aindex, v))
+                logging.debug(lemgram + ':')
+                logging.debug('hej %s %s' % (aindex, v))
                 table = p(*v)  # Instantiate table with vars from analysis
                 for form, msd in table:
                     for tag in msd:
@@ -52,7 +57,7 @@ def format_simple_inflection(ans):
                 out.append((score, infl))
             except Exception as e:
                 # fails if the inflection does not work (instantiation fails)
-                print(e)
+                logging.debug(e)
     out.sort(reverse=True, key=lambda x: x[0])
     return [o[1] for o in out]
 
@@ -75,7 +80,8 @@ def format_inflection(ans, kbest, debug=False):
             out.append(infl)
 
             if debug:
-                print("Members:", ", ".join([p(*[var[1] for var in vs])[0][0] for vs in p.var_insts]))
+                logging.debug("Members: %s" %
+                              ", ".join([p(*[var[1] for var in vs])[0][0] for vs in p.var_insts]))
     return out
 
 
@@ -96,7 +102,7 @@ def lmf_tableize(table, paradigm=None, score=0):
         wfs.append({'writtenForm': form, 'msd': tag})
 
     obj['WordForms'] = wfs
-    return []
+    return obj
 
 
 def tableize(table, add_tags=True):
@@ -117,6 +123,7 @@ def tableize(table, add_tags=True):
         thesetags.append("msd=%s" % tag if tag else '')
     return (thistable, thesetags)
 
+
 def relevant_paradigms(paradigmdict, lexicon, pos):
     try:
         return paradigmdict[lexicon][pos]
@@ -124,3 +131,26 @@ def relevant_paradigms(paradigmdict, lexicon, pos):
         e = Exception()
         e.message = "No word class %s for lexicon %s" % (pos, lexicon)
         raise e
+
+
+def compile_list(query, searchfield, q, lexicon, show, size, start, mode):
+    query = search_q(query, searchfield, q, lexicon)
+    res = karp_query('minientry',
+                     {'q': query, 'show': show, 'size': size,
+                      'start': start, 'mode': mode,
+                      'resource': lexicon})
+    ans = []
+    for hit in res["hits"]["hits"]:
+        ans.append(hit["_source"])
+    return ans
+
+
+def search_q(query, searchfield, q, lexicon):
+    if q:
+        logging.debug('q is %s' % q)
+        query.append('and|%s.search|equals|%s' % (searchfield, q))
+    if query:
+        query = 'extended||' + '||'.join(query)
+    else:
+        query = 'extended||and|lexiconName|equals|%s' % lexicon
+    return query
