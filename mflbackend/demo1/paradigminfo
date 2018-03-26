@@ -12,8 +12,8 @@ parametrar:
 
 Svar vid träff, short=true:
 {
-  "MorphologicalPatternID": "p15_pryd..av.1", 
-  "categories": {
+  "MorphologicalPatternID": "p15_pryd..av.1",
+  "TransformCategory": {
     "bklass": [
       ""
     ], 
