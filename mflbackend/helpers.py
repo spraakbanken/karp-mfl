@@ -37,7 +37,7 @@ def karp_request(action):
     return data
 
 
-def format_simple_inflection(ans):
+def format_simple_inflection(ans, pos=''):
     " format an inflection and report whether anything has been printed "
     out = []
     for lemgram, words, analyses in ans:
@@ -46,7 +46,8 @@ def format_simple_inflection(ans):
                 logging.debug('v %s %s' % (v, type(v)))
                 infl = {'paradigm': p.name, 'WordForms': [],
                         'variables': dict(zip(range(1, len(v)+1), v)),
-                        'score': score}
+                        'score': score,
+                        'lemgram': '', 'partOfSpeech': pos}
                 logging.debug(lemgram + ':')
                 logging.debug('hej %s %s' % (aindex, v))
                 table = p(*v)  # Instantiate table with vars from analysis
@@ -54,22 +55,31 @@ def format_simple_inflection(ans):
                     for tag in msd:
                         infl['WordForms'].append({'writtenForm': form,
                                                   'msd': tag[1]})
+                # TODO is the baseform always the first form?
+                # infl['baseform'] = infl['Wordforms'][0]['writtenForm']
                 out.append((score, infl))
             except Exception as e:
                 # fails if the inflection does not work (instantiation fails)
-                logging.debug(e)
+                logging.exception(e)
     out.sort(reverse=True, key=lambda x: x[0])
+#   X lemgram
+#   X grundform
+#   X paradigmnamn
+#   X ordklass
+#   annan klass
     return [o[1] for o in out]
 
 
-def format_inflection(ans, kbest, debug=False):
+#TODO who uses this? add pos to that
+def format_inflection(ans, kbest, pos='', debug=False):
     " format an inflection and report whether anything has been printed "
     out = []
     for words, analyses in ans:
         for aindex, (score, p, v) in enumerate(analyses):
             infl = {'paradigm': p.name, 'WordForms': [],
                     'variables': dict(zip(range(1, len(v)+1), v)),
-                    'score': score}
+                    'score': score,
+                    'lemgram': '', 'partOfSpeech': pos}
             if aindex >= kbest:
                 break
             table = p(*v)          # Instantiate table with vars from analysis
@@ -77,6 +87,7 @@ def format_inflection(ans, kbest, debug=False):
                 for tag in msd:
                     infl['WordForms'].append({'writtenForm': form,
                                               'msd': tag[1]})
+
             out.append(infl)
 
             if debug:
@@ -85,7 +96,7 @@ def format_inflection(ans, kbest, debug=False):
     return out
 
 
-def lmf_tableize(table, paradigm=None, score=0):
+def lmf_tableize(table, paradigm=None, pos='', score=0):
     table = table.split(',')
     obj = {'score': score, 'paradigm': '', 'new': True}
     if paradigm is not None:
@@ -102,6 +113,8 @@ def lmf_tableize(table, paradigm=None, score=0):
         wfs.append({'writtenForm': form, 'msd': tag})
 
     obj['WordForms'] = wfs
+    obj['lemgram'] = ''
+    obj['partOfSpeech'] = pos
     return obj
 
 
