@@ -37,13 +37,33 @@ def lexiconinfo(lex=''):
 def paradigminfo():
     lexicon = request.args.get('lexicon', '')
     paradigm = request.args.get('paradigm', '')
+    short = request.args.get('short', '')
+    short = short in [True, 'true', 'True']
     lexconf = helpers.get_lexiconconf(lexicon)
     q = 'extended||and|%s.search|equals|%s' %\
         (lexconf['extractparadigm'], paradigm)
     res = helpers.karp_query('query', {'q': q},
                              mode=lexconf['paradigmMode'],
                              resource=lexconf["paradigmlexiconName"])
-    return jsonify(res['hits']['hits'])
+    ans = {}
+    if res['hits']['total'] > 0:
+        obj = res['hits']['hits'][0]['_source']
+        if short:
+            short_obj = {}
+            short_obj['MorphologicalPatternID'] = obj['MorphologicalPatternID']
+            short_obj['partOfSpeech'] = obj['_partOfSpeech']
+            short_obj['entries'] = obj['_entries']
+            print('short', obj.get('TransformCategory'), obj.keys())
+            for classname, classval in obj.get('TransformCategory', {}).items():
+                print('class',classname,classval)
+                if not 'categories' in short_obj:
+                    short_obj['categories'] = {}
+                short_obj['categories'][classname] = classval
+            obj = short_obj
+
+        return jsonify(obj)
+    else:
+        return jsonify({})
 
 
 @app.route('/pos')
@@ -75,13 +95,19 @@ def autocompleteparadigm():
 def searchtab():
     return render_template('search.html', infotext="mfl")
 
+# För alla inflect, ge tillbaka
+#   lemgram
+#   grundform
+#   paradigmnamn
+#   ordklass
+#   annan klass
 
 # Test inflections
 @app.route('/inflectclass')
 def inflectclass():
     lexicon = request.args.get('lexicon', 'saldomp')
     lexconf = helpers.get_lexiconconf(lexicon)
-    word = request.args.get('word', '')
+    word = request.args.get('wordform', '')
     ppriorv = float(request.args.get('pprior', lexconf["pprior"]))
     classname = request.args.get('classname', '')
     classval = request.args.get('classval', '')
@@ -95,10 +121,10 @@ def inflectclass():
                              )
     possible_p = [line[0] for line in res['stat_table']]
     paras, numex, lms = helpers.relevant_paradigms(paradigmdict, lexicon, pos)
-    res = generate.test_paradigms(['%s\t%s' % (word, '|'.join(possible_p))],
+    res = generate.test_name_paradigms(['%s\t%s' % (word, '|'.join(possible_p))],
                                   paras, debug=True, kbest=10, pprior=ppriorv,
                                   lms=lms, numexamples=len(paras))
-    ans = {"WordForms": helpers.format_simple_inflection(res)}
+    ans = {"Results": helpers.format_simple_inflection(res, pos=pos)}
     return jsonify(ans)
 
 
@@ -112,7 +138,8 @@ def inflect():
     paras, numex, lms = helpers.relevant_paradigms(paradigmdict, lexicon, pos)
     ans = handle.inflect_table(table,
                                [paras, numex, lms, config["print_tables"],
-                                config["debug"], ppriorv])
+                                config["debug"], ppriorv],
+                               pos=pos)
     logging.debug('ans')
     if 'paradigm' in ans:
         ans['paradigm'] = str(ans['paradigm'])
@@ -125,11 +152,12 @@ def inflect():
 def inflectlike():
     lexicon = request.args.get('lexicon', 'saldomp')
     lexconf = helpers.get_lexiconconf(lexicon)
-    word = request.args.get('word', '')
+    word = request.args.get('wordform', '')
     # TODO remove, should be the lemgrams pos
     # conf shoud tell how to get pos from lemgram
     pos = request.args.get('pos', lexconf['defaultpos'])
     like = request.args.get('like')
+    print('like',like)
     ppriorv = float(request.args.get('pprior', lexconf["pprior"]))
     # TODO ask karp for the right paradigms?
     # q = 'extended||and|%s.search|equals|%s' % (lexconf['lemgram'], lemgram)
@@ -139,10 +167,10 @@ def inflectlike():
     #                         mode=lexconf['lexiconmode'])
     paras, numex, lms = helpers.relevant_paradigms(paradigmdict, lexicon, pos)
     logging.debug('test %s paradigms' % len(paras))
-    res = generate.test_paradigms(['%s\t%s' % (word, like)], paras,
+    res = generate.test_member_paradigms(['%s\t%s' % (word, like)], paras,
                                   debug=True, pprior=ppriorv, lms=lms,
                                   numexamples=len(paras))
-    ans = {"Results": helpers.format_simple_inflection(res), 'new': False}
+    ans = {"Results": helpers.format_simple_inflection(res, pos=pos), 'new': False}
     # print('ans', ans)
     return jsonify(ans)
 
@@ -185,7 +213,8 @@ def list():
                                   'buckets': classname+'.bucket'},
                                  mode=lexconf['lexiconMode'])
         return jsonify({"compiled_on": classname,
-                        "list": res['stat_table']})
+                        "list": res['stat_table'],
+                        "fields": ["entries"]})
 
     if s == "wf":
         # TODO this is probably not correct, due to ES approx
@@ -195,7 +224,8 @@ def list():
                                   'buckets': lexconf["baseform"]+'.bucket'},
                                  mode=lexconf['lexiconMode'])
         return jsonify({"compiled_on": "wf",
-                        "list": res['stat_table']})
+                        "list": res['stat_table'],
+                        "fields": ["entries"]})
 
     elif s == "paradigm":
         query = helpers.search_q(query, lexconf["extractparadigm"], q, lexicon)
@@ -204,11 +234,13 @@ def list():
                                   'buckets': lexconf["extractparadigm"]+'.bucket'},
                                  mode=lexconf['lexiconMode'])
         return jsonify({"compiled_on": "wf",
-                        "list": res['stat_table']})
+                        "list": res['stat_table'],
+                        "fields": ["entries"]})
     else:
         return "Don't know what to do"
 
 
+# TODO all compiled_on: visa entries sist
 @app.route('/compile')
 def compile():
     q = request.args.get('q', '')  # querystring
@@ -259,7 +291,7 @@ def compile():
         mode = lexconf['lexiconMode']
         ans = helpers.compile_list(query, lexconf["baseform"], q, lexicon,
                                    lexconf["show"], size, start, mode)
-        return jsonify({"compiled_on": "wordforms", "stats": ans})
+        return jsonify({"compiled_on": "wordforms", "stats": ans, "fields": ["entries"]})
 
     elif s == "paradigm":
         # TODO no need to look in config for this, it should always be the same
@@ -318,6 +350,7 @@ def add_table():
                                     config["print_tables"],
                                     config["debug"],
                                     lexconf["pprior"]],
+                                   pos=pos,
                                    kbest=1)
 
     if ans['new']:
