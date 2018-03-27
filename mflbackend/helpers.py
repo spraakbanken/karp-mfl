@@ -1,5 +1,6 @@
 import json
 import logging
+import pextract.paradigm as P
 import urllib.parse
 import urllib.request
 
@@ -72,9 +73,11 @@ def format_simple_inflection(ans, pos=''):
                                                   'msd': tag[1]})
                 # TODO is the baseform always the first form?
                 # infl['baseform'] = infl['Wordforms'][0]['writtenForm']
+                print('could use paradigm', lemgram)
                 out.append((score, infl))
             except Exception as e:
                 # fails if the inflection does not work (instantiation fails)
+                print('could not use paradigm', lemgram)
                 logging.exception(e)
     out.sort(reverse=True, key=lambda x: x[0])
 #   X lemgram
@@ -177,13 +180,26 @@ def tableize(table, add_tags=True):
     return (thistable, thesetags)
 
 
-def relevant_paradigms(paradigmdict, lexicon, pos):
+def relevant_paradigms(lexconf, paradigmdict, lexicon, pos, possible_p=[]):
+    print('conf', lexconf)
     try:
-        return paradigmdict[lexicon][pos]
+        q = {'q': 'extended||and|p_id|equals|%s' % '|'.join(possible_p),
+            'size': 1000}
+        res = karp_query('query', q, mode=lexconf['paradigmMode'],
+                         resource=lexconf['paradigmlexiconName'])
+
+        numex, lms = paradigmdict[lexicon][pos]
+        return load_paradigms(res, lexconf), numex, lms
     except:
         e = Exception()
         e.message = "No word class %s for lexicon %s" % (pos, lexicon)
         raise e
+
+
+def load_paradigms(es_result, lexconf):
+    paras = [hit['_source'] for hit in es_result['hits']['hits']]
+    paradigms = P.load_json(paras)
+    return paradigms
 
 
 def compile_list(query, searchfield, q, lexicon, show, size, start, mode):

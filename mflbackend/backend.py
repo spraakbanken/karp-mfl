@@ -108,18 +108,35 @@ def inflectclass():
     classval = request.args.get('classval', '')
     pos = request.args.get('pos', lexconf['defaultpos'])
     q = 'extended||and|%s.search|equals|%s||and|%s|startswith|%s'\
-        % (classname, classval, lexconf["pos"], pos)
-    res = helpers.karp_query('statlist',
+        % (classname, classval, "pos", pos)
+    # TODO using minientry will speed up things, but paradigm solts won't be happy
+    res = helpers.karp_query('query',
                              {'q': q,
-                              'mode': lexconf['lexiconMode'],
-                              'buckets': lexconf['extractparadigm']+'.bucket'}
+                              'mode': lexconf['paradigmMode'],
+                              'resource': lexconf['paradigmlexiconName'],
+                              'buckets': 'MorphologicalPatternID.bucket',
+                              'show': 'standard'}
                              )
-    possible_p = [line[0] for line in res['stat_table']]
-    paras, numex, lms = helpers.relevant_paradigms(paradigmdict, lexicon, pos)
-    res = generate.test_name_paradigms(['%s\t%s' % (word, '|'.join(possible_p))],
-                                  paras, debug=True, kbest=10, pprior=ppriorv,
-                                  lms=lms, numexamples=len(paras))
+    #res = helpers.karp_query('statlist',
+    #                         {'q': q,
+    #                          'mode': lexconf['lexiconMode'],
+    #                          'buckets': lexconf['extractparadigm']+'.bucket'}
+    #                         )
+    #possible_p = [line[0] for line in res['stat_table']][0]
+    print('conf1', lexconf)
+    #paras, numex, lms = helpers.relevant_paradigms(lexconf, paradigmdict, lexicon, pos, possible_p)
+
+    numex, lms = paradigmdict[lexicon][pos]
+    paras = helpers.load_paradigms(res, lexconf)
+    print('available', [p.name for p in paras])
+    res = generate.run_paradigms(paras, [word], kbest=100, pprior=ppriorv, lms=lms, numexamples=numex)
+    # res = generate.test_name_paradigms(['%s\t%s' % (word, '|'.join(possible_p))],
+    #                               paras, debug=True, kbest=10, pprior=ppriorv,
+    #                               lms=lms, numexamples=len(paras))
+    print('generated', res)
+    print('generated', len(res))
     ans = {"Results": helpers.format_simple_inflection(res, pos=pos)}
+    print('asked', q)
     return jsonify(ans)
 
 
@@ -439,12 +456,13 @@ def read_paradigms(lexicon, pos, mode):
 
 
 def update_model(lexicon, pos, paradigmdict, conf):
-    paras = read_paradigms(conf['paradigmlexiconName'], pos, conf['paradigmMode'])
-    para, numex, lms = mp.build(paras, lexconf["ngramorder"],
-                                lexconf["ngramprior"],
-                                conf['paradigmlexiconName'],
-                                inpformat='json')
-    paradigmdict[lexicon][pos] = numex, lms
+    #paras = read_paradigms(conf['paradigmlexiconName'], pos, conf['paradigmMode'])
+    # para, numex, lms = mp.build(paras, lexconf["ngramorder"],
+    #                             lexconf["ngramprior"],
+    #                             conf['paradigmlexiconName'],
+    #                             inpformat='json')
+    paradigmdict[lexicon][pos] = 1, 0
+
 
 
 logging.basicConfig(stream=sys.stderr, level='DEBUG')
