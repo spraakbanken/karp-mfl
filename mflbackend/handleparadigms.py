@@ -1,5 +1,6 @@
 import helpers
 import logging
+import uuid
 
 import pextract.morphparser as mp
 import pextract.pextract as pex
@@ -13,21 +14,34 @@ def load_paradigms(paradigms):
     pass
 
 
-def add_paradigm(pid, paradigm, paradigms):
+def add_paradigm(presource, lresource, pid, paradigm, paradigms, identifier, pos, classes, table):
+   # TODO use classs
+    print('id %s, para %s.\n classes %s, identifier %s' % (pid, paradigm, classes, identifier))
     paradigm.set_id(pid)
+    puuid = str(uuid.uuid1())
+    paradigm.set_uuid(puuid)
+    paradigm.set_lexicon(presource)
+    paradigm.set_pos(pos)
+    paradigm._entries = 1
+    print('uuid', puuid)
+    print(paradigm.members)
+    print(paradigm.var_insts)
     paradigms.append(paradigm)
-    # send_to_karp()
+    helpers.karp_add(paradigm.jsonify(), resource=presource, _id=puuid)
+    helpers.karp_add(table, resource=lresource)
 
 
-def add_word_to_paradigm(lemgram, inst, paradigm):
+def add_word_to_paradigm(presource, lresource, lemgram, inst, classes, paradigm, table):
+    # TODO use classs
     logging.debug('old count %s' % paradigm.count)
     var_inst = list(enumerate([lemgram]+list(inst)))
     logging.debug('old var inst %s' % paradigm.var_insts[-1])
     paradigm.var_insts.append(var_inst)
-    paradigm.count += 1
+    paradigm.members.append(lemgram)
     logging.debug('new var inst %s' % paradigm.var_insts[-1])
     logging.debug('new count %s' % paradigm.count)
-    # send_to_karp()
+    helpers.karp_update(paradigm.uuid, paradigm.jsonify(), resource=presource)
+    helpers.karp_add(table, resource=lresource)
 
 
 def update_paradigm(pid, paradigm, paradigms):
@@ -60,5 +74,5 @@ def inflect_table(table, settings, pos='', kbest=10):
         paradigm = pex.learnparadigms([pex_table])[0]
         logging.debug('learned %s' % paradigm)
         ans = {'Results': helpers.lmf_tableize(table, paradigm=paradigm, pos=pos),
-               'new': True, 'analyses': res}
+               'new': True, 'analyzes': res}
     return ans

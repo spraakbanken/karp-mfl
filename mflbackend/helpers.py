@@ -13,6 +13,21 @@ def get_lexiconconf(lexicon):
     return json.load(open('config/saldomp.json'))
 
 
+def karp_add(data, resource='saldomp', _id=None):
+    data = {'doc': data, 'message': 'Mfl generated paradigm'}
+    if _id:
+        return karp_request("readd/%s/%s" % (resource, _id), data=json.dumps(data).encode('utf8'))
+    else:
+        return karp_request("add/%s" % resource, data=json.dumps(data).encode('utf8'))
+
+
+def karp_update(uuid, data, resource='saldomp'):
+    data = {'doc': data, 'message': 'Mfl generated paradigm'}
+    print('data', data)
+    print('uuid', uuid)
+    return karp_request("mkupdate/%s/%s" % (resource, uuid), data=json.dumps(data).encode('utf8'))
+
+
 def karp_query(action, query, mode='external', resource='saldomp'):
     if 'mode' not in query:
         query['mode'] = mode
@@ -27,11 +42,11 @@ def karp_query(action, query, mode='external', resource='saldomp'):
     return karp_request("%s?%s" % (action, params))
 
 
-def karp_request(action):
+def karp_request(action, data=None):
     q = "%s/%s" % (KARP_BACKEND, action)
     logging.debug('send %s' % q)
     logging.debug('send %s' % q)
-    response = urllib.request.urlopen(q).read().decode('utf8')
+    response = urllib.request.urlopen(q, data=data).read().decode('utf8')
     logging.debug('response %s' % response)
     data = json.loads(response)
     return data
@@ -94,6 +109,31 @@ def format_inflection(ans, kbest, pos='', debug=False):
                 logging.debug("Members: %s" %
                               ", ".join([p(*[var[1] for var in vs])[0][0] for vs in p.var_insts]))
     return out
+
+
+# TODO lexicon specific
+def lmf_wftableize(paradigm, table, classes=[], baseform='', identifier='', pos='', resource=''):
+    table = table.split(',')
+    obj = {'lexiconName': resource}
+    wfs = []
+    for l in table:
+        if '|' in l:
+            form, tag = l.split('|')
+        else:
+            form = l
+            tag = ''
+        wfs.append({'writtenForm': form, 'msd': tag})
+        if not baseform:
+            baseform = form
+
+    obj['WordForms'] = wfs
+    form = {}
+    form['lemgram'] = identifier
+    form['partOfSpeech'] = pos
+    form['baseform'] = baseform
+    form['paradigm'] = paradigm
+    obj['FormRepresentations'] = [form]
+    return obj
 
 
 def lmf_tableize(table, paradigm=None, pos='', score=0):

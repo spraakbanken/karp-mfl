@@ -4,6 +4,7 @@ import sys
 sys.path.append('pextract')
 import pextract.generate as generate
 import pextract.morphparser as mp
+import pextract.pextract as pex
 
 import handleparadigms as handle
 import helpers
@@ -45,7 +46,6 @@ def paradigminfo():
     res = helpers.karp_query('query', {'q': q},
                              mode=lexconf['paradigmMode'],
                              resource=lexconf["paradigmlexiconName"])
-    ans = {}
     if res['hits']['total'] > 0:
         obj = res['hits']['hits'][0]['_source']
         if short:
@@ -53,12 +53,7 @@ def paradigminfo():
             short_obj['MorphologicalPatternID'] = obj['MorphologicalPatternID']
             short_obj['partOfSpeech'] = obj['_partOfSpeech']
             short_obj['entries'] = obj['_entries']
-            print('short', obj.get('TransformCategory'), obj.keys())
-            for classname, classval in obj.get('TransformCategory', {}).items():
-                print('class',classname,classval)
-                if not 'categories' in short_obj:
-                    short_obj['categories'] = {}
-                short_obj['categories'][classname] = classval
+            short_obj['TransformCategory'] = obj.get('TransformCategory', {})
             obj = short_obj
 
         return jsonify(obj)
@@ -302,14 +297,17 @@ def compile():
         ans = helpers.compile_list(query, lexconf["extractparadigm"], q,
                                    lexicon, show, size, start, mode)
         res = []
+        # TODO iclasses may not be in the same order every time
         for hit in ans:
+            iclasses = []
             stats = [hit['MorphologicalPatternID']]
             for iclass in lexconf['inflectionalclass'].keys():
                 stats.append(len(hit['TransformCategory'][iclass]))
+                iclasses.append(iclass)
             stats.append(hit['_entries'])
             res.append(stats)
         return jsonify({"compiled_on": "paradigm", "stats": res,
-                        "fields": list(lexconf['inflectionalclass'].keys())+['entries']})
+                        "fields": iclasses+['entries']})
 
     else:
         return "Don't know what to do"
@@ -324,46 +322,88 @@ def renameparadigm():
 
 @app.route('/addtable')
 def add_table():
+    # TODO see config for needed and possible fields
+    # or is that not needed?
     lexicon = request.args.get('lexicon', 'saldomp')
     lexconf = helpers.get_lexiconconf(lexicon)
     table = request.args.get('table', '')
-    pos = request.args.get('pos', lexconf['defaultpos'])
+    pos = request.args.get('pos', '') or\
+          request.args.get('partOfSpeech', lexconf['defaultpos'])
     identifier = request.args.get('identifier', '')
     paradigm = request.args.get('paradigm', '')
-    classes = request.args.getlist('class', '')
-    is_new = request.args.get('new', False)
-    is_new = is_new in ['True', 'true', True]
-    ans = ''
-    try:
-        classes = dict([c.split(':') for c in classes.split(',')])
-    except:
+    if not identifier or not paradigm or not pos:
         e = Exception()
-        e.message = "Could not parse classes. Format should be 'classname1:apa,classname2:bepa'" % (classes)
+        e.message = "Both identifier, partOfSpeech and paradigm must be given!"
         raise e
-    if paradigm:
-        # TODO make work. return score, para, var_inst
-        ans = handle.validate_paradigm(table, paradigm, pos, lexicon)
-    if not ans:
-        paras, numex, lms = helpers.relevant_paradigms(paradigmdict, lexicon, pos)
-        ans = handle.inflect_table(table,
-                                   [paras, numex, lms,
-                                    config["print_tables"],
-                                    config["debug"],
-                                    lexconf["pprior"]],
-                                   pos=pos,
-                                   kbest=1)
+    classes = request.args.getlist('class', '')
+    is_new = request.args.get('new')
+    is_new = is_new in ['True', 'true', True]
+    try:
+        print(classes)
+        classes = dict([c.split(':') for c in classes])
+    except Exception as e1:
+        e = Exception()
+        e.message = "Could not parse classes. Format should be 'classname:apa,classname2:bepa'" % (classes)
+        raise e
+    paras, numex, lms = helpers.relevant_paradigms(paradigmdict, lexicon, pos)
+    if is_new and paradigm in [p.name for p in paras]:
+        e = Exception()
+        e.message = "Paradigm name %s is already used" % (paradigm)
+        raise e
 
-    if ans['new']:
-        para = ans['extractparadigm']
-        # TODO make work
-        handle.add_paradigm(identifier, para, paras, classes, identifier)
-    # else -> increase count for one and members
+    pex_table = helpers.tableize(table, add_tags=False)
+    wf_table = helpers.lmf_wftableize(paradigm, table, classes, baseform='',
+                                      identifier=identifier, pos=pos,
+                                      resource=lexconf['lexiconName'])
+    if not is_new:
+        fittingparadigms = [p for p in paras if p.name == paradigm]
+
     else:
-        score, para, v = ans['analyzes']
-        # TODO make work
-        handle.add_word_to_paradigm(identifier, v, classes, para)
+       fittingparadigms = [p for p in paras]
 
-    return jsonify({'added': str(para)})
+    print('fitting', fittingparadigms)
+    ans = mp.test_paradigms([pex_table], fittingparadigms, numex, lms,
+                            config["print_tables"], config["debug"],
+                            lexconf["pprior"], returnempty=False)
+    if not is_new and len(ans) < 1:
+        # ans = ans[0][1]  # use first variable instantiation (if many),
+        #                 # [1] to get score, p, v
+        print('ans', ans)
+        logging.warning("Could not inflect %s as %s" % (table, paradigm))
+        e = Exception()
+        e.message = "Table can not belong to paradigm %s" % (paradigm)
+        raise e
+
+    if not ans:
+        print(ans)
+        # TODO make work
+        para = pex.learnparadigms([pex_table])[0]
+        print('para is', para)
+        v = para.var_insts
+       # ans = mp.test_paradigms([pex_table], [para], numex, lms,
+       #                          config["print_tables"], config["debug"],
+       #                          lexconf["pprior"], returnempty=False)
+       # score, para, v = ans[0][1][0]
+        handle.add_paradigm(lexconf['paradigmlexiconName'],
+                            lexconf['lexiconName'], paradigm, para, paras,
+                            identifier, pos, classes, wf_table)
+    else:
+        # else -> increase count for one and members
+        p = ans[0][1][0][1]
+        print('name', p.name)
+        print('name', p.name)
+        print('lexicno', p.lex)
+        print('ans',ans[0][1][0][1])
+        score, para, v = ans[0][1][0]
+        # TODO make work
+        # TODO send along table to save
+        handle.add_word_to_paradigm(lexconf['paradigmlexiconName'],
+                                    lexconf['lexiconName'], identifier, v,
+                                    classes, para, wf_table)
+
+    return jsonify({'added': paradigm, 'identifier': identifier,
+                    'var_inst': dict(enumerate(v, 1)), 'classes': classes,
+                    'pattern': para.pattern()})
 
 
 #  add to doc
@@ -389,6 +429,22 @@ def add_table():
 #     # buckets = stats['FormRepresentations.bklass']['buckets']
 #     count = stats["doc_count"]
 #     return render_template('bklasslist.html', count=count, results=buckets)
+
+
+def read_paradigms(lexicon, pos, mode):
+    # get all paradigms from ES
+    query = {'size': 10000, 'q': 'extended||and|pos|equals|%s' % pos}
+    res = helpers.karp_query('query', query, mode=mode, resource=lexicon)
+    return [hit['_source'] for hit in res['hits']['hits']]
+
+
+def update_model(lexicon, pos, paradigmdict, conf):
+    paras = read_paradigms(conf['paradigmlexiconName'], pos, conf['paradigmMode'])
+    para, numex, lms = mp.build(paras, lexconf["ngramorder"],
+                                lexconf["ngramprior"],
+                                conf['paradigmlexiconName'],
+                                inpformat='json')
+    paradigmdict[lexicon][pos] = numex, lms
 
 
 logging.basicConfig(stream=sys.stderr, level='DEBUG')
@@ -418,7 +474,6 @@ config = {"print_tables": False,
 
 if __name__ == '__main__':
     import json
-    import os.path
     # sys.setdefaultencoding('utf8')
     # TODO how to handle the paradigms? In memory? On disk?
     paradigmdict = {}
@@ -428,15 +483,21 @@ if __name__ == '__main__':
         # TODO can't have same pos for many pfiles, in that case, they
         # must be merged
         paradigmdict[lex['name']] = {}
-        for pfile in lex['pfiles']:
-            pos = os.path.basename(os.path.splitext(pfile)[0])
+        for pos in lex['pos']:
+            update_model(lex['name'], pos, paradigmdict, lexconf)
+    app.run()
 
-            print("reading %s" % pfile)
-            parafile = open(pfile, encoding='utf8').readlines()
-            para, numex, lms = mp.build(pfile, lexconf["ngramorder"],
-            # TODO small should be true
-                                        lexconf["ngramprior"]) #, small=True)
-            paradigmdict[lex['name']][pos] = ((para, numex, lms))
+    # import os.path
+        # for pfile in lex['pfiles']:
+        #     pos = os.path.basename(os.path.splitext(pfile)[0])
+
+        #     print("reading %s" % pfile)
+        #     parafile = open(pfile, encoding='utf8').readlines()
+        #     para, numex, lms = mp.build(pfile, lexconf["ngramorder"],
+        #                                 lexconf["ngramprior"],
+        #                                 lexicon=lex['name']) #, small=True)
+        #     # TODO small should be true
+        #     paradigmdict[lex['name']][pos] = ((para, numex, lms))
     #from pympler import asizeof
     #print('p big size', asizeof.asizeof(paradigmdict))
 
@@ -444,4 +505,3 @@ if __name__ == '__main__':
     # lexconf = helpers.get_lexiconconf("saldomp")
     # paradigms, numexamples, lms = mp.build(parafile, lexconf["ngramorder"], lexconf["ngramprior"])
     # parafile = open(parafile, encoding='utf8').readlines()
-    app.run()

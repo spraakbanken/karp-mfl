@@ -4,7 +4,6 @@
 "paradigmlexiconName": "saldompparadigms",
 "paradigmMode": "saldompparadigms",
 "inflectionalclass": {"bklass": "FormRepresentations.bklass", "fm_paradigm": "FormRepresentations.fm_paradigm.raw"},
-"inflectionalclass": {"bklass": "FormRepresentations.bklass", "fm_paradigm": "FormRepresentations.fm_paradigm.raw", "fm_paradgm": "FormRepresentations.fm_paradigm.raw"},
 "paradigmbucketpath": "FormRepresentations.paradigm.raw",
 "extractparadigm": "paradigm",
 "corpus": "suc3",
@@ -15,5 +14,8 @@
 "show": "lemgram,bklass,paradigm,pos,inherent",
 "ngramorder": 3,
 "ngramprior": 0.01,
-"pprior": 4.0
+"pprior": 4.0,
+"identifier": "lemgram",
+"needed_lexiconFields": ["lemgram", "pos"],
+"possible_lexiconFields": ["bklass", "fm_paradigm"]
 }
