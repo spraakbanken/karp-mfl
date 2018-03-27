@@ -7,6 +7,9 @@ parametrar:
   lexicon - vilket lexikon
   short - visa komprimerad version
   
+Framtida tillägg i svaret:
+variabelrestriktioner
+  
  Svar vid ingen träff:
   {}
 
