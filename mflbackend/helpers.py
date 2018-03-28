@@ -1,3 +1,4 @@
+import errors as e
 import json
 import logging
 import pextract.paradigm as P
@@ -17,16 +18,19 @@ def get_lexiconconf(lexicon):
 def karp_add(data, resource='saldomp', _id=None):
     data = {'doc': data, 'message': 'Mfl generated paradigm'}
     if _id:
-        return karp_request("readd/%s/%s" % (resource, _id), data=json.dumps(data).encode('utf8'))
+        return karp_request("readd/%s/%s" % (resource, _id),
+                            data=json.dumps(data).encode('utf8'))
     else:
-        return karp_request("add/%s" % resource, data=json.dumps(data).encode('utf8'))
+        return karp_request("add/%s" % resource,
+                            data=json.dumps(data).encode('utf8'))
 
 
 def karp_update(uuid, data, resource='saldomp'):
     data = {'doc': data, 'message': 'Mfl generated paradigm'}
     print('data', data)
     print('uuid', uuid)
-    return karp_request("mkupdate/%s/%s" % (resource, uuid), data=json.dumps(data).encode('utf8'))
+    return karp_request("mkupdate/%s/%s" % (resource, uuid),
+                        data=json.dumps(data).encode('utf8'))
 
 
 def karp_query(action, query, mode='external', resource='saldomp'):
@@ -88,7 +92,7 @@ def format_simple_inflection(ans, pos=''):
     return [o[1] for o in out]
 
 
-#TODO who uses this? add pos to that
+# TODO who uses this? add pos to that
 def format_inflection(ans, kbest, pos='', debug=False):
     " format an inflection and report whether anything has been printed "
     out = []
@@ -105,17 +109,18 @@ def format_inflection(ans, kbest, pos='', debug=False):
                 for tag in msd:
                     infl['WordForms'].append({'writtenForm': form,
                                               'msd': tag[1]})
-
             out.append(infl)
 
             if debug:
                 logging.debug("Members: %s" %
-                              ", ".join([p(*[var[1] for var in vs])[0][0] for vs in p.var_insts]))
+                              ", ".join([p(*[var[1] for var in vs])[0][0]
+                                         for vs in p.var_insts]))
     return out
 
 
 # TODO lexicon specific
-def lmf_wftableize(paradigm, table, classes=[], baseform='', identifier='', pos='', resource=''):
+def lmf_wftableize(paradigm, table, classes={}, baseform='', identifier='',
+                   pos='', resource=''):
     table = table.split(',')
     obj = {'lexiconName': resource}
     wfs = []
@@ -135,7 +140,10 @@ def lmf_wftableize(paradigm, table, classes=[], baseform='', identifier='', pos=
     form['partOfSpeech'] = pos
     form['baseform'] = baseform
     form['paradigm'] = paradigm
+    for key, val in classes.items():
+        form[key] = val
     obj['FormRepresentations'] = [form]
+
     return obj
 
 
@@ -164,10 +172,10 @@ def lmf_tableize(table, paradigm=None, pos='', score=0):
 def tableize(table, add_tags=True):
     thistable, thesetags = [], []
     table = table.split(',')
-    if len(table[0].split('|')) > 2 or table[0].split('|') != "identifier":
-        thistable.append(table[0].split('|')[0])
-        thistag = "msd=identifier" if add_tags else ''
-        thesetags.append(thistag)
+    # if len(table[0].split('|')) < 2 or table[0].split('|') != "identifier":
+    #     thistable.append(table[0].split('|')[0])
+    #     thistag = [("msd", "identifier")] # if add_tags else ''
+    #     thesetags.append(thistag)
 
     for l in table:
         if '|' in l:
@@ -176,24 +184,19 @@ def tableize(table, add_tags=True):
             form = l
             tag = 'tag' if add_tags else ''
         thistable.append(form)
-        thesetags.append("msd=%s" % tag if tag else '')
+        thesetags.append([("msd", tag if tag else '')])
     return (thistable, thesetags)
 
 
-def relevant_paradigms(lexconf, paradigmdict, lexicon, pos, possible_p=[]):
-    print('conf', lexconf)
-    try:
-        q = {'q': 'extended||and|p_id|equals|%s' % '|'.join(possible_p),
-            'size': 1000}
-        res = karp_query('query', q, mode=lexconf['paradigmMode'],
-                         resource=lexconf['paradigmlexiconName'])
+def relevant_paradigms(paradigmdict, lexicon, pos, possible_p=[]):
+    all_paras, numex, lms = paradigmdict[lexicon][pos]
+    print('all_paras', all_paras.keys())
+    if possible_p:
+        all_paras = [all_paras[p] for p in possible_p if p in all_paras]
+    else:
+        all_paras = list(all_paras.values())
 
-        numex, lms = paradigmdict[lexicon][pos]
-        return load_paradigms(res, lexconf), numex, lms
-    except:
-        e = Exception()
-        e.message = "No word class %s for lexicon %s" % (pos, lexicon)
-        raise e
+    return all_paras, numex, lms
 
 
 def load_paradigms(es_result, lexconf):
@@ -212,6 +215,13 @@ def compile_list(query, searchfield, q, lexicon, show, size, start, mode):
     for hit in res["hits"]["hits"]:
         ans.append(hit["_source"])
     return ans
+
+
+def check_identifier(_id, field, resource, mode):
+    q = {'size': 0, 'q': 'extended||and|%s.search|equals|%s' % (field, _id)}
+    res = karp_query('query', q, mode=mode, resource=resource)
+    if res['hits']['total'] > 0:
+        raise e.MflException("Identifier %s already in use" % _id)
 
 
 def search_q(query, searchfield, q, lexicon):
