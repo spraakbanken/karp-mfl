@@ -1,7 +1,7 @@
 import errors as e
 import json
 import logging
-import pextract.paradigm as P
+import paradigm as P
 import urllib.parse
 import urllib.request
 
