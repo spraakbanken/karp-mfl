@@ -16,7 +16,7 @@ Följ instruktionerna [här](https://github.com/spraakbanken/karp-docker),
 men använd es6-branchen!
 Hoppa också över steget "Setup Karps configurations" och gör istället:
 
-- Gå til `karp-backend`
+- Gå till `karp-backend`
 - Hämta `mflkarpconf2.zip`, lägg den i `/karp-backend`, unzippa.
 - Kopiera `config/lexiconconf.json` till docker-wsauth-mappen (`cp config/lexiconconf.json ../dummyauth`)
 - Installera python moduler i karp-backend:
@@ -45,7 +45,7 @@ Hämta mfl-backend
 
 Använd dev-branchen!
 
-Ändra fulimporten i `backend.py` (i början av filen, ~ rad 5) så attpathen till pextract läggs till i `sys.path`
+Ändra fulimporten i `backend.py` (i början av filen, ~ rad 5) så att pathen till pextract läggs till i `sys.path`
 
 Starta på `localhost:5000`: `python3 backend.py`
 
