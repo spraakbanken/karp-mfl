@@ -16,8 +16,8 @@ def load_paradigms(paradigms):
 
 def add_paradigm(presource, lresource, pid, paradigm, paradigms, identifier,
                  pos, classes, table):
-   # TODO use classs
-    print('id %s, para %s.\n classes %s, identifier %s' % (pid, paradigm, classes, identifier))
+    # TODO use classs
+    logging.debug('id %s, para %s.\n classes %s, identifier %s' % (pid, paradigm, classes, identifier))
     paradigm.set_id(pid)
     puuid = str(uuid.uuid1())
     paradigm.set_uuid(puuid)
@@ -26,9 +26,9 @@ def add_paradigm(presource, lresource, pid, paradigm, paradigms, identifier,
     paradigm._entries = 1
     for key, val in classes.items():
         paradigm.add_class(key, [val])
-    print('uuid', puuid)
-    print(paradigm.members)
-    print(paradigm.var_insts)
+    logging.debug('uuid', puuid)
+    # print(paradigm.members)
+    # print(paradigm.var_insts)
     # Add to our in memory paradigms
     paradigms[puuid] = paradigm
     helpers.karp_add(paradigm.jsonify(), resource=presource, _id=puuid)

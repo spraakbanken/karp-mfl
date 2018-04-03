@@ -8,6 +8,7 @@
 "extractparadigm": "paradigm",
 "corpus": "suc3",
 "pos": "pos",
+"msd": "msd",
 "defaultpos": "nn",
 "baseform": "baseformC",
 "lemgram": "lemgram",
