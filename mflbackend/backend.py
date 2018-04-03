@@ -2,10 +2,10 @@ import errors as e
 from flask import Flask, jsonify, render_template, request
 import logging
 import sys
-sys.path.append('pextract')
-import pextract.generate as generate
-import pextract.morphparser as mp
-import pextract.pextract as pex
+sys.path.append('/home/malin/Spraak/pextract/sbextract/src')
+import generate as generate
+import morphparser as mp
+import pextract as pex
 
 import handleparadigms as handle
 import helpers

@@ -2,8 +2,8 @@ import helpers
 import logging
 import uuid
 
-import pextract.morphparser as mp
-import pextract.pextract as pex
+import morphparser as mp
+import pextract as pex
 
 
 def reload_paradigms(paradigms):
