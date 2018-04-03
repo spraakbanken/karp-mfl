@@ -11,8 +11,7 @@ KARP_BACKEND = 'http://localhost:8081/app/'
 
 
 def get_lexiconconf(lexicon):
-    # TODO
-    return json.load(open('config/saldomp.json'))
+    return json.load(open('config/%s.json' % lexicon))
 
 
 def karp_add(data, resource='saldomp', _id=None):
@@ -27,8 +26,8 @@ def karp_add(data, resource='saldomp', _id=None):
 
 def karp_update(uuid, data, resource='saldomp'):
     data = {'doc': data, 'message': 'Mfl generated paradigm'}
-    print('data', data)
-    print('uuid', uuid)
+    # print('data', data)
+    # print('uuid', uuid)
     return karp_request("mkupdate/%s/%s" % (resource, uuid),
                         data=json.dumps(data).encode('utf8'))
 
@@ -77,11 +76,11 @@ def format_simple_inflection(ans, pos=''):
                                                   'msd': tag[1]})
                 # TODO is the baseform always the first form?
                 # infl['baseform'] = infl['Wordforms'][0]['writtenForm']
-                print('could use paradigm', lemgram)
+                logging.debug('could use paradigm %s' % lemgram)
                 out.append((score, infl))
             except Exception as e:
                 # fails if the inflection does not work (instantiation fails)
-                print('could not use paradigm', lemgram)
+                logging.debug('could not use paradigm %s' % lemgram)
                 logging.exception(e)
     out.sort(reverse=True, key=lambda x: x[0])
 #   X lemgram
@@ -184,13 +183,14 @@ def tableize(table, add_tags=True):
             form = l
             tag = 'tag' if add_tags else ''
         thistable.append(form)
-        thesetags.append([("msd", tag if tag else '')])
+        if add_tags:
+            thesetags.append([("msd", tag)])
     return (thistable, thesetags)
 
 
 def relevant_paradigms(paradigmdict, lexicon, pos, possible_p=[]):
     all_paras, numex, lms = paradigmdict[lexicon][pos]
-    print('all_paras', all_paras.keys())
+    # print('all_paras', all_paras.keys())
     if possible_p:
         all_paras = [all_paras[p] for p in possible_p if p in all_paras]
     else:
