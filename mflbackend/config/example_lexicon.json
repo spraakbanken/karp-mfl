@@ -20,5 +20,8 @@
 "baseform": "baseformC", // the karp search field for the baseform
 "identifier": "lemgram", // the karp search field for the lemma identifier
 "needed_lexiconFields": ["lemgram", "pos"], // ?? this might be needed later on
-"possible_lexiconFields": ["bklass", "fm_paradigm"] //??  this might be needed later on
+"possible_lexiconFields": ["bklass", "fm_paradigm"], //??  this might be needed later on
+"src": "config.saldomp_convert" // the path to a python file with lexicon specific code
+                                // such as conversions
+
 }
