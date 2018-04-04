@@ -276,7 +276,7 @@ def compile():
         ans = []
         for pbucket in res['aggregations']['q_statistics'][lexconf['inflectionalclass'][classname]]['buckets']:
             if extra:
-                pcount = len(pbucket[lexconf['paradigmbucketpath']]['buckets'])
+                pcount = len(pbucket[lexconf['extractparadigmpath']]['buckets'])
                 ans.append([pbucket["key"], pcount, pbucket["doc_count"]])
             else:
                 ans.append([pbucket["key"]])

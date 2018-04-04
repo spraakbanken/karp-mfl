@@ -59,7 +59,7 @@ def karp_request(action, data=None):
 def format_simple_inflection(ans, pos=''):
     " format an inflection and report whether anything has been printed "
     out = []
-    for lemgram, words, analyses in ans:
+    for paradigm, words, analyses in ans:
         for aindex, (score, p, v) in enumerate(analyses):
             try:
                 logging.debug('v %s %s' % (v, type(v)))
@@ -67,7 +67,7 @@ def format_simple_inflection(ans, pos=''):
                         'variables': dict(zip(range(1, len(v)+1), v)),
                         'score': score,
                         'lemgram': '', 'partOfSpeech': pos}
-                logging.debug(lemgram + ':')
+                logging.debug(paradigm + ':')
                 logging.debug('hej %s %s' % (aindex, v))
                 table = p(*v)  # Instantiate table with vars from analysis
                 for form, msd in table:
@@ -76,11 +76,11 @@ def format_simple_inflection(ans, pos=''):
                                                   'msd': tag[1]})
                 # TODO is the baseform always the first form?
                 # infl['baseform'] = infl['Wordforms'][0]['writtenForm']
-                logging.debug('could use paradigm %s' % lemgram)
+                logging.debug('could use paradigm %s' % paradigm)
                 out.append((score, infl))
             except Exception as e:
                 # fails if the inflection does not work (instantiation fails)
-                logging.debug('could not use paradigm %s' % lemgram)
+                logging.debug('could not use paradigm %s' % paradigm)
                 logging.exception(e)
     out.sort(reverse=True, key=lambda x: x[0])
 #   X lemgram
