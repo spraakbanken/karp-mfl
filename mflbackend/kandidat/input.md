@@ -78,7 +78,7 @@ Kandidaterna nås sedan genom `'/candidatelist?pos=nn&lexicon=saldomp'`:
 ###  Generera tabeller
 Frontenden konstruerar anrop mha kandidatlistan:
 
-`'/inflectclass?classname=paradigm&classval=p14_oxe..nn.1&lexicon=saldomp' -d '{"var_inst": {"1": "katt"}}'`
+`'/inflectclass?classname=paradigm&classval=p14_oxe..nn.1&lexicon=saldomp&1=katt'`
 
 Man skulle även kunna tänka sig:
 
