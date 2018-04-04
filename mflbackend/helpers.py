@@ -56,32 +56,36 @@ def karp_request(action, data=None):
     return data
 
 
-def format_simple_inflection(ans, pos=''):
+def format_simple_inflection(lexconf, ans, pos=''):
     " format an inflection and report whether anything has been printed "
     out = []
     for paradigm, words, analyses in ans:
         for aindex, (score, p, v) in enumerate(analyses):
-            try:
-                logging.debug('v %s %s' % (v, type(v)))
-                infl = {'paradigm': p.name, 'WordForms': [],
-                        'variables': dict(zip(range(1, len(v)+1), v)),
-                        'score': score,
-                        'lemgram': '', 'partOfSpeech': pos}
-                logging.debug(paradigm + ':')
-                logging.debug('hej %s %s' % (aindex, v))
-                table = p(*v)  # Instantiate table with vars from analysis
-                for form, msd in table:
-                    for tag in msd:
-                        infl['WordForms'].append({'writtenForm': form,
-                                                  'msd': tag[1]})
-                # TODO is the baseform always the first form?
-                # infl['baseform'] = infl['Wordforms'][0]['writtenForm']
-                logging.debug('could use paradigm %s' % paradigm)
-                out.append((score, infl))
-            except Exception as e:
-                # fails if the inflection does not work (instantiation fails)
-                logging.debug('could not use paradigm %s' % paradigm)
-                logging.exception(e)
+            logging.debug('hej %s %s' % (aindex, v))
+            res = make_table(lexconf, p, v, score, pos)
+            if res is not None:
+                out.append((score, res))
+            # try:
+            #     logging.debug('v %s %s' % (v, type(v)))
+            #     infl = {'paradigm': p.name, 'WordForms': [],
+            #             'variables': dict(zip(range(1, len(v)+1), v)),
+            #             'score': score,
+            #             'partOfSpeech': pos}
+            #     logging.debug(paradigm + ':')
+            #     table = p(*v)  # Instantiate table with vars from analysis
+            #     for form, msd in table:
+            #         for tag in msd:
+            #             infl['WordForms'].append({'writtenForm': form,
+            #                                       'msd': tag[1]})
+            #     func = extra_src(lexconf, 'get_baseform',
+            #                      lambda infl: infl['WordForms'][0]['writtenForm'])
+            #     infl['baseform'] = func(infl)
+            #     logging.debug('could use paradigm %s' % paradigm)
+            #     out.append((score, infl))
+            # except Exception as e:
+            #     # fails if the inflection does not work (instantiation fails)
+            #     logging.debug('could not use paradigm %s' % paradigm)
+            #     logging.exception(e)
     out.sort(reverse=True, key=lambda x: x[0])
 #   X lemgram
 #   X grundform
@@ -91,7 +95,31 @@ def format_simple_inflection(ans, pos=''):
     return [o[1] for o in out]
 
 
-# TODO who uses this? add pos to that
+def make_table(lexconf, paradigm, v, score, pos):
+    try:
+        logging.debug('v %s %s' % (v, type(v)))
+        infl = {'paradigm': paradigm.name, 'WordForms': [],
+                'variables': dict(zip(range(1, len(v)+1), v)),
+                'score': score,
+                'partOfSpeech': pos}
+        logging.debug('%s:' % paradigm.name)
+        table = paradigm(*v)  # Instantiate table with vars from analysis
+        for form, msd in table:
+            for tag in msd:
+                infl['WordForms'].append({'writtenForm': form,
+                                          'msd': tag[1]})
+        func = extra_src(lexconf, 'get_baseform',
+                         lambda infl: infl['WordForms'][0]['writtenForm'])
+        infl['baseform'] = func(infl)
+        logging.debug('could use paradigm %s' % paradigm)
+        return infl
+    except Exception as e:
+        # fails if the inflection does not work (instantiation fails)
+        logging.debug('could not use paradigm %s' % paradigm)
+        logging.exception(e)
+        return None
+
+
 def format_inflection(ans, kbest, pos='', debug=False):
     " format an inflection and report whether anything has been printed "
     out = []
@@ -118,32 +146,52 @@ def format_inflection(ans, kbest, pos='', debug=False):
 
 
 # TODO lexicon specific
-def lmf_wftableize(paradigm, table, classes={}, baseform='', identifier='',
-                   pos='', resource=''):
-    table = table.split(',')
-    obj = {'lexiconName': resource}
-    wfs = []
-    for l in table:
-        if '|' in l:
-            form, tag = l.split('|')
-        else:
-            form = l
-            tag = ''
-        wfs.append({'writtenForm': form, 'msd': tag})
-        if not baseform:
-            baseform = form
+def lmf_wftableize(lexconf, paradigm, table, classes={}, baseform='',
+                   identifier='', pos='', resource=''):
+    def default(paradigm, table, classes, baseform, identifier, pos, reosource):
+        # TODO implement something more generic?
+        table = table.split(',')
+        obj = {'lexiconName': resource}
+        wfs = []
+        for l in table:
+            if '|' in l:
+                form, tag = l.split('|')
+            else:
+                form = l
+                tag = ''
+            wfs.append({'writtenForm': form, 'msd': tag})
+            if not baseform:
+                baseform = form
 
-    obj['WordForms'] = wfs
-    form = {}
-    form['lemgram'] = identifier
-    form['partOfSpeech'] = pos
-    form['baseform'] = baseform
-    form['paradigm'] = paradigm
-    for key, val in classes.items():
-        form[key] = val
-    obj['FormRepresentations'] = [form]
+        obj['WordForms'] = wfs
+        form = {}
+        form['lemgram'] = identifier
+        form['partOfSpeech'] = pos
+        form['baseform'] = baseform
+        form['paradigm'] = paradigm
+        for key, val in classes.items():
+            form[key] = val
+        obj['FormRepresentations'] = [form]
+        obj['used_default'] = 'true'
+        return obj
 
-    return obj
+    func = extra_src(lexconf, 'lmf_wftabelize', default)
+
+    return func(paradigm, table, classes, baseform, identifier, pos, resource)
+
+
+def extra_src(lexconf, funcname, default):
+    import importlib
+    # If importing fails, try with a different path.
+    logging.debug('look for %s' % (funcname))
+    logging.debug('file: %s' % lexconf['src'])
+    try:
+        classmodule = importlib.import_module(lexconf['src'])
+        logging.debug('\n\ngo look in %s\n\n' % classmodule)
+        func = getattr(classmodule, funcname)
+        return func
+    except:
+        return default
 
 
 def lmf_tableize(table, paradigm=None, pos='', score=0):
@@ -190,7 +238,6 @@ def tableize(table, add_tags=True):
 
 def relevant_paradigms(paradigmdict, lexicon, pos, possible_p=[]):
     all_paras, numex, lms = paradigmdict[lexicon][pos]
-    # print('all_paras', all_paras.keys())
     if possible_p:
         all_paras = [all_paras[p] for p in possible_p if p in all_paras]
     else:

@@ -7,7 +7,7 @@
 "inflectionalclass": {"bklass": "FormRepresentations.bklass", "fm_paradigm": "FormRepresentations.fm_paradigm.raw"},
 "extractparadigm": "paradigm",
 "extractparadigmpath": "FormRepresentations.paradigm.raw",
-"corpus": "suc3",
+"corpora": ["suc3"],
 "show": "lemgram,bklass,paradigm,pos,inherent",
 "ngramorder": 3,
 "ngramprior": 0.01,
@@ -17,5 +17,6 @@
 "baseform": "baseformC",
 "identifier": "lemgram",
 "needed_lexiconFields": ["lemgram", "pos"],
-"possible_lexiconFields": ["bklass", "fm_paradigm"]
+"possible_lexiconFields": ["bklass", "fm_paradigm"],
+"src": "config.saldomp_convert"
 }
