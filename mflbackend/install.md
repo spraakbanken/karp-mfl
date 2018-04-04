@@ -32,7 +32,7 @@ Fortsätt följa instruktionerna på github.
 
 Avsluta med:
 
-`docker-compose run --rm karp python offline.py --create_mode paradigms test`
+`docker-compose run --rm karp python offline.py --import_mode paradigms test`
 
 `docker-compose run --rm karp python offline.py --publish_mode paradigms test`
 
