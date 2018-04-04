@@ -39,7 +39,6 @@
              ],
     "pfiles":  ["/home/malin/Spraak/pextract/sbextract/saldomwords/nn.p"],
     "pfiles":  ["vbm.p"],
-    "pos":  ["abm", "nn"],
-    "pos":  ["nn"]
+    "pos":  ["abm", "nn"]
   }
 ]
