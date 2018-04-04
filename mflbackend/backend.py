@@ -99,6 +99,8 @@ def defaulttable():
 # Test inflections
 @app.route('/inflectclass')
 def inflectclass():
+# TODO Specialfall:
+# '/inflectclass?classname=extractparadigm&classval=p14_oxe..nn.1&lexicon=saldomp' -d '{"var_inst": {"1": "katt"}}'`
     " Inflect a word according to a user defined category "
     lexicon = request.args.get('lexicon', 'saldomp')
     lexconf = helpers.get_lexiconconf(lexicon)
@@ -108,6 +110,7 @@ def inflectclass():
     classval = request.args.get('classval', '')
     pos = request.args.get('pos', '') or\
           request.args.get('partOfSpeech', lexconf['defaultpos'])
+
     q = 'extended||and|%s.search|equals|%s||and|%s|equals|%s'\
         % (classname, classval, lexconf['pos'], pos)
     res = helpers.karp_query('statlist',
@@ -119,14 +122,40 @@ def inflectclass():
                              )
     possible_p = [line[0] for line in res['stat_table']]
     logging.debug('possible_p %s' % possible_p)
-    paras, numex, lms = helpers.relevant_paradigms(paradigmdict, lexicon, pos,
-                                                   possible_p)
+    paras, numex, lms = helpers.relevant_paradigms(paradigmdict, lexicon,
+                                                   pos, possible_p)
+    if classname == "paradigm":
+    # TODO rename to extractparadigm
+    #if classname == "extractparadigm":
+        var_inst = sorted([(key,val) for key,val in request.args.items() if key.isdigit()])
+        var_inst.sort()
+        var_inst = [val for key, val in var_inst]
+        logging.debug('look for %s as %s' % (classval, pos))
+        if len(paras) < 1:
+            raise e.MflException("Cannot find paradigm %s" % classval)
+        table = helpers.make_table(lexconf, paras[0], var_inst, 0, pos)
+        ans = {"Results": [table]}
 
-    res = generate.run_paradigms(paras, [word], kbest=100, pprior=ppriorv,
-                                 lms=lms, numexamples=numex)
-    # print('generated', res)
-    logging.debug('generated %s results' % len(res))
-    ans = {"Results": helpers.format_simple_inflection(res, pos=pos)}
+    else:
+        # q = 'extended||and|%s.search|equals|%s||and|%s|equals|%s'\
+        #     % (classname, classval, lexconf['pos'], pos)
+        # res = helpers.karp_query('statlist',
+        #                          {'q': q,
+        #                           'mode': lexconf['paradigmMode'],
+        #                           'resource': lexconf['paradigmlexiconName'],
+        #                           'buckets': '_id'
+        #                           }
+        #                          )
+        # possible_p = [line[0] for line in res['stat_table']]
+        # logging.debug('possible_p %s' % possible_p)
+        # paras, numex, lms = helpers.relevant_paradigms(paradigmdict, lexicon,
+        #                                                pos, possible_p)
+
+        res = generate.run_paradigms(paras, [word], kbest=100, pprior=ppriorv,
+                                     lms=lms, numexamples=numex)
+        # print('generated', res)
+        logging.debug('generated %s results' % len(res))
+        ans = {"Results": helpers.format_simple_inflection(lexconf, res, pos=pos)}
     # print('asked', q)
     return jsonify(ans)
 
@@ -184,7 +213,7 @@ def inflectlike():
         logging.debug('test %s paradigms' % len(paras))
         res = generate.run_paradigms(paras, [word], kbest=100, pprior=ppriorv,
                                      lms=lms, numexamples=numex, vbest=20)
-        result = helpers.format_simple_inflection(res, pos=pos)
+        result = helpers.format_simple_inflection(lexconf, res, pos=pos)
     else:
         result = []
     ans = {"Results": result, 'new': False}
@@ -359,9 +388,9 @@ def add_table():
         raise e.MflException("Paradigm name %s is already used" % (paradigm))
 
     pex_table = helpers.tableize(table, add_tags=False)
-    wf_table = helpers.lmf_wftableize(paradigm, table, classes, baseform='',
-                                      identifier=identifier, pos=pos,
-                                      resource=lexconf['lexiconName'])
+    wf_table = helpers.lmf_wftableize(lexconf, paradigm, table, classes,
+                                      baseform='', identifier=identifier,
+                                      pos=pos, resource=lexconf['lexiconName'])
     if not is_new:
         logging.debug('not new, look for %s' % paradigm)
         fittingparadigms = [p for p in paras if p.p_id == paradigm]
@@ -411,6 +440,33 @@ def add_table():
     return jsonify({'paradigm': paradigm, 'identifier': identifier,
                     'var_inst': dict(enumerate(v, 1)), 'classes': classes,
                     'pattern': para.pattern(), 'partOfSpeech': pos})
+
+
+
+
+@app.route('/addcandidates')
+# /addcandidates?pos=nn&lexicon=saldomp -d @kandidat.txt`
+def addcandidates():
+    # TODO
+    pass
+
+@app.route('/candidatelist')
+# /candidatelist?pos=nn&lexicon=saldomp
+def candidatelist():
+    # TODO
+    pass
+
+@app.route('/removecandidate')
+# /removecandidate?identifier=katt..nn.1&lexicon=saldomp'`
+def removecandidate():
+    # TODO
+    pass
+
+@app.route('/recomputecandidates')
+# ￼`'/recomputecandidates?pos=nn&lexicon=saldomp'`
+def recomputecandiadtes():
+    # TODO
+    pass
 
 
 def read_paradigms(lexicon, pos, mode):

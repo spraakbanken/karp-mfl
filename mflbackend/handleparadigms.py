@@ -16,7 +16,6 @@ def load_paradigms(paradigms):
 
 def add_paradigm(presource, lresource, pid, paradigm, paradigms, identifier,
                  pos, classes, table):
-    # TODO use classs
     logging.debug('id %s, para %s.\n classes %s, identifier %s' % (pid, paradigm, classes, identifier))
     paradigm.set_id(pid)
     puuid = str(uuid.uuid1())
@@ -37,7 +36,6 @@ def add_paradigm(presource, lresource, pid, paradigm, paradigms, identifier,
 
 def add_word_to_paradigm(presource, lresource, lemgram, inst, classes,
                          paradigm, table):
-    # TODO use classs
     logging.debug('old count %s' % paradigm.count)
     var_inst = list(enumerate([lemgram]+list(inst)))
     logging.debug('old var inst %s' % paradigm.var_insts[-1])
@@ -72,7 +70,6 @@ def inflect_table(table, settings, pos='', kbest=10):
         ans = {"Results": helpers.format_inflection(res, kbest=kbest, pos=pos),
                'new': False, 'analyzes': res[0][1][0]}
     else:
-        # TODO  will this be the correct output?
         pex_table = helpers.tableize(table, add_tags=True)
         paradigm = pex.learnparadigms([pex_table])[0]
         logging.debug('learned %s' % paradigm)
