@@ -490,10 +490,28 @@ def candidatelist():
 
 
 @app.route('/removecandidate')
-# /removecandidate?identifier=katt..nn.1&lexicon=saldomp'`
-def removecandidate():
-    # TODO
-    pass
+@app.route('/removecandidate/<_id>')
+def removecandidate(_id=''):
+    ''' Either use this with the ES id:
+        /removecandidate/ABC83Z
+        or with the lexcion's identifiers
+        /removecandidate?identifier=ABC83Z
+    '''
+    lexicon = request.args.get('lexicon', 'saldomp')
+    lexconf = helpers.get_lexiconconf(lexicon)
+    if not _id:
+        try:
+            identifier = request.args.get('identifier', '')
+            q = 'extended||and|%s.search|equals|%s' % (lexconf['identifier'], identifier)
+            res = helpers.karp_query('query', query={'q': q},
+                                     mode=lexconf['candidateMode'],
+                                     resource=lexconf['candidatelexiconName'])
+            _id = res['hits']['hits'][0]['_id']
+        except Exception as e1:
+            logging.error(e1)
+            raise e.MflException("Could not find candidate %s" % identifier)
+    return jsonify({"deleted": helpers.karp_delete(_id, lexconf['candidatelexiconName'])})
+
 
 @app.route('/recomputecandidates')
 # ￼`'/recomputecandidates?pos=nn&lexicon=saldomp'`

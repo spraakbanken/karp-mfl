@@ -33,6 +33,11 @@ def karp_bulkadd(data, resource='saldomp'):
                         data=json.dumps(data).encode('utf8'))
 
 
+def karp_delete(_id, resource='saldomp'):
+    # TODO must use password!
+    return karp_request("delete/%s/%s" % (resource, _id))
+
+
 def karp_update(uuid, data, resource='saldomp'):
     # TODO must use password!
     data = {'doc': data, 'message': 'Mfl generated paradigm'}
@@ -200,7 +205,7 @@ def get_pos(lexconf, lemgram):
 def get_baseform_infl(lexconf, infl):
     func = extra_src(lexconf, 'get_baseform',
                      lambda infl: infl['WordForms'][0]['writtenForm'])
-    return func(infl=infl)
+    return func(entry=infl)
 
 
 def get_baseform(lexconf, lemgram):

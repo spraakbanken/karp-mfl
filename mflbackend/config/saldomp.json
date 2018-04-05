@@ -13,7 +13,7 @@
 "show": "lemgram,bklass,paradigm,pos,inherent",
 "ngramorder": 3,
 "ngramprior": 0.01,
-"pprior": 4.0,
+"pprior": 1.0,
 "pos": "pos",
 "msd": "msd",
 "baseform": "baseformC",
