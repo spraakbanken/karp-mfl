@@ -213,7 +213,7 @@ def inflectlike():
         result = helpers.format_simple_inflection(lexconf, res, pos=pos)
     else:
         result = []
-    ans = {"Results": result, 'new': False}
+    ans = {"Results": result}
     return jsonify(ans)
 
 
@@ -403,7 +403,7 @@ def add_table():
                                  lexconf['paradigmMode'])
 
     logging.debug('fitting', fittingparadigms)
-    ans = mp.test_paradigms([pex_table], fittingparadigms, numex, lms,
+    ans = mp.test_paradigms(pex_table, fittingparadigms, numex, lms,
                             config["print_tables"], config["debug"],
                             lexconf["pprior"], returnempty=False,
                             match_all=True)
@@ -466,7 +466,7 @@ def addcandidates():
         forms = [helpers.get_baseform(lexconf, lemgram)] + forms[1:]
         pex_table = helpers.tableize(','.join(forms), add_tags=False)
         logging.debug('inflect forms %s msd %s' % pex_table)
-        res = mp.test_paradigms([pex_table], paras, numex, lms,
+        res = mp.test_paradigms(pex_table, paras, numex, lms,
                                  config["print_tables"], config["debug"],
                                  ppriorv, returnempty=False)
         to_save.append(helpers.make_candidate(lexconf['candidatelexiconName'], lemgram, forms, res, pos))

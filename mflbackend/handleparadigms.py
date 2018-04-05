@@ -3,7 +3,7 @@ import logging
 import uuid
 
 import morphparser as mp
-import pextract as pex
+import pextract.pextract as pex
 
 
 def reload_paradigms(paradigms):
@@ -63,16 +63,17 @@ def remove_paradigm(pid, paradigms):
 def inflect_table(table, settings, pos='', kbest=10):
     pex_table = helpers.tableize(table, add_tags=False)
     logging.debug('inflect forms %s msd %s' % pex_table)
-    res = mp.test_paradigms([pex_table], *settings, returnempty=False)
+    res = mp.test_paradigms(pex_table, *settings, returnempty=False)
     logging.debug('inflect table %s, tags %s' % (pex_table[0], pex_table[1]))
     logging.debug('res %s' % res)
     if res:
         ans = {"Results": helpers.format_inflection(res, kbest=kbest, pos=pos),
-               'new': False, 'analyzes': res[0][1][0]}
+               'analyzes': res[0][1][0]}
     else:
         pex_table = helpers.tableize(table, add_tags=True)
+        print('pex',pex, dir(pex))
         paradigm = pex.learnparadigms([pex_table])[0]
         logging.debug('learned %s' % paradigm)
         ans = {'Results': helpers.lmf_tableize(table, paradigm=paradigm, pos=pos),
-               'new': True, 'analyzes': res}
+               'analyzes': res}
     return ans

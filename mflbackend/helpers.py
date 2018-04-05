@@ -117,8 +117,8 @@ def make_table(lexconf, paradigm, v, score, pos):
         logging.debug('v %s %s' % (v, type(v)))
         infl = {'paradigm': paradigm.name, 'WordForms': [],
                 'variables': dict(zip(range(1, len(v)+1), v)),
-                'score': score,
-                'partOfSpeech': pos}
+                'score': score, 'count': paradigm.count,
+                'new': False, 'partOfSpeech': pos}
         logging.debug('%s:' % paradigm.name)
         table = paradigm(*v)  # Instantiate table with vars from analysis
         for form, msd in table:
@@ -142,9 +142,9 @@ def format_inflection(ans, kbest, pos='', debug=False):
     for words, analyses in ans:
         for aindex, (score, p, v) in enumerate(analyses):
             infl = {'paradigm': p.name, 'WordForms': [],
-                    'variables': dict(zip(range(1, len(v)+1), v)),
-                    'score': score,
-                    'lemgram': '', 'partOfSpeech': pos}
+                    'variables': dict(zip(range(1, len(v)+1), v)), 'score':
+                    score, 'count': p.count, 'new': False, 'lemgram': '',
+                    'partOfSpeech': pos}
             if aindex >= kbest:
                 break
             table = p(*v)          # Instantiate table with vars from analysis
@@ -234,7 +234,6 @@ def lmf_tableize(table, paradigm=None, pos='', score=0):
     if paradigm is not None:
         obj['variables'] = paradigm.var_insts[0]
         obj['paradigm'] = paradigm.name
-        obj['new'] = False
     wfs = []
     for l in table:
         if '|' in l:
@@ -247,6 +246,7 @@ def lmf_tableize(table, paradigm=None, pos='', score=0):
     obj['WordForms'] = wfs
     obj['lemgram'] = ''
     obj['partOfSpeech'] = pos
+    obj['count'] = 0
     return obj
 
 
@@ -265,7 +265,7 @@ def tableize(table, add_tags=True):
             form = l
             tag = 'tag' if add_tags else ''
         thistable.append(form)
-        if add_tags:
+        if add_tags or tag:
             thesetags.append([("msd", tag)])
     return (thistable, thesetags)
 
