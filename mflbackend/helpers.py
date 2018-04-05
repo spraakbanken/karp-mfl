@@ -2,6 +2,7 @@ import errors as e
 import json
 import logging
 import paradigm as P
+import re
 import urllib.parse
 import urllib.request
 
@@ -15,6 +16,7 @@ def get_lexiconconf(lexicon):
 
 
 def karp_add(data, resource='saldomp', _id=None):
+    # TODO must use password!
     data = {'doc': data, 'message': 'Mfl generated paradigm'}
     if _id:
         return karp_request("readd/%s/%s" % (resource, _id),
@@ -24,7 +26,15 @@ def karp_add(data, resource='saldomp', _id=None):
                             data=json.dumps(data).encode('utf8'))
 
 
+def karp_bulkadd(data, resource='saldomp'):
+    # TODO must use password!
+    data = {'doc': data, 'message': 'Mfl candidate list'}
+    return karp_request("addbulk/%s" % resource,
+                        data=json.dumps(data).encode('utf8'))
+
+
 def karp_update(uuid, data, resource='saldomp'):
+    # TODO must use password!
     data = {'doc': data, 'message': 'Mfl generated paradigm'}
     # print('data', data)
     # print('uuid', uuid)
@@ -33,6 +43,7 @@ def karp_update(uuid, data, resource='saldomp'):
 
 
 def karp_query(action, query, mode='external', resource='saldomp'):
+    # TODO must use password!
     if 'mode' not in query:
         query['mode'] = mode
     if 'resource' not in query and 'lexiconName' not in query:
@@ -47,6 +58,7 @@ def karp_query(action, query, mode='external', resource='saldomp'):
 
 
 def karp_request(action, data=None):
+    # TODO must use password!
     q = "%s/%s" % (KARP_BACKEND, action)
     logging.debug('send %s' % q)
     logging.debug('send %s' % q)
@@ -108,9 +120,8 @@ def make_table(lexconf, paradigm, v, score, pos):
             for tag in msd:
                 infl['WordForms'].append({'writtenForm': form,
                                           'msd': tag[1]})
-        func = extra_src(lexconf, 'get_baseform',
-                         lambda infl: infl['WordForms'][0]['writtenForm'])
-        infl['baseform'] = func(infl)
+
+        infl['baseform'] = get_baseform_infl(lexconf, infl)
         logging.debug('could use paradigm %s' % paradigm)
         return infl
     except Exception as e:
@@ -178,6 +189,24 @@ def lmf_wftableize(lexconf, paradigm, table, classes={}, baseform='',
     func = extra_src(lexconf, 'lmf_wftabelize', default)
 
     return func(paradigm, table, classes, baseform, identifier, pos, resource)
+
+
+def get_pos(lexconf, lemgram):
+    func = extra_src(lexconf, 'get_pos',
+                     lambda x: re.search('.*\.\.(.*?)\..*', x))
+    return func(lemgram)
+
+
+def get_baseform_infl(lexconf, infl):
+    func = extra_src(lexconf, 'get_baseform',
+                     lambda infl: infl['WordForms'][0]['writtenForm'])
+    return func(infl=infl)
+
+
+def get_baseform(lexconf, lemgram):
+    func = extra_src(lexconf, 'get_baseform',
+                     lambda x: x.split('\.')[0])
+    return func(lemgram=lemgram)
 
 
 def extra_src(lexconf, funcname, default):
@@ -280,3 +309,36 @@ def search_q(query, searchfield, q, lexicon):
     else:
         query = 'extended||and|lexiconName|equals|%s' % lexicon
     return query
+
+
+def make_candidate(lexicon, lemgram, table, paradigms, pos, kbest=5):
+    obj = {}
+    form = {'lemgram': lemgram, 'partOfSpeech': pos, 'baseform': table[0]}
+    obj['FormRepresentations'] = [form]
+    obj['lexiconName'] = lexicon
+    obj['CandidateParadigms'] = []
+    obj['WordForms'] = []
+    # attested forms
+    for form in table[1:]:
+        if '|' in form:
+            form, tag = form.split('|')
+            wf = {'writtenForm': form, 'msd': tag}
+        else:
+            wf = {'writtenForm': form}
+        obj['WordForms'].append(wf)
+    cands = []
+    for w, analyses in paradigms:
+        for score, p, v in analyses:
+             cand = {}
+             cand['name'] = p.name
+             cand['uuid'] = p.uuid
+             cand['VariableInstances'] = dict(enumerate(v, 1))
+             cand['score'] = score
+             cands.append((score, cand))
+
+    cands.sort(reverse=True, key=lambda x: x[0])
+    if cands:
+        obj['maxScore'] = cands[0][0]
+
+    obj['CandidateParadigms'] = [c for score, c in cands[:kbest]]
+    return obj
