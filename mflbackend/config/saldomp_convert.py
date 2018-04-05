@@ -1,7 +1,6 @@
 import re
 
 def get_baseform(entry={}, lemgram=''):
-    print('baseform, entry %s, lemgram %s' % (entry, lemgram))
     if lemgram:
         return lemgram.split('.')[0]
     elif 'lemgram' in entry:
