@@ -99,8 +99,6 @@ def defaulttable():
 # Test inflections
 @app.route('/inflectclass')
 def inflectclass():
-# TODO Specialfall:
-# '/inflectclass?classname=extractparadigm&classval=p14_oxe..nn.1&lexicon=saldomp' -d '{"var_inst": {"1": "katt"}}'`
     " Inflect a word according to a user defined category "
     lexicon = request.args.get('lexicon', 'saldomp')
     lexconf = helpers.get_lexiconconf(lexicon)
@@ -125,8 +123,11 @@ def inflectclass():
     paras, numex, lms = helpers.relevant_paradigms(paradigmdict, lexicon,
                                                    pos, possible_p)
     if classname == "paradigm":
-    # TODO rename to extractparadigm
-    #if classname == "extractparadigm":
+        # Special case: '?classname=extractparadigm&classval=p14_oxe..nn.1?1=katt&2=a'
+        # TODO rename to extractparadigm
+        #if classname == "extractparadigm":
+        if len(paras) < 1 or len(possible_p) < 1:
+            raise e.MflException("Cannot find paradigm %s" % classval)
         var_inst = sorted([(key,val) for key,val in request.args.items() if key.isdigit()])
         var_inst.sort()
         var_inst = [val for key, val in var_inst]
@@ -188,15 +189,11 @@ def inflectlike():
     lexicon = request.args.get('lexicon', 'saldomp')
     lexconf = helpers.get_lexiconconf(lexicon)
     word = request.args.get('wordform', '')
-    # TODO remove, should be the lemgrams pos
-    # conf shoud tell how to get pos from lemgram
-    pos = request.args.get('pos', '') or\
-          request.args.get('partOfSpeech', lexconf['defaultpos'])
     like = request.args.get('like')
     logging.debug('like %s' % like)
     ppriorv = float(request.args.get('pprior', lexconf["pprior"]))
-    q = 'extended||and|%s.search|equals|%s||and|%s|equals|%s'\
-        % ('first-attest', like, "pos", pos)
+    pos = helpers.get_pos(lexconf, like)
+    q = 'extended||and|%s.search|equals|%s' % ('first-attest', like)
     res = helpers.karp_query('statlist',
                              {'q': q,
                               'mode': lexconf['paradigmMode'],
@@ -444,17 +441,53 @@ def add_table():
 
 
 
-@app.route('/addcandidates')
-# /addcandidates?pos=nn&lexicon=saldomp -d @kandidat.txt`
+@app.route('/addcandidates', methods=['POST'])
 def addcandidates():
-    # TODO
-    pass
+    # TODO test and run
+    '''  katt..nn.1
+         hund..nn.1,hundar|pl indef nom
+         mås..nn.2,måsars
+    '''
+    data = request.get_data().decode() # decode from bytes
+    logging.debug('data %s' % data)
+    tables = data.split('\n')
+    pos = request.args.get('pos', '') or\
+          request.args.get('partOfSpeech', lexconf['defaultpos'])
+    ppriorv = float(request.args.get('pprior', lexconf["pprior"]))
+    lexicon = request.args.get('lexicon', 'saldomp')
+    paras, numex, lms = helpers.relevant_paradigms(paradigmdict, lexicon, pos)
+    to_save = []
+    for table in tables:
+        if not table:
+            continue
+        logging.debug('table %s' % table)
+        forms = table.split(',')
+        lemgram = forms[0]
+        forms = [helpers.get_baseform(lexconf, lemgram)] + forms[1:]
+        pex_table = helpers.tableize(','.join(forms), add_tags=False)
+        logging.debug('inflect forms %s msd %s' % pex_table)
+        res = mp.test_paradigms([pex_table], paras, numex, lms,
+                                 config["print_tables"], config["debug"],
+                                 ppriorv, returnempty=False)
+        to_save.append(helpers.make_candidate(lexconf['candidatelexiconName'], lemgram, forms, res, pos))
+    logging.debug('will save %s' % to_save)
+
+    helpers.karp_bulkadd(to_save, resource=lexconf['candidatelexiconName'])
+    return jsonify({'saved': to_save, 'candidatelexiconName': lexconf['candidatelexiconName']})
+
 
 @app.route('/candidatelist')
-# /candidatelist?pos=nn&lexicon=saldomp
 def candidatelist():
-    # TODO
-    pass
+    lexicon = request.args.get('lexicon', 'saldomp')
+    lexconf = helpers.get_lexiconconf(lexicon)
+    pos = request.args.get('pos', '') or\
+          request.args.get('partOfSpeech', lexconf['defaultpos'])
+    q = 'extended||and|%s.search|equals|%s' % (lexconf['pos'], pos)
+    res = helpers.karp_query('query', query={'q': q},
+                             mode=lexconf['candidateMode'],
+                             resource=lexconf['candidatelexiconName'])
+    return jsonify({"candidates": [hit['_source'] for hit in res['hits']['hits']]})
+
 
 @app.route('/removecandidate')
 # /removecandidate?identifier=katt..nn.1&lexicon=saldomp'`

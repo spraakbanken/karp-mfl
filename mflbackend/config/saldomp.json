@@ -3,6 +3,8 @@
 "lexiconMode": "external",
 "paradigmlexiconName": "saldompparadigms",
 "paradigmMode": "saldompparadigms",
+"candidatelexiconName": "saldompcandidates",
+"candidateMode": "candidates",
 "defaultpos": "nn",
 "inflectionalclass": {"bklass": "FormRepresentations.bklass", "fm_paradigm": "FormRepresentations.fm_paradigm.raw"},
 "extractparadigm": "paradigm",

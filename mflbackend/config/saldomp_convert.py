@@ -1,10 +1,18 @@
+import re
 
-
-def get_baseform(entry):
-    if 'lemgram' in entry:
+def get_baseform(entry={}, lemgram=''):
+    print('baseform, entry %s, lemgram %s' % (entry, lemgram))
+    if lemgram:
+        return lemgram.split('.')[0]
+    elif 'lemgram' in entry:
         return entry['lemgram'].split('.')[0]
     else:
         return entry['WordForms'][0]['writtenForm']
+
+
+def get_pos(lemgram):
+    return re.search('.*\.\.(.*?)\.', lemgram).group(1)
+
 
 def lmf_wftableize(paradigm, table, classes={}, baseform='', identifier='',
                    pos='', resource=''):
