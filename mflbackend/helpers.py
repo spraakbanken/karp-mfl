@@ -1,4 +1,5 @@
 import errors as e
+from flask import request
 import json
 import logging
 import paradigm as P
@@ -12,7 +13,11 @@ KARP_BACKEND = 'http://localhost:8081/app/'
 
 
 def get_lexiconconf(lexicon):
-    return json.load(open('config/%s.json' % lexicon))
+    try:
+        return json.load(open('config/%s.json' % lexicon))
+    except Exception as err:
+        logging.exception(err)
+        raise e.MflException("Could not open lexicon %s" % lexicon)
 
 
 def karp_add(data, resource='saldomp', _id=None):
@@ -196,7 +201,7 @@ def lmf_wftableize(lexconf, paradigm, table, classes={}, baseform='',
     return func(paradigm, table, classes, baseform, identifier, pos, resource)
 
 
-def get_pos(lexconf, lemgram):
+def identifier2pos(lexconf, lemgram):
     func = extra_src(lexconf, 'get_pos',
                      lambda x: re.search('.*\.\.(.*?)\..*', x))
     return func(lemgram)
@@ -286,8 +291,9 @@ def load_paradigms(es_result, lexconf):
     return paradigms
 
 
-def compile_list(query, searchfield, q, lexicon, show, size, start, mode):
-    query = search_q(query, searchfield, q, lexicon)
+def compile_list(query, searchfield, querystr, lexicon, show,
+                 size, start, mode):
+    query = search_q(query, searchfield, querystr, lexicon)
     res = karp_query('minientry',
                      {'q': query, 'show': show, 'size': size,
                       'start': start, 'mode': mode,
@@ -347,3 +353,9 @@ def make_candidate(lexicon, lemgram, table, paradigms, pos, kbest=5):
 
     obj['CandidateParadigms'] = [c for score, c in cands[:kbest]]
     return obj
+
+
+def read_pos(lexconf):
+    pos = request.args.get('pos', '')
+    partofspeech = request.args.get('partOfSpeech', lexconf['defaultpos'])
+    return pos or partofspeech

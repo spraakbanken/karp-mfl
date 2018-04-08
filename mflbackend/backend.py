@@ -1,7 +1,10 @@
 import errors as e
 from flask import Flask, jsonify, render_template, request
 import logging
+from hashlib import md5
 import sys
+import urllib.request
+
 sys.path.append('/home/malin/Spraak/pextract/sbextract/src')
 import generate as generate
 import morphparser as mp
@@ -37,10 +40,11 @@ def lexiconinfo(lex=''):
 def paradigminfo(paradigm=''):
     " Show information for the paradigm infobox "
     lexicon = request.args.get('lexicon', '')
+    lexconf = helpers.get_lexiconconf(lexicon)
+    authenticate(lexconf, 'read')
     paradigm = request.args.get('paradigm', paradigm)
     short = request.args.get('short', '')
     short = short in [True, 'true', 'True']
-    lexconf = helpers.get_lexiconconf(lexicon)
     q = 'extended||and|%s.search|equals|%s' %\
         (lexconf['extractparadigm'], paradigm)
     res = helpers.karp_query('query', {'q': q},
@@ -77,8 +81,7 @@ def defaulttable():
     " Show an empty table suiting the lexicon and part of speech "
     lexicon = request.args.get('lexicon', 'saldomp')
     lexconf = helpers.get_lexiconconf(lexicon)
-    pos = request.args.get('pos', '') or\
-          request.args.get('partOfSpeech', lexconf['defaultpos'])
+    pos = helpers.read_pos(lexconf)
     q = 'extended||and|%s.search|equals|%s' % (lexconf['pos'], pos)
     res = helpers.karp_query('statlist',
                              {'q': q,
@@ -106,8 +109,7 @@ def inflectclass():
     ppriorv = float(request.args.get('pprior', lexconf["pprior"]))
     classname = request.args.get('classname', '')
     classval = request.args.get('classval', '')
-    pos = request.args.get('pos', '') or\
-          request.args.get('partOfSpeech', lexconf['defaultpos'])
+    pos = helpers.read_pos(lexconf)
 
     q = 'extended||and|%s.search|equals|%s||and|%s|equals|%s'\
         % (classname, classval, lexconf['pos'], pos)
@@ -123,12 +125,12 @@ def inflectclass():
     paras, numex, lms = helpers.relevant_paradigms(paradigmdict, lexicon,
                                                    pos, possible_p)
     if classname == "paradigm":
-        # Special case: '?classname=extractparadigm&classval=p14_oxe..nn.1?1=katt&2=a'
-        # TODO rename to extractparadigm
-        #if classname == "extractparadigm":
+        # Special case: '?classname=paradigm&classval=p14_oxe..nn.1?1=katt&2=a'
+        # TODO rename to extractparadigm?
         if len(paras) < 1 or len(possible_p) < 1:
             raise e.MflException("Cannot find paradigm %s" % classval)
-        var_inst = sorted([(key,val) for key,val in request.args.items() if key.isdigit()])
+        var_inst = sorted([(key, val) for key, val in request.args.items()
+                           if key.isdigit()])
         var_inst.sort()
         var_inst = [val for key, val in var_inst]
         logging.debug('look for %s as %s' % (classval, pos))
@@ -138,25 +140,12 @@ def inflectclass():
         ans = {"Results": [table]}
 
     else:
-        # q = 'extended||and|%s.search|equals|%s||and|%s|equals|%s'\
-        #     % (classname, classval, lexconf['pos'], pos)
-        # res = helpers.karp_query('statlist',
-        #                          {'q': q,
-        #                           'mode': lexconf['paradigmMode'],
-        #                           'resource': lexconf['paradigmlexiconName'],
-        #                           'buckets': '_id'
-        #                           }
-        #                          )
-        # possible_p = [line[0] for line in res['stat_table']]
-        # logging.debug('possible_p %s' % possible_p)
-        # paras, numex, lms = helpers.relevant_paradigms(paradigmdict, lexicon,
-        #                                                pos, possible_p)
 
         res = generate.run_paradigms(paras, [word], kbest=100, pprior=ppriorv,
                                      lms=lms, numexamples=numex)
-        # print('generated', res)
         logging.debug('generated %s results' % len(res))
-        ans = {"Results": helpers.format_simple_inflection(lexconf, res, pos=pos)}
+        results = helpers.format_simple_inflection(lexconf, res, pos=pos)
+        ans = {"Results": results}
     # print('asked', q)
     return jsonify(ans)
 
@@ -167,8 +156,7 @@ def inflect():
     lexicon = request.args.get('lexicon', 'saldomp')
     lexconf = helpers.get_lexiconconf(lexicon)
     table = request.args.get('table', '')
-    pos = request.args.get('pos', '') or\
-          request.args.get('partOfSpeech', lexconf['defaultpos'])
+    pos = helpers.read_pos(lexconf)
     ppriorv = float(request.args.get('pprior', lexconf["pprior"]))
     paras, numex, lms = helpers.relevant_paradigms(paradigmdict, lexicon, pos)
     ans = handle.inflect_table(table,
@@ -192,7 +180,7 @@ def inflectlike():
     like = request.args.get('like')
     logging.debug('like %s' % like)
     ppriorv = float(request.args.get('pprior', lexconf["pprior"]))
-    pos = helpers.get_pos(lexconf, like)
+    pos = helpers.identifier2pos(lexconf, like)
     q = 'extended||and|%s.search|equals|%s' % ('first-attest', like)
     res = helpers.karp_query('statlist',
                              {'q': q,
@@ -223,8 +211,8 @@ def listing():
     s = request.args.get('s', '*')  # searchfield
     lexicon = request.args.get('lexicon', 'saldomp')
     lexconf = helpers.get_lexiconconf(lexicon)
-    pos = request.args.get('pos', '') or\
-          request.args.get('partOfSpeech', '')
+    authenticate(lexconf, 'read')
+    pos = helpers.read_pos(lexconf)
     query = []
     if pos:
         query.append('and|%s|startswith|%s' % (lexconf["pos"], pos))
@@ -266,17 +254,13 @@ def listing():
 
 @app.route('/compile')
 def compile():
-    # TODO
-    # -paradigm, filterera på wf/klass
-    # -klass, filterera på wf/paradigm
-    # -wf, filterera på klass/paradigm
     querystr = request.args.get('q', '')  # querystring
     search_f = request.args.get('s', '')  # searchfield
     compile_f = request.args.get('c', '')  # searchfield
     lexicon = request.args.get('lexicon', 'saldomp')
     lexconf = helpers.get_lexiconconf(lexicon)
-    pos = request.args.get('pos', '') or\
-          request.args.get('partOfSpeech', '')
+    authenticate(lexconf, 'read')
+    pos = helpers.read_pos(lexconf)
     size = request.args.get('size', '100')
     start = request.args.get('start', '0')
     extra = request.args.get('extra', 'true')
@@ -319,10 +303,8 @@ def compile():
 
     elif compile_f == "wf":
         mode = lexconf['lexiconMode']
-        print('compile wf, search: "%s" or "%s"' % (search_f, lexconf["baseform"]))
         if querystr:
             s_field = search_f or lexconf["baseform"]
-        print('compile wf, search: "%s"' % s_field)
         ans = helpers.compile_list(query, s_field, querystr, lexicon,
                                    lexconf["show"], size, start, mode)
         return jsonify({"compiled_on": "wordforms", "stats": ans,
@@ -369,9 +351,9 @@ def add_table():
     # or is that not needed?
     lexicon = request.args.get('lexicon', 'saldomp')
     lexconf = helpers.get_lexiconconf(lexicon)
+    authenticate(lexconf, 'write')
     table = request.args.get('table', '')
-    pos = request.args.get('pos', '') or\
-          request.args.get('partOfSpeech', lexconf['defaultpos'])
+    pos = helpers.read_pos(lexconf)
     paradigm = request.args.get('paradigm', '')
     # check that the table's identier is unique
     identifier = request.args.get('identifier', '')
@@ -451,22 +433,20 @@ def add_table():
                     'pattern': para.pattern(), 'partOfSpeech': pos})
 
 
-
-
 @app.route('/addcandidates', methods=['POST'])
 def addcandidates():
-    # TODO test and run
     '''  katt..nn.1
          hund..nn.1,hundar|pl indef nom
          mås..nn.2,måsars
     '''
-    data = request.get_data().decode() # decode from bytes
+    data = request.get_data().decode()  # decode from bytes
     logging.debug('data %s' % data)
     tables = data.split('\n')
-    pos = request.args.get('pos', '') or\
-          request.args.get('partOfSpeech', lexconf['defaultpos'])
-    ppriorv = float(request.args.get('pprior', lexconf["pprior"]))
     lexicon = request.args.get('lexicon', 'saldomp')
+    lexconf = helpers.get_lexiconconf(lexicon)
+    pos = helpers.read_pos(lexconf)
+    ppriorv = float(request.args.get('pprior', lexconf["pprior"]))
+    authenticate(lexconf, 'write')
     paras, numex, lms = helpers.relevant_paradigms(paradigmdict, lexicon, pos)
     to_save = []
     for table in tables:
@@ -479,21 +459,23 @@ def addcandidates():
         pex_table = helpers.tableize(','.join(forms), add_tags=False)
         logging.debug('inflect forms %s msd %s' % pex_table)
         res = mp.test_paradigms(pex_table, paras, numex, lms,
-                                 config["print_tables"], config["debug"],
-                                 ppriorv, returnempty=False)
-        to_save.append(helpers.make_candidate(lexconf['candidatelexiconName'], lemgram, forms, res, pos))
+                                config["print_tables"], config["debug"],
+                                ppriorv, returnempty=False)
+        to_save.append(helpers.make_candidate(lexconf['candidatelexiconName'],
+                                              lemgram, forms, res, pos))
     logging.debug('will save %s' % to_save)
 
     helpers.karp_bulkadd(to_save, resource=lexconf['candidatelexiconName'])
-    return jsonify({'saved': to_save, 'candidatelexiconName': lexconf['candidatelexiconName']})
+    return jsonify({'saved': to_save,
+                    'candidatelexiconName': lexconf['candidatelexiconName']})
 
 
 @app.route('/candidatelist')
 def candidatelist():
     lexicon = request.args.get('lexicon', 'saldomp')
     lexconf = helpers.get_lexiconconf(lexicon)
-    pos = request.args.get('pos', '') or\
-          request.args.get('partOfSpeech', lexconf['defaultpos'])
+    authenticate(lexconf, 'read')
+    pos = helpers.read_pos(lexconf)
     q = 'extended||and|%s.search|equals|%s' % (lexconf['pos'], pos)
     res = helpers.karp_query('query', query={'q': q},
                              mode=lexconf['candidateMode'],
@@ -511,6 +493,7 @@ def removecandidate(_id=''):
     '''
     lexicon = request.args.get('lexicon', 'saldomp')
     lexconf = helpers.get_lexiconconf(lexicon)
+    authenticate(lexconf, 'write')
     if not _id:
         try:
             identifier = request.args.get('identifier', '')
@@ -568,31 +551,54 @@ def handle_invalid_usage(error):
         logging.debug('Error on url %s' % request.full_path)
         logging.exception(error)
 
-        return "Error!!\n%s" % error.message, 400
+        status = error.status_code
+        return "Error!!\n%s" % error.message, status
     except Exception:
         return "Oops, something went wrong\n", 500
 
+
+def authenticate(lexconf, action):
+    auth = request.authorization
+    postdata = {"include_open_resources": "true"}
+    if auth is not None:
+        user, pw = auth.username, auth.password
+        server = config['AUTH_SERVER']
+        mdcode = user + pw + config['SECRET_KEY']
+        postdata["checksum"] = md5(mdcode.encode('utf8')).hexdigest()
+    else:
+        server = config['AUTH_RESOURCES']
+
+    data = json.dumps(postdata).encode('utf8')
+    logging.debug('ask %s, data %s' % (server, postdata))
+    response = urllib.request.urlopen(server, data).read().decode('utf8')
+    auth_response = json.loads(response)
+    lexitems = auth_response.get("permitted_resources", {})
+    permissions = lexitems.get("lexica", {}).get(lexconf['wsauth_name'], {})
+    logging.debug('permissions %s' % permissions)
+    if not permissions.get(action, False):
+        raise e.MflException("Action %s not allowed in lexicon %s" %
+                             (action, lexconf['lexiconName']), 401)
 
 # TODO how to set these??
 # For saldomp, i have increased pprior a lot, from 1.0 to 5.0
 config = {"print_tables": False,
           "kbest": 10,
           "debug": False,
-          "choose": False
+          "choose": False,
+          "AUTH_RESOURCES": "http://localhost:8082/app/resources",
+          "AUTH_SERVER": "http://localhost:8082/app/authenticate",
+          "SECRET_KEY": "secret"
           }
 
 
 if __name__ == '__main__':
     import json
-    # sys.setdefaultencoding('utf8')
-    # TODO how to handle the paradigms? In memory? On disk?
     paradigmdict = {}
+    snabb = sys.argv[-1] == '--snabb'
     for lex in json.load(open('config/lexicons.json')):
-        # TODO which lexconf
-        lexconf = helpers.get_lexiconconf("saldomp")
-        # TODO can't have same pos for many pfiles, in that case, they
-        # must be merged
+        lexconf = helpers.get_lexiconconf(lex['name'])
         paradigmdict[lex['name']] = {}
-        for pos in lex['pos']:
-            update_model(lex['name'], pos, paradigmdict, lexconf)
+        if not snabb:
+            for pos in lex['pos']:
+                update_model(lex['name'], pos, paradigmdict, lexconf)
     app.run()

@@ -372,8 +372,9 @@ Result:
 Available query parameters:
 <table>
   <tr><td>'lexicon': </td><td> the lexicon </td></tr>
-  <tr><td>'s': </td><td></td>the search field </tr>
-  <tr><td>'q':</td><td>  the querystring</td></tr>
+  <tr><td>'c':</td><td>  the field to compile on</td></tr>
+  <tr><td>'q':</td><td>  the querystring. Optional</td></tr>
+  <tr><td>'s': </td><td></td>the search field. Default: same as the c field </tr>
   <tr><td>'partOfSpeech':</td><td> the part of speech </td></tr>
   <tr><td>'size':</td><td> the number of hits to show </td></tr>
   <tr><td>'start':</td><td> start showing hit number </td></tr>
@@ -386,9 +387,12 @@ Available query parameters:
 <p>
 Examples:
 <ul>
-  <li><a href="{{url}}compile?s=wf&q=katt"><pre>{{url}}compile?s=wf&amp;q=katt</pre></a>
-  <li><a href="{{url}}compile?s=paradigm&q=p15_pryd..av.1"><pre>{{url}}compile?s=paradigm&amp;q=p15_pryd..av.1</pre></a>
-  <li><a href="{{url}}compile?s=class&q=3&classname=bklass"><pre>{{url}}compile?s=class&amp;q=3&classname=bklass</pre></a>
+  <li><a href="{{url}}compile?c=wf&q=katt"><pre>{{url}}compile?c=wf&amp;q=katt</pre></a>
+  <li><a href="{{url}}compile?c=paradigm&q=p15_pryd..av.1"><pre>{{url}}compile?c=paradigm&amp;q=p15_pryd..av.1</pre></a>
+  <li><a href="{{url}}compile?c=class&q=3&classname=bklass"><pre>{{url}}compile?c=class&amp;q=3&classname=bklass</pre></a>
+  <li><a href="{{url}}compile?c=wf&q=p1_överfart..nn.1&s=paradigm"><pre>{{url}}compile?c=wf&amp;q=p1_överfart..nn.1&s=paradigm</pre></a>
+  <li><a href="{{url}}compile?c=paradigm&s=bklass&q=1"><pre>{{url}}compile?c=paradigm&amp;s=bklass&q=1</pre></a>
+  <li><a href="{{url}}compile?c=class&classname=bklass&q=bok&s=wf"><pre>{{url}}compile?c=class&amp;classname=bklass&q=bok&s=wf</pre></a>
 </ul>
 
 
