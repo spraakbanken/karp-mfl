@@ -266,8 +266,13 @@ def listing():
 
 @app.route('/compile')
 def compile():
-    q = request.args.get('q', '')  # querystring
-    s = request.args.get('s', '*')  # searchfield
+    # TODO
+    # -paradigm, filterera på wf/klass
+    # -klass, filterera på wf/paradigm
+    # -wf, filterera på klass/paradigm
+    querystr = request.args.get('q', '')  # querystring
+    search_f = request.args.get('s', '')  # searchfield
+    compile_f = request.args.get('c', '')  # searchfield
     lexicon = request.args.get('lexicon', 'saldomp')
     lexconf = helpers.get_lexiconconf(lexicon)
     pos = request.args.get('pos', '') or\
@@ -280,10 +285,11 @@ def compile():
     if pos:
         query.append('and|%s|startswith|%s' % (lexconf["pos"], pos))
 
-    if s == 'class':
+    if compile_f == 'class':
         classname = request.args.get('classname', '')
-        if q:
-            query.append('and|%s|equals|%s' % (classname, q))
+        if querystr:
+            s_field = search_f or classname
+            query.append('and|%s|equals|%s' % (s_field, querystr))
         if query:
             query = 'extended||' + '||'.join(query)
         else:
@@ -311,21 +317,27 @@ def compile():
         return jsonify({"compiled_on": classname, "stats": ans,
                         "fields": ["paradigm", "entries"]})
 
-    elif s == "wf":
+    elif compile_f == "wf":
         mode = lexconf['lexiconMode']
-        ans = helpers.compile_list(query, lexconf["baseform"], q, lexicon,
+        print('compile wf, search: "%s" or "%s"' % (search_f, lexconf["baseform"]))
+        if querystr:
+            s_field = search_f or lexconf["baseform"]
+        print('compile wf, search: "%s"' % s_field)
+        ans = helpers.compile_list(query, s_field, querystr, lexicon,
                                    lexconf["show"], size, start, mode)
         return jsonify({"compiled_on": "wordforms", "stats": ans,
                         "fields": ["wf"]})
 
-    elif s == "paradigm":
+    elif compile_f == "paradigm":
         # TODO no need to look in config for this, it should always be the same
+        if querystr:
+            s_field = search_f or lexconf["extractparadigm"]
         show = ','.join([lexconf['extractparadigm'], 'TransformCategory',
                         '_entries'])
         lexicon = lexconf['paradigmlexiconName']
         mode = lexconf['paradigmMode']
-        ans = helpers.compile_list(query, lexconf["extractparadigm"], q,
-                                   lexicon, show, size, start, mode)
+        ans = helpers.compile_list(query, s_field, querystr, lexicon, show,
+                                   size, start, mode)
         res = []
         # TODO iclasses may not be in the same order every time
         iclasses = []
@@ -341,7 +353,7 @@ def compile():
                         "fields": iclasses+['entries']})
 
     else:
-        return "Don't know what to do"
+        raise e.MflException("Don't know what to do")
 
 
 # Update
