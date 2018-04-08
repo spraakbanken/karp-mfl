@@ -17,8 +17,10 @@
 "pos": "pos",
 "msd": "msd",
 "baseform": "baseformC",
+"wf": "baseformC",
 "identifier": "lemgram",
 "needed_lexiconFields": ["lemgram", "pos"],
 "possible_lexiconFields": ["bklass", "fm_paradigm"],
-"src": "config.saldomp_convert"
+"src": "config.saldomp_convert",
+"wsauth_name": "saldomp"
 }
