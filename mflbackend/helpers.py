@@ -78,53 +78,52 @@ def karp_request(action, data=None):
     return data
 
 
-def format_simple_inflection(lexconf, ans, pos=''):
+def format_inflection(lexconf, ans, kbest=0, pos='', debug=False):
     " format an inflection and report whether anything has been printed "
     out = []
-    for paradigm, words, analyses in ans:
-        for aindex, (score, p, v) in enumerate(analyses):
-            logging.debug('hej %s %s' % (aindex, v))
-            res = make_table(lexconf, p, v, score, pos)
-            if res is not None:
-                out.append((score, res))
-            # try:
-            #     logging.debug('v %s %s' % (v, type(v)))
-            #     infl = {'paradigm': p.name, 'WordForms': [],
-            #             'variables': dict(zip(range(1, len(v)+1), v)),
-            #             'score': score,
-            #             'partOfSpeech': pos}
-            #     logging.debug(paradigm + ':')
-            #     table = p(*v)  # Instantiate table with vars from analysis
-            #     for form, msd in table:
-            #         for tag in msd:
-            #             infl['WordForms'].append({'writtenForm': form,
-            #                                       'msd': tag[1]})
-            #     func = extra_src(lexconf, 'get_baseform',
-            #                      lambda infl: infl['WordForms'][0]['writtenForm'])
-            #     infl['baseform'] = func(infl)
-            #     logging.debug('could use paradigm %s' % paradigm)
-            #     out.append((score, infl))
-            # except Exception as e:
-            #     # fails if the inflection does not work (instantiation fails)
-            #     logging.debug('could not use paradigm %s' % paradigm)
-            #     logging.exception(e)
-    out.sort(reverse=True, key=lambda x: x[0])
-#   X lemgram
-#   X grundform
-#   X paradigmnamn
-#   X ordklass
-#   annan klass
-    return [o[1] for o in out]
+    #for words, analyses in ans:
+    for aindex, (score, p, v) in enumerate(ans):
+        if kbest and aindex >= kbest:
+            break
+        out.append(make_table(lexconf, p, v, score, pos))
+        # infl = {'paradigm': p.name, 'WordForms': [],
+        #         'variables': dict(zip(range(1, len(v)+1), v)), 'score':
+        #         score, 'count': p.count, 'new': False, 'lemgram': '',
+        #         'partOfSpeech': pos}
+        # table = p(*v)          # Instantiate table with vars from analysis
+        # for form, msd in table:
+        #     for tag in msd:
+        #         infl['WordForms'].append({'writtenForm': form,
+        #                                   'msd': tag[1]})
+        # out.append(infl)
+        # if debug:
+        #     logging.debug("Members: %s" %
+        #                   ", ".join([p(*[var[1] for var in vs])[0][0]
+        #                              for vs in p.var_insts]))
+    return out
+
+
+#def format_simple_inflection(lexconf, ans, pos=''):
+#    " format an inflection and report whether anything has been printed "
+#    out = []
+#    for paradigm, words, analyses in ans:
+#        for aindex, (score, p, v) in enumerate(analyses):
+#            logging.debug('hej %s %s' % (aindex, v))
+#            res = make_table(lexconf, p, v, score, pos)
+#            if res is not None:
+#                out.append((score, res))
+#    out.sort(reverse=True, key=lambda x: x[0])
+#    return [o[1] for o in out]
 
 
 def make_table(lexconf, paradigm, v, score, pos):
     try:
-        logging.debug('v %s %s' % (v, type(v)))
+        #logging.debug('v %s %s' % (v, type(v)))
         infl = {'paradigm': paradigm.name, 'WordForms': [],
                 'variables': dict(zip(range(1, len(v)+1), v)),
                 'score': score, 'count': paradigm.count,
                 'new': False, 'partOfSpeech': pos}
-        logging.debug('%s:' % paradigm.name)
+        #logging.debug('%s:' % paradigm.name)
         table = paradigm(*v)  # Instantiate table with vars from analysis
         for form, msd in table:
             for tag in msd:
@@ -132,38 +131,13 @@ def make_table(lexconf, paradigm, v, score, pos):
                                           'msd': tag[1]})
 
         infl['baseform'] = get_baseform_infl(lexconf, infl)
-        logging.debug('could use paradigm %s' % paradigm)
+        #logging.debug('could use paradigm %s' % paradigm)
         return infl
     except Exception as e:
         # fails if the inflection does not work (instantiation fails)
         logging.debug('could not use paradigm %s' % paradigm)
         logging.exception(e)
         return None
-
-
-def format_inflection(ans, kbest, pos='', debug=False):
-    " format an inflection and report whether anything has been printed "
-    out = []
-    for words, analyses in ans:
-        for aindex, (score, p, v) in enumerate(analyses):
-            infl = {'paradigm': p.name, 'WordForms': [],
-                    'variables': dict(zip(range(1, len(v)+1), v)), 'score':
-                    score, 'count': p.count, 'new': False, 'lemgram': '',
-                    'partOfSpeech': pos}
-            if aindex >= kbest:
-                break
-            table = p(*v)          # Instantiate table with vars from analysis
-            for form, msd in table:
-                for tag in msd:
-                    infl['WordForms'].append({'writtenForm': form,
-                                              'msd': tag[1]})
-            out.append(infl)
-
-            if debug:
-                logging.debug("Members: %s" %
-                              ", ".join([p(*[var[1] for var in vs])[0][0]
-                                         for vs in p.var_insts]))
-    return out
 
 
 # TODO lexicon specific
@@ -255,7 +229,7 @@ def lmf_tableize(table, paradigm=None, pos='', score=0):
     return obj
 
 
-def tableize(table, add_tags=True):
+def tableize(table, add_tags=True, fill_tags=True):
     thistable, thesetags = [], []
     table = table.split(',')
     # if len(table[0].split('|')) < 2 or table[0].split('|') != "identifier":
@@ -272,6 +246,8 @@ def tableize(table, add_tags=True):
         thistable.append(form)
         if add_tags or tag:
             thesetags.append([("msd", tag)])
+        elif fill_tags:
+            thesetags.append('')
     return (thistable, thesetags)
 
 
@@ -338,14 +314,13 @@ def make_candidate(lexicon, lemgram, table, paradigms, pos, kbest=5):
             wf = {'writtenForm': form}
         obj['WordForms'].append(wf)
     cands = []
-    for w, analyses in paradigms:
-        for score, p, v in analyses:
-             cand = {}
-             cand['name'] = p.name
-             cand['uuid'] = p.uuid
-             cand['VariableInstances'] = dict(enumerate(v, 1))
-             cand['score'] = score
-             cands.append((score, cand))
+    for score, p, v in paradigms:
+         cand = {}
+         cand['name'] = p.name
+         cand['uuid'] = p.uuid
+         cand['VariableInstances'] = dict(enumerate(v, 1))
+         cand['score'] = score
+         cands.append((score, cand))
 
     cands.sort(reverse=True, key=lambda x: x[0])
     if cands:
@@ -359,3 +334,11 @@ def read_pos(lexconf):
     pos = request.args.get('pos', '')
     partofspeech = request.args.get('partOfSpeech', lexconf['defaultpos'])
     return pos or partofspeech
+
+
+def read_restriction(lexconf):
+    restrict = request.args.get('restrict_to_baseform')
+    print('restrict???', restrict)
+    if restrict is None:
+        return lexconf['restrict_to_baseform']
+    return restrict in ['True', 'true', True]

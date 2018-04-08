@@ -22,5 +22,6 @@
 "needed_lexiconFields": ["lemgram", "pos"],
 "possible_lexiconFields": ["bklass", "fm_paradigm"],
 "src": "config.saldomp_convert",
-"wsauth_name": "saldomp"
+"wsauth_name": "saldomp",
+"restrict_to_baseform": true
 }

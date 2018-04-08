@@ -6,7 +6,6 @@ import sys
 import urllib.request
 
 sys.path.append('/home/malin/Spraak/pextract/sbextract/src')
-import generate as generate
 import morphparser as mp
 import pextract as pex
 
@@ -140,11 +139,12 @@ def inflectclass():
         ans = {"Results": [table]}
 
     else:
-
-        res = generate.run_paradigms(paras, [word], kbest=100, pprior=ppriorv,
-                                     lms=lms, numexamples=numex)
+        restrict_to_baseform = helpers.read_restriction(lexconf)
+        res = mp.run_paradigms(paras, [word], kbest=100, pprior=ppriorv,
+                               lms=lms, numexamples=numex,
+                               baseform=restrict_to_baseform)
         logging.debug('generated %s results' % len(res))
-        results = helpers.format_simple_inflection(lexconf, res, pos=pos)
+        results = helpers.format_inflection(lexconf, res, pos=pos)
         ans = {"Results": results}
     # print('asked', q)
     return jsonify(ans)
@@ -162,8 +162,9 @@ def inflect():
     ans = handle.inflect_table(table,
                                [paras, numex, lms, config["print_tables"],
                                 config["debug"], ppriorv],
+                               lexconf,
                                pos=pos)
-    logging.debug('ans')
+    #logging.debug('ans')
     if 'paradigm' in ans:
         ans['paradigm'] = str(ans['paradigm'])
     elif 'analyzes' in ans:
@@ -196,9 +197,11 @@ def inflectlike():
                                                        possible_p=possible_p)
 
         logging.debug('test %s paradigms' % len(paras))
-        res = generate.run_paradigms(paras, [word], kbest=100, pprior=ppriorv,
-                                     lms=lms, numexamples=numex, vbest=20)
-        result = helpers.format_simple_inflection(lexconf, res, pos=pos)
+        restrict_to_baseform = helpers.read_restriction(lexconf)
+        res = mp.run_paradigms(paras, [word], kbest=100, pprior=ppriorv,
+                               lms=lms, numexamples=numex, vbest=20,
+                               baseform=restrict_to_baseform)
+        result = helpers.format_inflection(lexconf, res, pos=pos)
     else:
         result = []
     ans = {"Results": result}
@@ -401,7 +404,6 @@ def add_table():
                             config["print_tables"], config["debug"],
                             lexconf["pprior"], returnempty=False,
                             match_all=True)
-
     if not is_new and len(ans) < 1:
         # print('ans', ans)
         logging.warning("Could not inflect %s as %s" % (table, paradigm))
@@ -418,12 +420,12 @@ def add_table():
     else:
         # else -> increase count for one and members
         # print('ans', ans)
-        p = ans[0][1][0][1]
+        #p = ans[0][0][1]
         # print('name', p.name)
         # print('name', p.name)
         # print('lexicon', p.lex)
         # print('ans', ans[0][1][0][1])
-        score, para, v = ans[0][1][0]
+        score, para, v = ans[0][0]
         handle.add_word_to_paradigm(lexconf['paradigmlexiconName'],
                                     lexconf['lexiconName'], identifier, v,
                                     classes, para, wf_table)
@@ -458,9 +460,11 @@ def addcandidates():
         forms = [helpers.get_baseform(lexconf, lemgram)] + forms[1:]
         pex_table = helpers.tableize(','.join(forms), add_tags=False)
         logging.debug('inflect forms %s msd %s' % pex_table)
+        restrict_to_baseform = helpers.read_restriction(lexconf)
         res = mp.test_paradigms(pex_table, paras, numex, lms,
                                 config["print_tables"], config["debug"],
-                                ppriorv, returnempty=False)
+                                ppriorv, returnempty=False,
+                                baseform=restrict_to_baseform)
         to_save.append(helpers.make_candidate(lexconf['candidatelexiconName'],
                                               lemgram, forms, res, pos))
     logging.debug('will save %s' % to_save)

@@ -60,20 +60,21 @@ def remove_paradigm(pid, paradigms):
     del paradigms[pid]
 
 
-def inflect_table(table, settings, pos='', kbest=10):
-    pex_table = helpers.tableize(table, add_tags=False)
-    logging.debug('inflect forms %s msd %s' % pex_table)
-    res = mp.test_paradigms(pex_table, *settings, returnempty=False)
-    logging.debug('inflect table %s, tags %s' % (pex_table[0], pex_table[1]))
-    logging.debug('res %s' % res)
+def inflect_table(table, settings, lexconf, pos='', kbest=10):
+    baseform = helpers.read_restriction(lexconf)
+    fill_tags = '|' in table
+    pex_table = helpers.tableize(table, add_tags=False, fill_tags=fill_tags)
+    logging.debug('inflect forms %s msd %s. Restricted %s' % (pex_table[0], pex_table[1], baseform))
+    res = mp.test_paradigms(pex_table, *settings, returnempty=False, baseform=baseform)
+    #logging.debug('res %s' % res)
     if res:
-        ans = {"Results": helpers.format_inflection(res, kbest=kbest, pos=pos),
-               'analyzes': res[0][1][0]}
+        ans = {"Results": helpers.format_inflection(lexconf, res, kbest=kbest, pos=pos)}
+               #'analyzes': res[1][0]}
     else:
         pex_table = helpers.tableize(table, add_tags=True)
-        print('pex',pex, dir(pex))
+        #print('pex',pex, dir(pex))
         paradigm = pex.learnparadigms([pex_table])[0]
         logging.debug('learned %s' % paradigm)
-        ans = {'Results': helpers.lmf_tableize(table, paradigm=paradigm, pos=pos),
-               'analyzes': res}
+        ans = {'Results': helpers.lmf_tableize(table, paradigm=paradigm, pos=pos)}
+               #'analyzes': res}
     return ans
