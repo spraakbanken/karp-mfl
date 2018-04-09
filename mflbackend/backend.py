@@ -125,13 +125,14 @@ def inflectclass():
     logging.debug('possible_p %s' % possible_p)
     paras, numex, lms = helpers.relevant_paradigms(paradigmdict, lexicon,
                                                    pos, possible_p)
-    if classname == "paradigm":
+    # TODO what if there are no variables?
+    var_inst = sorted([(key, val) for key, val in request.args.items()
+                       if key.isdigit()])
+    if classname == "paradigm" and var_inst:
         # Special case: '?classname=paradigm&classval=p14_oxe..nn.1?1=katt&2=a'
         # TODO rename to extractparadigm?
         if len(paras) < 1 or len(possible_p) < 1:
             raise e.MflException("Cannot find paradigm %s" % classval)
-        var_inst = sorted([(key, val) for key, val in request.args.items()
-                           if key.isdigit()])
         var_inst.sort()
         var_inst = [val for key, val in var_inst]
         logging.debug('look for %s as %s' % (classval, pos))
@@ -295,7 +296,7 @@ def compile():
                                   'buckets': ','.join(['%s.bucket' % b for b in buckets])},
                                  mode=lexconf['lexiconMode'])
         ans = []
-        for pbucket in res['aggregations']['q_statistics'][lexconf['inflectionalclass'][classname]]['buckets']:
+        for pbucket in helpers.get_classbucket(classname, res,lexconf):
             if extra:
                 pcount = len(pbucket[lexconf['extractparadigmpath']]['buckets'])
                 ans.append([pbucket["key"], pcount, pbucket["doc_count"]])
@@ -323,14 +324,14 @@ def compile():
             s_field = search_f or lexconf["extractparadigm"]
         else:
             s_field = search_f
-        show = ','.join([lexconf['extractparadigm'], 'TransformCategory',
+        show = ','.join([lexconf['extractparadigm'],
+                        'TransformCategory',
                         '_entries'])
         lexicon = lexconf['paradigmlexiconName']
         mode = lexconf['paradigmMode']
         ans = helpers.compile_list(query, s_field, querystr, lexicon, show,
                                    size, start, mode)
         res = []
-        # TODO iclasses may not be in the same order every time
         iclasses = []
         for hit in ans:
             iclasses = []  # only need one instance
@@ -493,7 +494,7 @@ def removecandidate(_id=''):
     ''' Either use this with the ES id:
         /removecandidate/ABC83Z
         or with the lexcion's identifiers
-        /removecandidate?identifier=ABC83Z
+        /removecandidate?identifier=katt..nn.1
     '''
     lexicon = request.args.get('lexicon', 'saldomp')
     lexconf = helpers.get_lexiconconf(lexicon)
