@@ -393,7 +393,7 @@ def add_table():
 
     else:
         # TODO If an paradigm is already fitting, refuse to add as new?
-        fittingparadigms = [p for p in paras]
+        fittingparadigms = paras
         # check that this is a new name
         helpers.check_identifier(paradigm, 'MorphologicalPatternID',
                                  lexconf['paradigmlexiconName'],
@@ -418,21 +418,15 @@ def add_table():
                             lexconf['lexiconName'], paradigm, para, paras,
                             identifier, pos, classes, wf_table)
     else:
-        # else -> increase count for one and members
-        # print('ans', ans)
-        #p = ans[0][0][1]
-        # print('name', p.name)
-        # print('name', p.name)
-        # print('lexicon', p.lex)
-        # print('ans', ans[0][1][0][1])
         score, para, v = ans[0][0]
         handle.add_word_to_paradigm(lexconf['paradigmlexiconName'],
                                     lexconf['lexiconName'], identifier, v,
                                     classes, para, wf_table)
 
-    return jsonify({'paradigm': paradigm, 'identifier': identifier,
+    return jsonify({'paradigm': para.name, 'identifier': identifier,
                     'var_inst': dict(enumerate(v, 1)), 'classes': classes,
-                    'pattern': para.pattern(), 'partOfSpeech': pos})
+                    'pattern': para.pattern(), 'partOfSpeech': pos,
+                    'members': para.count})
 
 
 @app.route('/addcandidates', methods=['POST'])
@@ -605,4 +599,4 @@ if __name__ == '__main__':
         if not snabb:
             for pos in lex['pos']:
                 update_model(lex['name'], pos, paradigmdict, lexconf)
-    app.run()
+    app.run(threaded=True)
