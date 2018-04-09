@@ -317,6 +317,8 @@ def compile():
         # TODO no need to look in config for this, it should always be the same
         if querystr:
             s_field = search_f or lexconf["extractparadigm"]
+        else:
+            s_field = search_f
         show = ','.join([lexconf['extractparadigm'], 'TransformCategory',
                         '_entries'])
         lexicon = lexconf['paradigmlexiconName']
