@@ -310,6 +310,8 @@ def compile():
         mode = lexconf['lexiconMode']
         if querystr:
             s_field = search_f or lexconf["baseform"]
+        else:
+            s_field = search_f
         ans = helpers.compile_list(query, s_field, querystr, lexicon,
                                    lexconf["show"], size, start, mode)
         return jsonify({"compiled_on": "wordforms", "stats": ans,
@@ -334,7 +336,7 @@ def compile():
             iclasses = []  # only need one instance
             stats = [hit['MorphologicalPatternID']]
             for iclass in lexconf['inflectionalclass'].keys():
-                stats.append(len(hit['TransformCategory'].get(iclass, '')))
+                stats.append(len(hit['TransformCategory'].get(iclass, [])))
                 iclasses.append(iclass)
             stats.append(hit['_entries'])
             res.append(stats)
