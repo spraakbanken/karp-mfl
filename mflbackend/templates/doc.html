@@ -201,6 +201,7 @@ Available query parameters:
   <tr><td>'table':</td><td> the inflection table </td></tr>
   <tr><td>'partOfSpeech':</td><td> the part of speech </td></tr>
   <tr><td>'pprior':</td><td> the pprior value to pextract: how much weight to give the frequency of the paradigms. Default: </td></tr>
+  <tr><td>'restrict_to_baseform':</td><td> Should the first form in the given table also be the first form in the resulting table? Default: given by lexicon config</td></tr>
 </table>
 
 <p>
@@ -226,10 +227,17 @@ Result:
         ...
       ],
       "paradigm": "paradigm_name"
+      "baseform": "computed baseform",
+      "count": #other words in this paradigm,
+      "new": true/false (is this a new paradigm)
+      "partOfSpeech": pos,
+      "score": score,
+      "variables": {
+        "1": "first_variable_instance",
+        ...
+      }
     }
   ],
-  "analyzes": "1::msd=tag#1+iten::msd=tag\t0=apa,,1=apa" // shows variable instantiations and paradigm pattern for new paradigms
-  "new": false/true
 }
 </pre>
 
@@ -244,6 +252,7 @@ Available query parameters:
   <tr><td>'classname':</td><td> the type the inflectional class to use</td></tr>
   <tr><td>'classval':</td><td> the name of the declination class to use</td></tr>
   <tr><td>'pprior':</td><td> the pprior value to pextract: how much weight to give the frequency of the paradigms. Default: </td></tr>
+  <tr><td>'restrict_to_baseform':</td><td> Should the first form in the given table also be the first form in the resulting table? Default: given by lexicon config</td></tr>
 </table>
 
 <p>
@@ -273,7 +282,16 @@ Result:
           "writtenForm": "apornas"
         }
       ], 
-      "paradigm": "p6_br\u00e4nn\u00e4ssla"
+      "paradigm": "paradigm_name"
+      "baseform": "computed baseform",
+      "count": #other words in this paradigm,
+      "new": true/false (is this a new paradigm)
+      "partOfSpeech": pos,
+      "score": score,
+      "variables": {
+        "1": "first_variable_instance",
+        ...
+      }
     }, 
     {
       "WordForms": [...]
@@ -292,6 +310,7 @@ Available query parameters:
   <tr><td>'wordform':</td><td> the baseform </td></tr>
   <tr><td>'like':</td><td> inflect like this lemgram</td></tr>
   <tr><td>'partOfSpeech':</td><td> the part of speech </td></tr>
+  <tr><td>'restrict_to_baseform':</td><td> Should the first form in the given table also be the first form in the resulting table? Default: given by lexicon config</td></tr>
 </table>
 
 <p>
@@ -321,7 +340,16 @@ Result:
           "writtenForm": "apornas"
         }
       ],
-      "paradigm": "p6_br\u00e4nn\u00e4ssla"
+      "paradigm": "paradigm_name"
+      "baseform": "computed baseform",
+      "count": #other words in this paradigm,
+      "new": true/false (is this a new paradigm)
+      "partOfSpeech": pos,
+      "score": score,
+      "variables": {
+        "1": "first_variable_instance",
+        ...
+      }
     },
     {
       "WordForms": [...]

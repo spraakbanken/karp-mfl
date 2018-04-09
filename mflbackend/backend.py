@@ -1,5 +1,6 @@
 import errors as e
 from flask import Flask, jsonify, render_template, request
+from flask_cors import CORS
 import logging
 from hashlib import md5
 import sys
@@ -13,6 +14,7 @@ import handleparadigms as handle
 import helpers
 
 app = Flask(__name__)
+CORS(app)
 
 # metadata and documentation
 @app.route('/')
@@ -332,7 +334,7 @@ def compile():
             iclasses = []  # only need one instance
             stats = [hit['MorphologicalPatternID']]
             for iclass in lexconf['inflectionalclass'].keys():
-                stats.append(len(hit['TransformCategory'][iclass]))
+                stats.append(len(hit['TransformCategory'].get(iclass, '')))
                 iclasses.append(iclass)
             stats.append(hit['_entries'])
             res.append(stats)
