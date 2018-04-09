@@ -85,7 +85,9 @@ def format_inflection(lexconf, ans, kbest=0, pos='', debug=False):
     for aindex, (score, p, v) in enumerate(ans):
         if kbest and aindex >= kbest:
             break
-        out.append(make_table(lexconf, p, v, score, pos))
+        res = make_table(lexconf, p, v, score, pos)
+        if res is not None:
+            out.append(res)
         # infl = {'paradigm': p.name, 'WordForms': [],
         #         'variables': dict(zip(range(1, len(v)+1), v)), 'score':
         #         score, 'count': p.count, 'new': False, 'lemgram': '',
@@ -123,7 +125,7 @@ def make_table(lexconf, paradigm, v, score, pos):
                 'variables': dict(zip(range(1, len(v)+1), v)),
                 'score': score, 'count': paradigm.count,
                 'new': False, 'partOfSpeech': pos}
-        #logging.debug('%s:' % paradigm.name)
+        logging.debug('%s:, %s' % (paradigm.name, v))
         table = paradigm(*v)  # Instantiate table with vars from analysis
         for form, msd in table:
             for tag in msd:
@@ -135,7 +137,7 @@ def make_table(lexconf, paradigm, v, score, pos):
         return infl
     except Exception as e:
         # fails if the inflection does not work (instantiation fails)
-        logging.debug('could not use paradigm %s' % paradigm)
+        logging.debug('could not use paradigm %s' % paradigm.name)
         logging.exception(e)
         return None
 
@@ -342,3 +344,7 @@ def read_restriction(lexconf):
     if restrict is None:
         return lexconf['restrict_to_baseform']
     return restrict in ['True', 'true', True]
+
+
+def get_classbucket(iclass, res, lexconf):
+    return res['aggregations']['q_statistics'][lexconf['inflectionalclass'][iclass]]['buckets']

@@ -75,6 +75,6 @@ def inflect_table(table, settings, lexconf, pos='', kbest=10):
         #print('pex',pex, dir(pex))
         paradigm = pex.learnparadigms([pex_table])[0]
         logging.debug('learned %s' % paradigm)
-        ans = {'Results': helpers.lmf_tableize(table, paradigm=paradigm, pos=pos)}
+        ans = {'Results': [helpers.lmf_tableize(table, paradigm=paradigm, pos=pos)]}
                #'analyzes': res}
     return ans
