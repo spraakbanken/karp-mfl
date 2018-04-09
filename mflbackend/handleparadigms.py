@@ -3,7 +3,7 @@ import logging
 import uuid
 
 import morphparser as mp
-import pextract.pextract as pex
+import pextract as pex
 
 
 def reload_paradigms(paradigms):
