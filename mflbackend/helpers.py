@@ -162,7 +162,7 @@ def lmf_wftableize(lexconf, paradigm, table, classes={}, baseform='',
 
         obj['WordForms'] = wfs
         form = {}
-        form['lemgram'] = identifier
+        form['identifier'] = identifier
         form['partOfSpeech'] = pos
         form['baseform'] = baseform
         form['paradigm'] = paradigm
@@ -225,7 +225,7 @@ def lmf_tableize(table, paradigm=None, pos='', score=0):
         wfs.append({'writtenForm': form, 'msd': tag})
 
     obj['WordForms'] = wfs
-    obj['lemgram'] = ''
+    obj['identifier'] = ''
     obj['partOfSpeech'] = pos
     obj['count'] = 0
     return obj
@@ -300,9 +300,15 @@ def search_q(query, searchfield, q, lexicon):
     return query
 
 
+def multi_query(lexconf, fields, query, fullquery):
+    for ix, field in enumerate(fields):
+        q = query[ix]
+        fullquery.append('and|%s.search|equals|%s' % (lexconf.get(field, field), q))
+
+
 def make_candidate(lexicon, lemgram, table, paradigms, pos, kbest=5):
     obj = {}
-    form = {'lemgram': lemgram, 'partOfSpeech': pos, 'baseform': table[0]}
+    form = {'identifier': lemgram, 'partOfSpeech': pos, 'baseform': table[0]}
     obj['FormRepresentations'] = [form]
     obj['lexiconName'] = lexicon
     obj['CandidateParadigms'] = []
@@ -332,10 +338,15 @@ def make_candidate(lexicon, lemgram, table, paradigms, pos, kbest=5):
     return obj
 
 
+def read_one_pos(lexconf):
+    return read_pos(lexconf)[0]
+
+
 def read_pos(lexconf):
     pos = request.args.get('pos', '')
     partofspeech = request.args.get('partOfSpeech', lexconf['defaultpos'])
-    return pos or partofspeech
+    pos = pos or partofspeech
+    return pos.split(',')
 
 
 def read_restriction(lexconf):
@@ -346,5 +357,10 @@ def read_restriction(lexconf):
     return restrict in ['True', 'true', True]
 
 
+def get_bucket(bucket, res, lexconf):
+    return res['aggregations']['q_statistics'][bucket]['buckets']
+
+
 def get_classbucket(iclass, res, lexconf):
-    return res['aggregations']['q_statistics'][lexconf['inflectionalclass'][iclass]]['buckets']
+    return get_bucket(lexconf['inflectionalclass'][iclass], res, lexconf)
+    # return res['aggregations']['q_statistics'][lexconf['inflectionalclass'][iclass]]['buckets']

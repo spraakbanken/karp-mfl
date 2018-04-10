@@ -12,6 +12,20 @@ def get_baseform(entry={}, lemgram=''):
 def get_pos(lemgram):
     return re.search('.*\.\.(.*?)\.', lemgram).group(1)
 
+def make_overview(obj):
+    form = obj["FormRepresentations"][0]
+    print('form', form)
+    bklass = form.get("bklass", "")
+    inherent = form.get("inherent", "")
+    base = form.get("baseform", "")
+    lemgram = form.get("lemgram", "")
+    pos = form.get("partOfSpeech", "")
+    paradigm = form.get("paradigm", "")
+    fm_paradigm = form.get("fm_paradigm", "")
+    out = [base, pos, inherent, lemgram, bklass, fm_paradigm, paradigm]
+    fields = ["baseform", "partOfSpeech", "inherent", "identifier", "bklass", "fm_paradigm", "paradigm"]
+    return out, fields
+
 
 def lmf_wftableize(paradigm, table, classes={}, baseform='', identifier='',
                    pos='', resource=''):

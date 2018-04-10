@@ -30,8 +30,14 @@ def lexiconinfo(lex=''):
     " Give information about existing lexicons and their configs "
     # lex = request.args.get('lexicon', lex)
     if not lex:
-        lexicons = [l['name'] for l in json.load(open('config/lexicons.json'))]
-        return jsonify({"lexicons": lexicons})
+        open_lex = authenticate(action='checkopen')
+        res = []
+        for l in json.load(open('config/lexicons.json')):
+            lex = {}
+            lex['name'] = l['name']
+            lex['open'] = l['name'] in open_lex
+            res.append(lex)
+        return jsonify({"lexicons": res})
     else:
         lexconf = helpers.get_lexiconconf(lex)
         return jsonify(lexconf)
@@ -82,7 +88,7 @@ def defaulttable():
     " Show an empty table suiting the lexicon and part of speech "
     lexicon = request.args.get('lexicon', 'saldomp')
     lexconf = helpers.get_lexiconconf(lexicon)
-    pos = helpers.read_pos(lexconf)
+    pos = helpers.read_one_pos(lexconf)
     q = 'extended||and|%s.search|equals|%s' % (lexconf['pos'], pos)
     res = helpers.karp_query('statlist',
                              {'q': q,
@@ -110,7 +116,7 @@ def inflectclass():
     ppriorv = float(request.args.get('pprior', lexconf["pprior"]))
     classname = request.args.get('classname', '')
     classval = request.args.get('classval', '')
-    pos = helpers.read_pos(lexconf)
+    pos = helpers.read_one_pos(lexconf)
 
     q = 'extended||and|%s.search|equals|%s||and|%s|equals|%s'\
         % (classname, classval, lexconf['pos'], pos)
@@ -159,7 +165,7 @@ def inflect():
     lexicon = request.args.get('lexicon', 'saldomp')
     lexconf = helpers.get_lexiconconf(lexicon)
     table = request.args.get('table', '')
-    pos = helpers.read_pos(lexconf)
+    pos = helpers.read_one_pos(lexconf)
     ppriorv = float(request.args.get('pprior', lexconf["pprior"]))
     paras, numex, lms = helpers.relevant_paradigms(paradigmdict, lexicon, pos)
     ans = handle.inflect_table(table,
@@ -214,14 +220,14 @@ def inflectlike():
 @app.route('/list')
 def listing():
     q = request.args.get('q', '')  # querystring
-    s = request.args.get('s', '*')  # searchfield
+    s = request.args.get('c', '*')  # searchfield
     lexicon = request.args.get('lexicon', 'saldomp')
     lexconf = helpers.get_lexiconconf(lexicon)
     authenticate(lexconf, 'read')
     pos = helpers.read_pos(lexconf)
     query = []
     if pos:
-        query.append('and|%s|startswith|%s' % (lexconf["pos"], pos))
+        query.append('and|%s|startswith|%s' % (lexconf["pos"], '|'.join(pos)))
 
     if s == 'class':
         classname = request.args.get('classname', '')
@@ -260,8 +266,8 @@ def listing():
 
 @app.route('/compile')
 def compile():
-    querystr = request.args.get('q', '')  # querystring
-    search_f = request.args.get('s', '')  # searchfield
+    querystr  = request.args.get('q', '')  # querystring
+    search_f  = request.args.get('s', '')  # searchfield
     compile_f = request.args.get('c', '')  # searchfield
     lexicon = request.args.get('lexicon', 'saldomp')
     lexconf = helpers.get_lexiconconf(lexicon)
@@ -272,8 +278,15 @@ def compile():
     extra = request.args.get('extra', 'true')
     extra = extra in ['True', 'true', True]
     query = []
+    if ',' in search_f:
+        helpers.multi_query(lexconf, search_f.split(','), querystr.split(','), query)
+        search_f = ''
+        querystr = ''
+    print('query is now', query)
+
+    search_f = lexconf.get(search_f, search_f)
     if pos:
-        query.append('and|%s|startswith|%s' % (lexconf["pos"], pos))
+        query.append('and|%s|startswith|%s' % (lexconf["pos"], '|'.join(pos)))
 
     if compile_f == 'class':
         classname = request.args.get('classname', '')
@@ -309,21 +322,29 @@ def compile():
 
     elif compile_f == "wf":
         mode = lexconf['lexiconMode']
-        if querystr:
-            s_field = search_f or lexconf["baseform"]
-        else:
-            s_field = search_f
+        #if querystr:
+        s_field = search_f or lexconf["baseform"]
+        #else:
+        #    s_field = search_f
         ans = helpers.compile_list(query, s_field, querystr, lexicon,
                                    lexconf["show"], size, start, mode)
-        return jsonify({"compiled_on": "wordforms", "stats": ans,
-                        "fields": ["wf"]})
+        out = []
+        def default(obj):
+            return [obj['baseform']], ['baseform']
+        func = helpers.extra_src(lexconf, 'make_overview', default)
+        for ans in ans:
+            row, fields = func(ans)
+            out.append(row)
+
+        return jsonify({"compiled_on": "wordforms", "stats": out,
+                        "fields": fields})
 
     elif compile_f == "paradigm":
         # TODO no need to look in config for this, it should always be the same
-        if querystr:
-            s_field = search_f or lexconf["extractparadigm"]
-        else:
-            s_field = search_f
+        # if querystr:
+        s_field = search_f or lexconf["extractparadigm"]
+        # else:
+        #     s_field = search_f
         show = ','.join([lexconf['extractparadigm'],
                         'TransformCategory',
                         '_entries'])
@@ -363,7 +384,7 @@ def add_table():
     lexconf = helpers.get_lexiconconf(lexicon)
     authenticate(lexconf, 'write')
     table = request.args.get('table', '')
-    pos = helpers.read_pos(lexconf)
+    pos = helpers.read_one_pos(lexconf)
     paradigm = request.args.get('paradigm', '')
     # check that the table's identier is unique
     identifier = request.args.get('identifier', '')
@@ -447,7 +468,7 @@ def addcandidates():
     tables = data.split('\n')
     lexicon = request.args.get('lexicon', 'saldomp')
     lexconf = helpers.get_lexiconconf(lexicon)
-    pos = helpers.read_pos(lexconf)
+    pos = helpers.read_one_pos(lexconf)
     ppriorv = float(request.args.get('pprior', lexconf["pprior"]))
     authenticate(lexconf, 'write')
     paras, numex, lms = helpers.relevant_paradigms(paradigmdict, lexicon, pos)
@@ -481,7 +502,7 @@ def candidatelist():
     lexconf = helpers.get_lexiconconf(lexicon)
     authenticate(lexconf, 'read')
     pos = helpers.read_pos(lexconf)
-    q = 'extended||and|%s.search|equals|%s' % (lexconf['pos'], pos)
+    q = 'extended||and|%s.search|equals|%s' % (lexconf['pos'], '|'.join(pos))
     res = helpers.karp_query('query', query={'q': q},
                              mode=lexconf['candidateMode'],
                              resource=lexconf['candidatelexiconName'])
@@ -562,8 +583,11 @@ def handle_invalid_usage(error):
         return "Oops, something went wrong\n", 500
 
 
-def authenticate(lexconf, action):
-    auth = request.authorization
+def authenticate(lexconf={}, action='read'):
+    if action == 'checkopen':
+        auth = None
+    else:
+        auth = request.authorization
     postdata = {"include_open_resources": "true"}
     if auth is not None:
         user, pw = auth.username, auth.password
@@ -578,11 +602,15 @@ def authenticate(lexconf, action):
     response = urllib.request.urlopen(server, data).read().decode('utf8')
     auth_response = json.loads(response)
     lexitems = auth_response.get("permitted_resources", {})
-    permissions = lexitems.get("lexica", {}).get(lexconf['wsauth_name'], {})
-    logging.debug('permissions %s' % permissions)
-    if not permissions.get(action, False):
-        raise e.MflException("Action %s not allowed in lexicon %s" %
-                             (action, lexconf['lexiconName']), 401)
+    if action == 'checkopen':
+        return [lex for lex,per in lexitems.get("lexica", {}).items()
+                if per['read']]
+    else:
+        permissions = lexitems.get("lexica", {}).get(lexconf['wsauth_name'], {})
+        logging.debug('permissions %s' % permissions)
+        if not permissions.get(action, False):
+            raise e.MflException("Action %s not allowed in lexicon %s" %
+                                 (action, lexconf['lexiconName']), 401)
 
 # TODO how to set these??
 # For saldomp, i have increased pprior a lot, from 1.0 to 5.0

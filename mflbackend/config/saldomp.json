@@ -10,7 +10,7 @@
 "extractparadigm": "paradigm",
 "extractparadigmpath": "FormRepresentations.paradigm.raw",
 "corpora": ["suc3"],
-"show": "lemgram,bklass,paradigm,pos,inherent",
+"show": "lemgram,bklass,paradigm,pos,inherent,baseform,fm_paradigm",
 "ngramorder": 3,
 "ngramprior": 0.01,
 "pprior": 1.0,
