@@ -307,9 +307,7 @@ def multi_query(lexconf, fields, query, fullquery):
 
 
 def make_candidate(lexicon, lemgram, table, paradigms, pos, kbest=5):
-    obj = {}
-    form = {'identifier': lemgram, 'partOfSpeech': pos, 'baseform': table[0]}
-    obj['FormRepresentations'] = [form]
+    obj = {'identifier': lemgram, 'partOfSpeech': pos, 'baseform': table[0]}
     obj['lexiconName'] = lexicon
     obj['CandidateParadigms'] = []
     obj['WordForms'] = []
