@@ -579,8 +579,48 @@ def removecandidate(_id=''):
 @app.route('/recomputecandidates')
 # ￼`'/recomputecandidates?pos=nn&lexicon=saldomp'`
 def recomputecandiadtes():
-    # TODO
-    pass
+    lexicon = request.args.get('lexicon', 'saldomp')
+    lexconf = helpers.get_lexiconconf(lexicon)
+    postags = helpers.read_pos(lexconf)
+    authenticate(lexconf, 'read')
+    ppriorv = float(request.args.get('pprior', lexconf["pprior"]))
+    print('postags', postags)
+    counter = 0
+    for pos in postags:
+        print('pos', pos)
+        q = 'extended||and|%s.search|equals|%s' % (lexconf['pos'], pos)
+        res = helpers.karp_query('query', query={'q': q},
+                                 mode=lexconf['candidateMode'],
+                                 resource=lexconf['candidatelexiconName'])
+        paras, numex, lms = helpers.relevant_paradigms(paradigmdict, lexicon, pos)
+        for hit in res['hits']['hits']:
+            _id = hit['_id']
+            table = hit['_source']
+            logging.debug('table %s' % table)
+            forms = [table['baseform']]
+            for wf in table.get('WordForms', []):
+                form = wf['writtenForm']
+                msd = wf.get('msd', '')
+                if msd:
+                    forms.append(form+'|'+msd)
+                else:
+                    forms.append(form)
+            pex_table = helpers.tableize(','.join(forms), add_tags=False)
+            logging.debug('inflect forms %s msd %s' % pex_table)
+            restrict_to_baseform = helpers.read_restriction(lexconf)
+            res = mp.test_paradigms(pex_table, paras, numex, lms,
+                                    config["print_tables"], config["debug"],
+                                    ppriorv, returnempty=False,
+                                    baseform=restrict_to_baseform)
+            to_save = helpers.make_candidate(lexconf['candidatelexiconName'],
+                                             table['identifier'], forms, res,
+                                             table['partOfSpeech'])
+            counter += 1
+        logging.debug('will save %s' % to_save)
+        helpers.karp_update(_id, to_save, resource=lexconf['candidatelexiconName'])
+    return jsonify({"updated": counter})
+
+
 
 
 def read_paradigms(lexicon, pos, mode):
