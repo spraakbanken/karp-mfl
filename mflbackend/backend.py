@@ -136,7 +136,7 @@ def inflectclass():
     classname = request.args.get('classname', '')
     classval = request.args.get('classval', '')
     pos = helpers.read_one_pos(lexconf)
-
+    lemgram = helpers.make_identifier(lexconf, word, pos)
     q = 'extended||and|%s.search|equals|%s||and|%s|equals|%s'\
         % (classname, classval, lexconf['pos'], pos)
     res = helpers.karp_query('statlist',
@@ -163,7 +163,7 @@ def inflectclass():
         logging.debug('look for %s as %s' % (classval, pos))
         if len(paras) < 1:
             raise e.MflException("Cannot find paradigm %s" % classval)
-        table = helpers.make_table(lexconf, paras[0], var_inst, 0, pos)
+        table = helpers.make_table(lexconf, paras[0], var_inst, 0, pos, lemgram)
         ans = {"Results": [table]}
 
     else:
@@ -172,7 +172,7 @@ def inflectclass():
                                lms=lms, numexamples=numex,
                                baseform=restrict_to_baseform)
         logging.debug('generated %s results' % len(res))
-        results = helpers.format_inflection(lexconf, res, pos=pos)
+        results = helpers.format_inflection(lexconf, res, pos=pos, lemgram=lemgram)
         ans = {"Results": results}
     # print('asked', q)
     return jsonify(ans)
@@ -186,12 +186,13 @@ def inflect():
     table = request.args.get('table', '')
     pos = helpers.read_one_pos(lexconf)
     ppriorv = float(request.args.get('pprior', lexconf["pprior"]))
+    firstform = helpers.firstform(table)
+    lemgram = helpers.make_identifier(lexconf, firstform, pos)
     paras, numex, lms = helpers.relevant_paradigms(paradigmdict, lexicon, pos)
     ans = handle.inflect_table(table,
                                [paras, numex, lms, config["print_tables"],
                                 config["debug"], ppriorv],
-                               lexconf,
-                               pos=pos)
+                               lexconf, pos=pos, lemgram=lemgram)
     #logging.debug('ans')
     if 'paradigm' in ans:
         ans['paradigm'] = str(ans['paradigm'])
@@ -210,6 +211,7 @@ def inflectlike():
     logging.debug('like %s' % like)
     ppriorv = float(request.args.get('pprior', lexconf["pprior"]))
     pos = helpers.identifier2pos(lexconf, like)
+    lemgram = helpers.make_identifier(lexconf, word, pos)
     q = 'extended||and|%s.search|equals|%s' % ('first-attest', like)
     res = helpers.karp_query('statlist',
                              {'q': q,
@@ -229,7 +231,7 @@ def inflectlike():
         res = mp.run_paradigms(paras, [word], kbest=100, pprior=ppriorv,
                                lms=lms, numexamples=numex, vbest=20,
                                baseform=restrict_to_baseform)
-        result = helpers.format_inflection(lexconf, res, pos=pos)
+        result = helpers.format_inflection(lexconf, res, pos=pos, lemgram=lemgram)
     else:
         result = []
     ans = {"Results": result}
@@ -250,12 +252,13 @@ def inflectcandidate():
         raise e.MflException("Could not find candidate %s" % identifier)
     candidate = res['hits']['hits'][0]['_source']
     pos = candidate['partOfSpeech']
+    lemgram = helpers.make_identifier(lexconf, candidate['baseform'], pos)
     ans = []
     for inflect in candidate['CandidateParadigms']:
         var_inst = inflect['VariableInstances'].values()
         paras, n, l = helpers.relevant_paradigms(paradigmdict, lexicon,
                                                  pos, possible_p=[inflect['uuid']])
-        ans.append(helpers.make_table(lexconf, paras[0], var_inst, 0, pos))
+        ans.append(helpers.make_table(lexconf, paras[0], var_inst, 0, pos, lemgram=lemgram))
     return jsonify({"Results": ans})
 
 
@@ -510,18 +513,19 @@ def addcandidates():
     tables = data.split('\n')
     lexicon = request.args.get('lexicon', 'saldomp')
     lexconf = helpers.get_lexiconconf(lexicon)
-    pos = helpers.read_one_pos(lexconf)
     ppriorv = float(request.args.get('pprior', lexconf["pprior"]))
     authenticate(lexconf, 'write')
-    paras, numex, lms = helpers.relevant_paradigms(paradigmdict, lexicon, pos)
     to_save = []
     for table in tables:
         if not table:
             continue
         logging.debug('table %s' % table)
-        forms = table.split(',')
-        lemgram = forms[0]
-        forms = [helpers.get_baseform(lexconf, lemgram)] + forms[1:]
+        # TODO move the parsing somewhere else
+        forms, pos = table.strip().split('\t')
+        forms = forms.split(',')
+        baseform = forms[0]
+        lemgram = helpers.make_identifier(lexconf, baseform, pos, default=True)
+        paras, numex, lms = helpers.relevant_paradigms(paradigmdict, lexicon, pos)
         pex_table = helpers.tableize(','.join(forms), add_tags=False)
         logging.debug('inflect forms %s msd %s' % pex_table)
         restrict_to_baseform = helpers.read_restriction(lexconf)
