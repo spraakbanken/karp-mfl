@@ -6,6 +6,7 @@ import paradigm as P
 import re
 import urllib.parse
 import urllib.request
+import uuid
 
 
 # KARP_BACKEND = 'https://ws.spraakbanken.gu.se/ws/karp/v4/'
@@ -78,14 +79,14 @@ def karp_request(action, data=None):
     return data
 
 
-def format_inflection(lexconf, ans, kbest=0, pos='', debug=False):
+def format_inflection(lexconf, ans, kbest=0, pos='', lemgram='', debug=False):
     " format an inflection and report whether anything has been printed "
     out = []
     #for words, analyses in ans:
     for aindex, (score, p, v) in enumerate(ans):
         if kbest and aindex >= kbest:
             break
-        res = make_table(lexconf, p, v, score, pos)
+        res = make_table(lexconf, p, v, score, pos, lemgram=lemgram)
         if res is not None:
             out.append(res)
         # infl = {'paradigm': p.name, 'WordForms': [],
@@ -118,13 +119,14 @@ def format_inflection(lexconf, ans, kbest=0, pos='', debug=False):
 #    return [o[1] for o in out]
 
 
-def make_table(lexconf, paradigm, v, score, pos):
+def make_table(lexconf, paradigm, v, score, pos, lemgram=''):
     try:
         #logging.debug('v %s %s' % (v, type(v)))
         infl = {'paradigm': paradigm.name, 'WordForms': [],
                 'variables': dict(zip(range(1, len(v)+1), v)),
                 'score': score, 'count': paradigm.count,
-                'new': False, 'partOfSpeech': pos}
+                'new': False, 'partOfSpeech': pos,
+                'lemgram': lemgram}
         logging.debug('%s:, %s' % (paradigm.name, v))
         table = paradigm(*v)  # Instantiate table with vars from analysis
         for form, msd in table:
@@ -199,8 +201,8 @@ def extra_src(lexconf, funcname, default):
     import importlib
     # If importing fails, try with a different path.
     logging.debug('look for %s' % (funcname))
-    logging.debug('file: %s' % lexconf['src'])
     try:
+        logging.debug('file: %s' % lexconf['src'])
         classmodule = importlib.import_module(lexconf['src'])
         logging.debug('\n\ngo look in %s\n\n' % classmodule)
         func = getattr(classmodule, funcname)
@@ -209,7 +211,7 @@ def extra_src(lexconf, funcname, default):
         return default
 
 
-def lmf_tableize(table, paradigm=None, pos='', score=0):
+def lmf_tableize(table, paradigm=None, pos='', lemgram='', score=0):
     table = table.split(',')
     obj = {'score': score, 'paradigm': '', 'new': True}
     if paradigm is not None:
@@ -228,6 +230,7 @@ def lmf_tableize(table, paradigm=None, pos='', score=0):
     obj['identifier'] = ''
     obj['partOfSpeech'] = pos
     obj['count'] = 0
+    obj['lemgram'] = lemgram
     return obj
 
 
@@ -282,12 +285,31 @@ def compile_list(query, searchfield, querystr, lexicon, show,
     return ans
 
 
-def check_identifier(_id, field, resource, mode):
+def check_identifier(_id, field, resource, mode, fail=True):
     q = {'size': 0, 'q': 'extended||and|%s.search|equals|%s' % (field, _id)}
     res = karp_query('query', q, mode=mode, resource=resource)
-    if res['hits']['total'] > 0:
+    used = res['hits']['total'] > 0
+    if used and fail:
         raise e.MflException("Identifier %s already in use" % _id)
+    return not used
 
+
+def make_identifier(lexconf, baseform, pos, lexicon='', field='', mode='', default=False):
+    func = extra_src(lexconf, 'yield_identifier', None)
+
+    if default or func is None:
+        return str(uuid.uuid1())
+
+    lexicon = lexicon or lexconf['lexiconName']
+    field = field or lexconf['identifier']
+    mode = mode or lexconf['lexiconMode']
+
+    for _id in func(baseform, pos):
+        if check_identifier(_id, field, lexicon, mode, fail=False):
+           return _id
+
+    raise e.MflException("Could not come up with an identifier for %s, %s in lexicon %s" %
+                         (baseform, pos, lexicon))
 
 def search_q(query, searchfield, q, lexicon):
     if q:
@@ -362,3 +384,6 @@ def get_bucket(bucket, res, lexconf):
 def get_classbucket(iclass, res, lexconf):
     return get_bucket(lexconf['inflectionalclass'][iclass], res, lexconf)
     # return res['aggregations']['q_statistics'][lexconf['inflectionalclass'][iclass]]['buckets']
+
+def firstform(table):
+    return table.split(',')[0].split('|')[0]

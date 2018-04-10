@@ -53,3 +53,8 @@ def lmf_wftableize(paradigm, table, classes={}, baseform='', identifier='',
     obj['FormRepresentations'] = [form]
 
     return obj
+
+
+def yield_identifier(baseform, pos):
+    for ix in range(1, 101):
+        yield '%s..%s.%s' % (baseform, pos, ix)

@@ -60,7 +60,7 @@ def remove_paradigm(pid, paradigms):
     del paradigms[pid]
 
 
-def inflect_table(table, settings, lexconf, pos='', kbest=10):
+def inflect_table(table, settings, lexconf, pos='', lemgram='', kbest=10):
     baseform = helpers.read_restriction(lexconf)
     fill_tags = '|' in table
     pex_table = helpers.tableize(table, add_tags=False, fill_tags=fill_tags)
@@ -68,13 +68,15 @@ def inflect_table(table, settings, lexconf, pos='', kbest=10):
     res = mp.test_paradigms(pex_table, *settings, returnempty=False, baseform=baseform)
     #logging.debug('res %s' % res)
     if res:
-        ans = {"Results": helpers.format_inflection(lexconf, res, kbest=kbest, pos=pos)}
+        ans = {"Results": helpers.format_inflection(lexconf, res, kbest=kbest,
+                                                    pos=pos, lemgram=lemgram)}
                #'analyzes': res[1][0]}
     else:
         pex_table = helpers.tableize(table, add_tags=True)
         #print('pex',pex, dir(pex))
         paradigm = pex.learnparadigms([pex_table])[0]
         logging.debug('learned %s' % paradigm)
-        ans = {'Results': [helpers.lmf_tableize(table, paradigm=paradigm, pos=pos)]}
+        ans = {'Results': [helpers.lmf_tableize(table, paradigm=paradigm,
+                                                pos=pos, lemgram=lemgram)]}
                #'analyzes': res}
     return ans
