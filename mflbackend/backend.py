@@ -43,33 +43,52 @@ def lexiconinfo(lex=''):
         return jsonify(lexconf)
 
 
+@app.route('/wordinfo')
+@app.route('/wordinfo/<word>')
+def wordinfo(word=''):
+    " Show information for the word infobox "
+    lexicon = request.args.get('lexicon', 'saldomp')
+    identifier = word or request.args.get('identifier')
+    lexconf = helpers.get_lexiconconf(lexicon)
+    obj = give_info(lexicon, identifier, lexconf['identifier'],
+              lexconf['lexiconMode'], lexconf["lexiconName"])
+    return jsonify(obj)
+
+
+def give_info(lexicon, identifier, id_field, mode, resource):
+    " Show information for the word infobox "
+    lexconf = helpers.get_lexiconconf(lexicon)
+    authenticate(lexconf, 'read')
+    q = 'extended||and|%s.search|equals|%s' %\
+        (id_field, identifier)
+    res = helpers.karp_query('query', {'q': q},
+                             mode=mode,
+                             resource=resource)
+    if res['hits']['total'] > 0:
+        obj = res['hits']['hits'][0]['_source']
+        return obj
+
+
+@app.route('/paradigminfo')
 @app.route('/paradigminfo/<paradigm>')
 def paradigminfo(paradigm=''):
     " Show information for the paradigm infobox "
-    lexicon = request.args.get('lexicon', '')
-    lexconf = helpers.get_lexiconconf(lexicon)
-    authenticate(lexconf, 'read')
+    lexicon = request.args.get('lexicon', 'saldomp')
     paradigm = request.args.get('paradigm', paradigm)
     short = request.args.get('short', '')
     short = short in [True, 'true', 'True']
-    q = 'extended||and|%s.search|equals|%s' %\
-        (lexconf['extractparadigm'], paradigm)
-    res = helpers.karp_query('query', {'q': q},
-                             mode=lexconf['paradigmMode'],
-                             resource=lexconf["paradigmlexiconName"])
-    if res['hits']['total'] > 0:
-        obj = res['hits']['hits'][0]['_source']
-        if short:
-            short_obj = {}
-            short_obj['MorphologicalPatternID'] = obj['MorphologicalPatternID']
-            short_obj['partOfSpeech'] = obj['_partOfSpeech']
-            short_obj['entries'] = obj['_entries']
-            short_obj['TransformCategory'] = obj.get('TransformCategory', {})
-            obj = short_obj
-
-        return jsonify(obj)
-    else:
-        return jsonify({})
+    lexconf = helpers.get_lexiconconf(lexicon)
+    # TODO lexconf for extractParadigm should not be needed, same for all
+    obj = give_info(lexicon, paradigm, lexconf['extractparadigm'],
+                    lexconf['paradigmMode'], lexconf["paradigmlexiconName"])
+    if short:
+        short_obj = {}
+        short_obj['MorphologicalPatternID'] = obj['MorphologicalPatternID']
+        short_obj['partOfSpeech'] = obj['_partOfSpeech']
+        short_obj['entries'] = obj['_entries']
+        short_obj['TransformCategory'] = obj.get('TransformCategory', {})
+        obj = short_obj
+    return jsonify(obj)
 
 
 @app.route('/partofspeech')
@@ -106,7 +125,7 @@ def defaulttable():
     return jsonify(ans)
 
 
-# Test inflections
+# Inflections
 @app.route('/inflectclass')
 def inflectclass():
     " Inflect a word according to a user defined category "
@@ -215,6 +234,29 @@ def inflectlike():
         result = []
     ans = {"Results": result}
     return jsonify(ans)
+
+
+@app.route('/inflectcandidate')
+def inflectcandidate():
+    lexicon = request.args.get('lexicon', 'saldomp')
+    lexconf = helpers.get_lexiconconf(lexicon)
+    authenticate(lexconf, 'write')
+    identifier = request.args.get('identifier', '')
+    q = 'extended||and|%s.search|equals|%s' % ('identifier', identifier)
+    res = helpers.karp_query('query', query={'q': q},
+                             mode=lexconf['candidateMode'],
+                             resource=lexconf['candidatelexiconName'])
+    if res['hits']['total'] < 1:
+        raise e.MflException("Could not find candidate %s" % identifier)
+    candidate = res['hits']['hits'][0]['_source']
+    pos = candidate['partOfSpeech']
+    ans = []
+    for inflect in candidate['CandidateParadigms']:
+        var_inst = inflect['VariableInstances'].values()
+        paras, n, l = helpers.relevant_paradigms(paradigmdict, lexicon,
+                                                 pos, possible_p=[inflect['uuid']])
+        ans.append(helpers.make_table(lexconf, paras[0], var_inst, 0, pos))
+    return jsonify({"Results": ans})
 
 
 @app.route('/list')
@@ -523,7 +565,7 @@ def removecandidate(_id=''):
     if not _id:
         try:
             identifier = request.args.get('identifier', '')
-            q = 'extended||and|%s.search|equals|%s' % (lexconf['identifier'], identifier)
+            q = 'extended||and|%s.search|equals|%s' % ('identifier', identifier)
             res = helpers.karp_query('query', query={'q': q},
                                      mode=lexconf['candidateMode'],
                                      resource=lexconf['candidatelexiconName'])
