@@ -2,6 +2,7 @@ import errors as e
 from flask import request
 import json
 import logging
+from hashlib import md5
 import paradigm as P
 import re
 import urllib.parse
@@ -126,7 +127,7 @@ def make_table(lexconf, paradigm, v, score, pos, lemgram=''):
                 'variables': dict(zip(range(1, len(v)+1), v)),
                 'score': score, 'count': paradigm.count,
                 'new': False, 'partOfSpeech': pos,
-                'lemgram': lemgram}
+                'identifier': lemgram}
         logging.debug('%s:, %s' % (paradigm.name, v))
         table = paradigm(*v)  # Instantiate table with vars from analysis
         for form, msd in table:
@@ -230,7 +231,7 @@ def lmf_tableize(table, paradigm=None, pos='', lemgram='', score=0):
     obj['identifier'] = ''
     obj['partOfSpeech'] = pos
     obj['count'] = 0
-    obj['lemgram'] = lemgram
+    obj['identifier'] = lemgram
     return obj
 
 
@@ -311,6 +312,7 @@ def make_identifier(lexconf, baseform, pos, lexicon='', field='', mode='', defau
     raise e.MflException("Could not come up with an identifier for %s, %s in lexicon %s" %
                          (baseform, pos, lexicon))
 
+
 def search_q(query, searchfield, q, lexicon):
     if q:
         logging.debug('q is %s' % q)
@@ -343,12 +345,12 @@ def make_candidate(lexicon, lemgram, table, paradigms, pos, kbest=5):
         obj['WordForms'].append(wf)
     cands = []
     for score, p, v in paradigms:
-         cand = {}
-         cand['name'] = p.name
-         cand['uuid'] = p.uuid
-         cand['VariableInstances'] = dict(enumerate(v, 1))
-         cand['score'] = score
-         cands.append((score, cand))
+        cand = {}
+        cand['name'] = p.name
+        cand['uuid'] = p.uuid
+        cand['VariableInstances'] = dict(enumerate(v, 1))
+        cand['score'] = score
+        cands.append((score, cand))
 
     cands.sort(reverse=True, key=lambda x: x[0])
     if cands:
@@ -383,7 +385,59 @@ def get_bucket(bucket, res, lexconf):
 
 def get_classbucket(iclass, res, lexconf):
     return get_bucket(lexconf['inflectionalclass'][iclass], res, lexconf)
-    # return res['aggregations']['q_statistics'][lexconf['inflectionalclass'][iclass]]['buckets']
+
 
 def firstform(table):
     return table.split(',')[0].split('|')[0]
+
+
+def give_info(lexicon, identifier, id_field, mode, resource):
+    " Show information for the word infobox "
+    lexconf = get_lexiconconf(lexicon)
+    authenticate(lexconf, 'read')
+    q = 'extended||and|%s.search|equals|%s' %\
+        (id_field, identifier)
+    res = karp_query('query', {'q': q}, mode=mode, resource=resource)
+    if res['hits']['total'] > 0:
+        return res['hits']['hits'][0]['_source']
+
+
+def format_entry(lexconf, entry):
+    func = extra_src(lexconf, 'show_wordentry', lambda x: x)
+    return func(entry)
+
+
+def authenticate(lexconf={}, action='read'):
+    if action == 'checkopen':
+        auth = None
+    else:
+        auth = request.authorization
+    postdata = {"include_open_resources": "true"}
+    if auth is not None:
+        user, pw = auth.username, auth.password
+        server = config['AUTH_SERVER']
+        mdcode = user + pw + config['SECRET_KEY']
+        postdata["checksum"] = md5(mdcode.encode('utf8')).hexdigest()
+    else:
+        server = config['AUTH_RESOURCES']
+
+    data = json.dumps(postdata).encode('utf8')
+    logging.debug('ask %s, data %s' % (server, postdata))
+    response = urllib.request.urlopen(server, data).read().decode('utf8')
+    auth_response = json.loads(response)
+    lexitems = auth_response.get("permitted_resources", {})
+    if action == 'checkopen':
+        return [lex for lex, per in lexitems.get("lexica", {}).items()
+                if per['read']]
+    else:
+        permissions = lexitems.get("lexica", {}).get(lexconf['wsauth_name'], {})
+        logging.debug('permissions %s' % permissions)
+        if not permissions.get(action, False):
+            raise e.MflException("Action %s not allowed in lexicon %s" %
+                                 (action, lexconf['lexiconName']), 401)
+
+
+config = {"AUTH_RESOURCES": "http://localhost:8082/app/resources",
+          "AUTH_SERVER": "http://localhost:8082/app/authenticate",
+          "SECRET_KEY": "secret"
+          }

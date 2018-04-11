@@ -58,3 +58,17 @@ def lmf_wftableize(paradigm, table, classes={}, baseform='', identifier='',
 def yield_identifier(baseform, pos):
     for ix in range(1, 101):
         yield '%s..%s.%s' % (baseform, pos, ix)
+
+
+def show_wordentry(entry):
+    result = {}
+    form = entry.get("FormRepresentations", [{}])[0]
+    result['bklass'] = form.get("bklass", "")
+    result['inherent'] = form.get("inherent", "")
+    result['baseform'] = form.get("baseform", "")
+    result['identifier'] = form.get("lemgram", "")
+    result['partOfSpeech'] = form.get("partOfSpeech", "")
+    result['paradigm'] = form.get("paradigm", "")
+    result['fm_paradigm'] = form.get("fm_paradigm", "")
+    result['WordForms'] = entry.get('WordForms', [])
+    return result
