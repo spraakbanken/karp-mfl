@@ -2,9 +2,7 @@ import errors as e
 from flask import Flask, jsonify, render_template, request
 from flask_cors import CORS
 import logging
-from hashlib import md5
 import sys
-import urllib.request
 
 sys.path.append('/home/malin/Spraak/pextract/sbextract/src')
 import morphparser as mp
@@ -30,7 +28,7 @@ def lexiconinfo(lex=''):
     " Give information about existing lexicons and their configs "
     # lex = request.args.get('lexicon', lex)
     if not lex:
-        open_lex = authenticate(action='checkopen')
+        open_lex = helpers.authenticate(action='checkopen')
         res = []
         for l in json.load(open('config/lexicons.json')):
             lex = {}
@@ -50,23 +48,9 @@ def wordinfo(word=''):
     lexicon = request.args.get('lexicon', 'saldomp')
     identifier = word or request.args.get('identifier')
     lexconf = helpers.get_lexiconconf(lexicon)
-    obj = give_info(lexicon, identifier, lexconf['identifier'],
+    obj = helpers.give_info(lexicon, identifier, lexconf['identifier'],
               lexconf['lexiconMode'], lexconf["lexiconName"])
-    return jsonify(obj)
-
-
-def give_info(lexicon, identifier, id_field, mode, resource):
-    " Show information for the word infobox "
-    lexconf = helpers.get_lexiconconf(lexicon)
-    authenticate(lexconf, 'read')
-    q = 'extended||and|%s.search|equals|%s' %\
-        (id_field, identifier)
-    res = helpers.karp_query('query', {'q': q},
-                             mode=mode,
-                             resource=resource)
-    if res['hits']['total'] > 0:
-        obj = res['hits']['hits'][0]['_source']
-        return obj
+    return jsonify(helpers.format_entry(lexconf, obj))
 
 
 @app.route('/paradigminfo')
@@ -79,7 +63,7 @@ def paradigminfo(paradigm=''):
     short = short in [True, 'true', 'True']
     lexconf = helpers.get_lexiconconf(lexicon)
     # TODO lexconf for extractParadigm should not be needed, same for all
-    obj = give_info(lexicon, paradigm, lexconf['extractparadigm'],
+    obj = helpers.give_info(lexicon, paradigm, lexconf['extractparadigm'],
                     lexconf['paradigmMode'], lexconf["paradigmlexiconName"])
     if short:
         short_obj = {}
@@ -242,7 +226,7 @@ def inflectlike():
 def inflectcandidate():
     lexicon = request.args.get('lexicon', 'saldomp')
     lexconf = helpers.get_lexiconconf(lexicon)
-    authenticate(lexconf, 'write')
+    helpers.authenticate(lexconf, 'write')
     identifier = request.args.get('identifier', '')
     q = 'extended||and|%s.search|equals|%s' % ('identifier', identifier)
     res = helpers.karp_query('query', query={'q': q},
@@ -268,7 +252,7 @@ def listing():
     s = request.args.get('c', '*')  # searchfield
     lexicon = request.args.get('lexicon', 'saldomp')
     lexconf = helpers.get_lexiconconf(lexicon)
-    authenticate(lexconf, 'read')
+    helpers.authenticate(lexconf, 'read')
     pos = helpers.read_pos(lexconf)
     query = []
     if pos:
@@ -316,7 +300,7 @@ def compile():
     compile_f = request.args.get('c', '')  # searchfield
     lexicon = request.args.get('lexicon', 'saldomp')
     lexconf = helpers.get_lexiconconf(lexicon)
-    authenticate(lexconf, 'read')
+    helpers.authenticate(lexconf, 'read')
     pos = helpers.read_pos(lexconf)
     size = request.args.get('size', '100')
     start = request.args.get('start', '0')
@@ -427,7 +411,7 @@ def add_table():
     # or is that not needed?
     lexicon = request.args.get('lexicon', 'saldomp')
     lexconf = helpers.get_lexiconconf(lexicon)
-    authenticate(lexconf, 'write')
+    helpers.authenticate(lexconf, 'write')
     table = request.args.get('table', '')
     pos = helpers.read_one_pos(lexconf)
     paradigm = request.args.get('paradigm', '')
@@ -514,14 +498,14 @@ def addcandidates():
     lexicon = request.args.get('lexicon', 'saldomp')
     lexconf = helpers.get_lexiconconf(lexicon)
     ppriorv = float(request.args.get('pprior', lexconf["pprior"]))
-    authenticate(lexconf, 'write')
+    helpers.authenticate(lexconf, 'write')
     to_save = []
     for table in tables:
         if not table:
             continue
         logging.debug('table %s' % table)
         # TODO move the parsing somewhere else
-        forms, pos = table.strip().split('\t')
+        forms, pos = table.strip().split('\\t')
         forms = forms.split(',')
         baseform = forms[0]
         lemgram = helpers.make_identifier(lexconf, baseform, pos, default=True)
@@ -546,7 +530,7 @@ def addcandidates():
 def candidatelist():
     lexicon = request.args.get('lexicon', 'saldomp')
     lexconf = helpers.get_lexiconconf(lexicon)
-    authenticate(lexconf, 'read')
+    helpers.authenticate(lexconf, 'read')
     pos = helpers.read_pos(lexconf)
     q = 'extended||and|%s.search|equals|%s' % (lexconf['pos'], '|'.join(pos))
     res = helpers.karp_query('query', query={'q': q},
@@ -565,7 +549,7 @@ def removecandidate(_id=''):
     '''
     lexicon = request.args.get('lexicon', 'saldomp')
     lexconf = helpers.get_lexiconconf(lexicon)
-    authenticate(lexconf, 'write')
+    helpers.authenticate(lexconf, 'write')
     if not _id:
         try:
             identifier = request.args.get('identifier', '')
@@ -586,7 +570,7 @@ def recomputecandiadtes():
     lexicon = request.args.get('lexicon', 'saldomp')
     lexconf = helpers.get_lexiconconf(lexicon)
     postags = helpers.read_pos(lexconf)
-    authenticate(lexconf, 'read')
+    helpers.authenticate(lexconf, 'read')
     ppriorv = float(request.args.get('pprior', lexconf["pprior"]))
     print('postags', postags)
     counter = 0
@@ -669,44 +653,12 @@ def handle_invalid_usage(error):
         return "Oops, something went wrong\n", 500
 
 
-def authenticate(lexconf={}, action='read'):
-    if action == 'checkopen':
-        auth = None
-    else:
-        auth = request.authorization
-    postdata = {"include_open_resources": "true"}
-    if auth is not None:
-        user, pw = auth.username, auth.password
-        server = config['AUTH_SERVER']
-        mdcode = user + pw + config['SECRET_KEY']
-        postdata["checksum"] = md5(mdcode.encode('utf8')).hexdigest()
-    else:
-        server = config['AUTH_RESOURCES']
-
-    data = json.dumps(postdata).encode('utf8')
-    logging.debug('ask %s, data %s' % (server, postdata))
-    response = urllib.request.urlopen(server, data).read().decode('utf8')
-    auth_response = json.loads(response)
-    lexitems = auth_response.get("permitted_resources", {})
-    if action == 'checkopen':
-        return [lex for lex,per in lexitems.get("lexica", {}).items()
-                if per['read']]
-    else:
-        permissions = lexitems.get("lexica", {}).get(lexconf['wsauth_name'], {})
-        logging.debug('permissions %s' % permissions)
-        if not permissions.get(action, False):
-            raise e.MflException("Action %s not allowed in lexicon %s" %
-                                 (action, lexconf['lexiconName']), 401)
-
 # TODO how to set these??
 # For saldomp, i have increased pprior a lot, from 1.0 to 5.0
 config = {"print_tables": False,
           "kbest": 10,
           "debug": False,
           "choose": False,
-          "AUTH_RESOURCES": "http://localhost:8082/app/resources",
-          "AUTH_SERVER": "http://localhost:8082/app/authenticate",
-          "SECRET_KEY": "secret"
           }
 
 
