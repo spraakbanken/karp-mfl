@@ -175,7 +175,7 @@ def lmf_wftableize(lexconf, paradigm, table, classes={}, baseform='',
         obj['used_default'] = 'true'
         return obj
 
-    func = extra_src(lexconf, 'lmf_wftabelize', default)
+    func = extra_src(lexconf, 'lmf_wftableize', default)
 
     return func(paradigm, table, classes, baseform, identifier, pos, resource)
 
@@ -188,7 +188,7 @@ def identifier2pos(lexconf, lemgram):
 
 def get_baseform_infl(lexconf, infl):
     func = extra_src(lexconf, 'get_baseform',
-                     lambda infl: infl['WordForms'][0]['writtenForm'])
+                     lambda entry=infl: entry['WordForms'][0]['writtenForm'])
     return func(entry=infl)
 
 
