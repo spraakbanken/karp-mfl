@@ -475,7 +475,8 @@ def add_table():
                             lexconf['lexiconName'], paradigm, para, paras,
                             identifier, pos, classes, wf_table)
     else:
-        score, para, v = ans[0][0]
+        # TODO used to be ans[0][0], see slack 13:26 12/4
+        score, para, v = ans[0]
         handle.add_word_to_paradigm(lexconf['paradigmlexiconName'],
                                     lexconf['lexiconName'], identifier, v,
                                     classes, para, wf_table)
