@@ -357,7 +357,7 @@ def compile():
         #    s_field = search_f
         ans = helpers.compile_list(query, s_field, querystr, lexicon,
                                    lexconf["show"], size, start, mode)
-        out = []
+        out, fields = [], []
         def default(obj):
             return [obj['baseform']], ['baseform']
         func = helpers.extra_src(lexconf, 'make_overview', default)
@@ -505,7 +505,7 @@ def addcandidates():
             continue
         logging.debug('table %s' % table)
         # TODO move the parsing somewhere else
-        forms, pos = table.strip().split('\\t')
+        forms, pos = table.strip().split('\t')
         forms = forms.split(',')
         baseform = forms[0]
         lemgram = helpers.make_identifier(lexconf, baseform, pos, default=True)
