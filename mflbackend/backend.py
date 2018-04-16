@@ -1,6 +1,7 @@
 import errors as e
 from flask import Flask, jsonify, render_template, request
 from flask_cors import CORS
+import json
 import logging
 import sys
 
@@ -104,6 +105,8 @@ def defaulttable():
     wfs = []
     for tag in res['stat_table']:
         wfs.append({'writtenForm': '', 'msd': tag[0]})
+    if not wfs:
+        wfs.append({'writtenForm': '', 'msd': ''})
 
     ans = {'WordForms': wfs, 'partOfSpeech': pos}
     return jsonify(ans)
@@ -141,12 +144,10 @@ def inflectclass():
         # Special case: '?classname=paradigm&classval=p14_oxe..nn.1?1=katt&2=a'
         # TODO rename to extractparadigm?
         if len(paras) < 1 or len(possible_p) < 1:
-            raise e.MflException("Cannot find paradigm %s" % classval)
+            raise e.MflException("Cannot find paradigm %s" % classval, code="unknown_paradigm")
         var_inst.sort()
         var_inst = [val for key, val in var_inst]
         logging.debug('look for %s as %s' % (classval, pos))
-        if len(paras) < 1:
-            raise e.MflException("Cannot find paradigm %s" % classval)
         table = helpers.make_table(lexconf, paras[0], var_inst, 0, pos, lemgram)
         ans = {"Results": [table]}
 
@@ -173,6 +174,7 @@ def inflect():
     firstform = helpers.firstform(table)
     lemgram = helpers.make_identifier(lexconf, firstform, pos)
     paras, numex, lms = helpers.relevant_paradigms(paradigmdict, lexicon, pos)
+    print('got %s paradigms for %s %s' % (len(paras), lexicon, pos))
     ans = handle.inflect_table(table,
                                [paras, numex, lms, config["print_tables"],
                                 config["debug"], ppriorv],
@@ -233,7 +235,8 @@ def inflectcandidate():
                              mode=lexconf['candidateMode'],
                              resource=lexconf['candidatelexiconName'])
     if res['hits']['total'] < 1:
-        raise e.MflException("Could not find candidate %s" % identifier)
+        raise e.MflException("Could not find candidate %s" % identifier,
+                             code="unknown_candidate")
     candidate = res['hits']['hits'][0]['_source']
     pos = candidate['partOfSpeech']
     lemgram = helpers.make_identifier(lexconf, candidate['baseform'], pos)
@@ -333,12 +336,22 @@ def compile():
         else:
             buckets = [classname]
 
+        count = helpers.karp_query('statistics',
+                                 {'q': query,
+                                  'buckets': '%s.bucket' % classname,
+                                  'cardinality': True,
+                                  'size': 1},
+                                 resource=lexconf['lexiconName'],
+                                 mode=lexconf['lexiconMode'])
         res = helpers.karp_query('statistics',
                                  {'q': query,
+                                  'size': size,
                                   'buckets': ','.join(['%s.bucket' % b for b in buckets])},
+                                 resource=lexconf['lexiconName'],
                                  mode=lexconf['lexiconMode'])
         ans = []
-        for pbucket in helpers.get_classbucket(classname, res,lexconf):
+        # TODO give a total count
+        for pbucket in helpers.get_classbucket(classname, res, lexconf):
             if extra:
                 pcount = len(pbucket[lexconf['extractparadigmpath']]['buckets'])
                 ans.append([pbucket["key"], pcount, pbucket["doc_count"]])
@@ -347,7 +360,8 @@ def compile():
 
         logging.debug('extra? %s' % extra)
         return jsonify({"compiled_on": classname, "stats": ans,
-                        "fields": ["paradigm", "entries"]})
+                        "fields": ["paradigm", "entries"],
+                        "count": helpers.get_classcount(classname, count, lexconf)})
 
     elif compile_f == "wf":
         mode = lexconf['lexiconMode']
@@ -361,12 +375,12 @@ def compile():
         def default(obj):
             return [obj['baseform']], ['baseform']
         func = helpers.extra_src(lexconf, 'make_overview', default)
-        for ans in ans:
-            row, fields = func(ans)
+        for obj in ans["ans"]:
+            row, fields = func(obj)
             out.append(row)
 
         return jsonify({"compiled_on": "wordforms", "stats": out,
-                        "fields": fields})
+                        "fields": fields, "total": ans["total"]})
 
     elif compile_f == "paradigm":
         # TODO no need to look in config for this, it should always be the same
@@ -383,7 +397,7 @@ def compile():
                                    size, start, mode)
         res = []
         iclasses = []
-        for hit in ans:
+        for hit in ans["ans"]:
             iclasses = []  # only need one instance
             stats = [hit['MorphologicalPatternID']]
             for iclass in lexconf['inflectionalclass'].keys():
@@ -392,10 +406,10 @@ def compile():
             stats.append(hit['_entries'])
             res.append(stats)
         return jsonify({"compiled_on": "paradigm", "stats": res,
-                        "fields": iclasses+['entries']})
+                        "fields": iclasses+['entries'] ,"total": ans["total"]})
 
     else:
-        raise e.MflException("Don't know what to do")
+        raise e.MflException("Don't know what to do", code="unknown_action")
 
 
 # Update
@@ -419,8 +433,10 @@ def add_table():
     identifier = request.args.get('identifier', '')
     helpers.check_identifier(identifier, lexconf['identifier'],
                              lexconf['lexiconName'], lexconf['lexiconMode'])
-    if not identifier or not paradigm or not pos:
-        raise e.MflException("Both identifier, partOfSpeech and paradigm must be given!")
+    for name, field in [('identifier', identifier), ('paradigm', paradigm), ('partOfSpeech', pos)]:
+        if not field:
+            raise e.MflException("Both identifier, partOfSpeech and paradigm must be given!",
+                                 code="unknown_%s" % name)
     classes = request.args.get('class', '')
     is_new = request.args.get('new')
     is_new = is_new in ['True', 'true', True]
@@ -433,10 +449,12 @@ def add_table():
     except Exception as e1:
         logging.warning('Could not parse classes')
         logging.error(e1)
-        raise e.MflException("Could not parse classes. Format should be 'classname:apa,classname2:bepa'" % (classes))
+        raise e.MflException("Could not parse classes. Format should be 'classname:apa,classname2:bepa'" % (classes),
+                             code="unparsable_class")
     paras, numex, lms = helpers.relevant_paradigms(paradigmdict, lexicon, pos)
     if is_new and paradigm in [p.name for p in paras]:
-        raise e.MflException("Paradigm name %s is already used" % (paradigm))
+        raise e.MflException("Paradigm name %s is already used" % (paradigm),
+                             code="unique_paradigm")
 
     pex_table = helpers.tableize(table, add_tags=False)
     wf_table = helpers.lmf_wftableize(lexconf, paradigm, table, classes,
@@ -446,7 +464,8 @@ def add_table():
         logging.debug('not new, look for %s' % paradigm)
         fittingparadigms = [p for p in paras if p.p_id == paradigm]
         if not fittingparadigms:
-            raise e.MflException("Could not find paradigm %s" % paradigm)
+            raise e.MflException("Could not find paradigm %s" % paradigm,
+                                 code="unknown_paradigm")
 
     else:
         # TODO If an paradigm is already fitting, refuse to add as new?
@@ -464,7 +483,8 @@ def add_table():
     if not is_new and len(ans) < 1:
         # print('ans', ans)
         logging.warning("Could not inflect %s as %s" % (table, paradigm))
-        raise e.MflException("Table can not belong to paradigm %s" % (paradigm))
+        raise e.MflException("Table can not belong to paradigm %s" % (paradigm),
+                             code="inflect_problem")
 
     if not ans:
         # print(ans)
@@ -561,7 +581,8 @@ def removecandidate(_id=''):
             _id = res['hits']['hits'][0]['_id']
         except Exception as e1:
             logging.error(e1)
-            raise e.MflException("Could not find candidate %s" % identifier)
+            raise e.MflException("Could not find candidate %s" % identifier,
+                                 code="unknown_candidate")
     return jsonify({"deleted": helpers.karp_delete(_id, lexconf['candidatelexiconName'])})
 
 
@@ -622,14 +643,15 @@ def read_paradigms(lexicon, pos, mode):
 def update_model(lexicon, pos, paradigmdict, lexconf):
     paras = read_paradigms(lexconf['paradigmlexiconName'], pos,
                            lexconf['paradigmMode'])
+    logging.debug('memorize %s paradigms??' % len(paras))
     paras, numex, lms = mp.build(paras, lexconf["ngramorder"],
                                  lexconf["ngramprior"],
                                  lexicon=lexconf['paradigmlexiconName'],
                                  inpformat='json',
                                  pos=pos,
                                  small=False)
-    paradigms = {}
     logging.debug('memorize %s paradigms' % len(paras))
+    paradigms = {}
     for para in paras:
         paradigms[para.uuid] = para
     # print('keys', paradigms.keys())
@@ -647,11 +669,21 @@ def handle_invalid_usage(error):
         request.get_data()
         logging.debug('Error on url %s' % request.full_path)
         logging.exception(error)
-
-        status = error.status_code
-        return "Error!!\n%s" % error.message, status
+        if 'status_code' in dir(error):
+            status = error.status_code
+            content = json.dumps({
+                        "message": "Error!!\n%s" % error.message,
+                       "code": error.code
+                      })
+        else:
+            status = 404
+            content = json.dumps({
+                        "message": "Error!!\n%s" % error,
+                      })
+        return content, status
     except Exception:
-        return "Oops, something went wrong\n", 500
+        return {"message": "Oops, something went wrong\n",
+                "code": "unexpected error"}, 500
 
 
 # TODO how to set these??
@@ -664,7 +696,6 @@ config = {"print_tables": False,
 
 
 if __name__ == '__main__':
-    import json
     paradigmdict = {}
     snabb = sys.argv[-1] == '--snabb'
     for lex in json.load(open('config/lexicons.json')):
