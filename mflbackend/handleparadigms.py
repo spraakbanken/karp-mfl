@@ -65,13 +65,18 @@ def inflect_table(table, settings, lexconf, pos='', lemgram='', kbest=10):
     fill_tags = '|' in table
     pex_table = helpers.tableize(table, add_tags=False, fill_tags=fill_tags)
     logging.debug('inflect forms %s msd %s. Restricted %s' % (pex_table[0], pex_table[1], baseform))
-    res = mp.test_paradigms(pex_table, *settings, returnempty=False, baseform=baseform)
+    res = []
+    if settings[0]:
+        print('got some paradigms', len(settings[0]))
+        res = mp.test_paradigms(pex_table, *settings, returnempty=False, baseform=baseform)
     #logging.debug('res %s' % res)
     if res:
+        print('got some results', len(res))
         ans = {"Results": helpers.format_inflection(lexconf, res, kbest=kbest,
                                                     pos=pos, lemgram=lemgram)}
                #'analyzes': res[1][0]}
     else:
+        print('invent!', len(res))
         pex_table = helpers.tableize(table, add_tags=True)
         #print('pex',pex, dir(pex))
         paradigm = pex.learnparadigms([pex_table])[0]

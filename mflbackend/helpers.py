@@ -19,7 +19,8 @@ def get_lexiconconf(lexicon):
         return json.load(open('config/%s.json' % lexicon))
     except Exception as err:
         logging.exception(err)
-        raise e.MflException("Could not open lexicon %s" % lexicon)
+        raise e.MflException("Could not open lexicon %s" % lexicon,
+                             code="unknown_lexicon")
 
 
 def karp_add(data, resource='saldomp', _id=None):
@@ -258,13 +259,17 @@ def tableize(table, add_tags=True, fill_tags=True):
 
 
 def relevant_paradigms(paradigmdict, lexicon, pos, possible_p=[]):
-    all_paras, numex, lms = paradigmdict[lexicon][pos]
-    if possible_p:
-        all_paras = [all_paras[p] for p in possible_p if p in all_paras]
-    else:
-        all_paras = list(all_paras.values())
+    try:
+        all_paras, numex, lms = paradigmdict[lexicon].get(pos, ({}, 0, None))
+        if possible_p:
+            all_paras = [all_paras[p] for p in possible_p if p in all_paras]
+        else:
+            all_paras = list(all_paras.values())
 
-    return all_paras, numex, lms
+        return all_paras, numex, lms
+    except:
+        raise e.MflException("Could not read lexicon %s" % lexicon,
+                             code="unknown_lexicon")
 
 
 def load_paradigms(es_result, lexconf):
@@ -283,7 +288,7 @@ def compile_list(query, searchfield, querystr, lexicon, show,
     ans = []
     for hit in res["hits"]["hits"]:
         ans.append(hit["_source"])
-    return ans
+    return {"ans": ans, "total": res["hits"]["total"]}
 
 
 def check_identifier(_id, field, resource, mode, fail=True):
@@ -291,7 +296,8 @@ def check_identifier(_id, field, resource, mode, fail=True):
     res = karp_query('query', q, mode=mode, resource=resource)
     used = res['hits']['total'] > 0
     if used and fail:
-        raise e.MflException("Identifier %s already in use" % _id)
+        raise e.MflException("Identifier %s already in use" % _id,
+                             code="unique_%s" % field)
     return not used
 
 
@@ -310,7 +316,8 @@ def make_identifier(lexconf, baseform, pos, lexicon='', field='', mode='', defau
            return _id
 
     raise e.MflException("Could not come up with an identifier for %s, %s in lexicon %s" %
-                         (baseform, pos, lexicon))
+                         (baseform, pos, lexicon),
+                         code="id_generation")
 
 
 def search_q(query, searchfield, q, lexicon):
@@ -382,10 +389,17 @@ def read_restriction(lexconf):
 def get_bucket(bucket, res, lexconf):
     return res['aggregations']['q_statistics'][bucket]['buckets']
 
+def get_bucket_count(bucket, res, lexconf):
+    print(res["aggregations"]["q_statistics"][bucket])
+    return res["aggregations"]["q_statistics"][bucket]["value"]
+
 
 def get_classbucket(iclass, res, lexconf):
     return get_bucket(lexconf['inflectionalclass'][iclass], res, lexconf)
 
+
+def get_classcount(iclass, res, lexconf):
+    return get_bucket_count(lexconf['inflectionalclass'][iclass], res, lexconf)
 
 def firstform(table):
     return table.split(',')[0].split('|')[0]
@@ -400,6 +414,7 @@ def give_info(lexicon, identifier, id_field, mode, resource):
     res = karp_query('query', {'q': q}, mode=mode, resource=resource)
     if res['hits']['total'] > 0:
         return res['hits']['hits'][0]['_source']
+    return {}
 
 
 def format_entry(lexconf, entry):
@@ -434,7 +449,8 @@ def authenticate(lexconf={}, action='read'):
         logging.debug('permissions %s' % permissions)
         if not permissions.get(action, False):
             raise e.MflException("Action %s not allowed in lexicon %s" %
-                                 (action, lexconf['lexiconName']), 401)
+                                 (action, lexconf['lexiconName']),
+                                 code="authentication", status=401)
 
 
 config = {"AUTH_RESOURCES": "http://localhost:8082/app/resources",
