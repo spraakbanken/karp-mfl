@@ -1,6 +1,14 @@
 [
   {
+  "name": "saolp",
+  "pos":  ["subst."]
+  },
+  {
   "name": "saldomp",
-  "pos":  ["abm", "nn"]
+  "pos":  ["vb", "abm", "nn"]
+  }
+  {
+  "name": "votiska",
+  "pos":  ["nn"]
   }
 ]
