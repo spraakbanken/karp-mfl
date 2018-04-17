@@ -1,3 +1,4 @@
+import base64
 import errors as e
 from flask import request
 import json
@@ -71,14 +72,23 @@ def karp_query(action, query, mode='external', resource='saldomp'):
 
 
 def karp_request(action, data=None):
-    # TODO must use password!
     q = "%s/%s" % (KARP_BACKEND, action)
+
+    try:
+        auth = request.authorization
+        user, pw = auth.username, auth.password
+    except:
+        user, pw = 'mfl', 'mfl'
+    userpw = '%s:%s' % (user, pw)
+    basic = base64.b64encode(userpw.encode())
+    req = urllib.request.Request(q, data=data)
+    req.add_header('Authorization', 'Basic %s' % basic.decode())
+
     logging.debug('send %s' % q)
-    logging.debug('send %s' % q)
-    response = urllib.request.urlopen(q, data=data).read().decode('utf8')
-    logging.debug('response %s' % response)
-    data = json.loads(response)
-    return data
+    logging.debug('headers %s' % req.headers)
+    response = urllib.request.urlopen(req).read().decode('utf8')
+    return json.loads(response)
+
 
 
 def format_inflection(lexconf, ans, kbest=0, pos='', lemgram='', debug=False):

@@ -29,7 +29,6 @@ def lexiconinfo(lex=''):
     " Give information about existing lexicons and their configs "
     # lex = request.args.get('lexicon', lex)
     if not lex:
-        open_lex = helpers.authenticate(action='checkopen')
         res = []
         for l in json.load(open('config/lexicons.json')):
             lex = {}
@@ -228,7 +227,6 @@ def inflectlike():
 def inflectcandidate():
     lexicon = request.args.get('lexicon', 'saldomp')
     lexconf = helpers.get_lexiconconf(lexicon)
-    helpers.authenticate(lexconf, 'write')
     identifier = request.args.get('identifier', '')
     q = 'extended||and|%s.search|equals|%s' % ('identifier', identifier)
     res = helpers.karp_query('query', query={'q': q},
@@ -255,7 +253,6 @@ def listing():
     s = request.args.get('c', '*')  # searchfield
     lexicon = request.args.get('lexicon', 'saldomp')
     lexconf = helpers.get_lexiconconf(lexicon)
-    helpers.authenticate(lexconf, 'read')
     pos = helpers.read_pos(lexconf)
     query = []
     if pos:
@@ -303,7 +300,6 @@ def compile():
     compile_f = request.args.get('c', '')  # searchfield
     lexicon = request.args.get('lexicon', 'saldomp')
     lexconf = helpers.get_lexiconconf(lexicon)
-    helpers.authenticate(lexconf, 'read')
     pos = helpers.read_pos(lexconf)
     size = request.args.get('size', '100')
     start = request.args.get('start', '0')
@@ -425,7 +421,6 @@ def add_table():
     # or is that not needed?
     lexicon = request.args.get('lexicon', 'saldomp')
     lexconf = helpers.get_lexiconconf(lexicon)
-    helpers.authenticate(lexconf, 'write')
     table = request.args.get('table', '')
     pos = helpers.read_one_pos(lexconf)
     paradigm = request.args.get('paradigm', '')
@@ -519,7 +514,6 @@ def addcandidates():
     lexicon = request.args.get('lexicon', 'saldomp')
     lexconf = helpers.get_lexiconconf(lexicon)
     ppriorv = float(request.args.get('pprior', lexconf["pprior"]))
-    helpers.authenticate(lexconf, 'write')
     to_save = []
     for table in tables:
         if not table:
@@ -551,7 +545,6 @@ def addcandidates():
 def candidatelist():
     lexicon = request.args.get('lexicon', 'saldomp')
     lexconf = helpers.get_lexiconconf(lexicon)
-    helpers.authenticate(lexconf, 'read')
     pos = helpers.read_pos(lexconf)
     q = 'extended||and|%s.search|equals|%s' % (lexconf['pos'], '|'.join(pos))
     res = helpers.karp_query('query', query={'q': q},
@@ -570,7 +563,6 @@ def removecandidate(_id=''):
     '''
     lexicon = request.args.get('lexicon', 'saldomp')
     lexconf = helpers.get_lexiconconf(lexicon)
-    helpers.authenticate(lexconf, 'write')
     if not _id:
         try:
             identifier = request.args.get('identifier', '')
@@ -592,7 +584,6 @@ def recomputecandiadtes():
     lexicon = request.args.get('lexicon', 'saldomp')
     lexconf = helpers.get_lexiconconf(lexicon)
     postags = helpers.read_pos(lexconf)
-    helpers.authenticate(lexconf, 'read')
     ppriorv = float(request.args.get('pprior', lexconf["pprior"]))
     print('postags', postags)
     counter = 0
