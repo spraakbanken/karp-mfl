@@ -56,5 +56,6 @@ def yield_identifier(baseform, pos):
 
 def show_wordentry(entry):
     entry['identifier'] = entry.get("lemgram", "")
-    del entry['lemgram']
+    if 'lemgram' in entry:
+        del entry['lemgram']
     return entry

@@ -1,16 +1,19 @@
 import re
 
+
 def get_baseform(entry={}, lemgram=''):
     if lemgram:
         return lemgram.split('.')[0]
     elif 'lemgram' in entry:
         return entry['lemgram'].split('.')[0]
-    else:
+    elif len(entry.get('WordForms', [])) > 0:
         return entry['WordForms'][0]['writtenForm']
+    return 'default'
 
 
 def get_pos(lemgram):
     return re.search('.*\.\.(.*?)\.', lemgram).group(1)
+
 
 def make_overview(obj):
     form = obj["FormRepresentations"][0]
