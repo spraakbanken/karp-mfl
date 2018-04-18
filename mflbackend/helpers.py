@@ -69,7 +69,7 @@ def karp_query(action, query, mode='external', resource='saldomp'):
 
 
 def karp_request(action, data=None):
-    q = "%s/%s" % (C.confgi['KARP_BACKEND'], action)
+    q = "%s/%s" % (C.config['KARP_BACKEND'], action)
 
     try:
         auth = request.authorization
