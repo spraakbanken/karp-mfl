@@ -474,7 +474,7 @@ def add_table():
                                  lexconf['paradigmlexiconName'],
                                  lexconf['paradigmMode'])
 
-    logging.debug('fitting', fittingparadigms)
+    logging.debug('fitting %s'  % fittingparadigms)
     ans = mp.test_paradigms(pex_table, fittingparadigms, numex, lms,
                             C.config["print_tables"], C.config["debug"],
                             lexconf["pprior"], returnempty=False,
@@ -683,6 +683,15 @@ def handle_invalid_usage(error):
 
 # For saldomp, i have increased pprior a lot, from 1.0 to 5.0
 
+
+def start():
+    for lex in C.config['all_lexicons']:
+        lexconf = helpers.get_lexiconconf(lex['name'])
+        paradigmdict[lex['name']] = {}
+        for pos in lex['pos']:
+            update_model(lex['name'], pos, paradigmdict, lexconf)
+
+paradigmdict = {}
 
 if __name__ == '__main__':
     paradigmdict = {}

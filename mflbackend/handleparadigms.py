@@ -44,6 +44,7 @@ def add_word_to_paradigm(presource, lresource, lemgram, inst, classes,
     for key, val in classes.items():
         paradigm.add_class(key, [val])
     paradigm.count += 1
+    paradigm.set_lexicon(presource)
     logging.debug('new var inst %s' % paradigm.var_insts[-1])
     logging.debug('new count %s' % paradigm.count)
     helpers.karp_update(paradigm.uuid, paradigm.jsonify(), resource=presource)
