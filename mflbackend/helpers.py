@@ -208,7 +208,6 @@ def lmf_tableize(table, paradigm=None, pos='', lemgram='', score=0):
         wfs.append({'writtenForm': form, 'msd': tag})
 
     obj['WordForms'] = wfs
-    obj['identifier'] = ''
     obj['partOfSpeech'] = pos
     obj['count'] = 0
     obj['identifier'] = lemgram
@@ -237,6 +236,22 @@ def tableize(table, add_tags=True, fill_tags=True, identifier=''):
             thesetags.append([("msd", tag)])
         elif fill_tags:
             thesetags.append('')
+    return (thistable, thesetags)
+
+
+def tableize_obj(obj, add_tags=True, fill_tags=True, identifier=''):
+    thistable, thesetags = [obj['baseform']], ['']
+    if identifier:
+        thistable.append(identifier)
+        thesetags.append([("msd", "identifier")])
+    for wf in obj['WordForms']:
+        thistable.append(wf['writtenForm'])
+        tag = wf.get('msd', 'tag' if add_tags else '')
+        if add_tags or tag:
+            thesetags.append([("msd", tag)])
+        elif fill_tags:
+            thesetags.append('')
+        tag = 'tag' if add_tags else ''
     return (thistable, thesetags)
 
 
