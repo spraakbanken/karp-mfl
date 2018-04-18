@@ -12,10 +12,6 @@ import urllib.request
 import uuid
 
 
-# KARP_BACKEND = 'https://ws.spraakbanken.gu.se/ws/karp/v4/'
-KARP_BACKEND = 'http://localhost:8081/app/'
-
-
 def get_lexiconconf(lexicon):
     try:
         return json.load(open(C.config['lexiconpath'][lexicon]))
@@ -73,7 +69,7 @@ def karp_query(action, query, mode='external', resource='saldomp'):
 
 
 def karp_request(action, data=None):
-    q = "%s/%s" % (KARP_BACKEND, action)
+    q = "%s/%s" % (C.confgi['KARP_BACKEND'], action)
 
     try:
         auth = request.authorization
@@ -91,50 +87,21 @@ def karp_request(action, data=None):
     return json.loads(response)
 
 
-
 def format_inflection(lexconf, ans, kbest=0, pos='', lemgram='', debug=False):
     " format an inflection and report whether anything has been printed "
     out = []
-    #for words, analyses in ans:
     for aindex, (score, p, v) in enumerate(ans):
         if kbest and aindex >= kbest:
             break
         res = make_table(lexconf, p, v, score, pos, lemgram=lemgram)
         if res is not None:
             out.append(res)
-        # infl = {'paradigm': p.name, 'WordForms': [],
-        #         'variables': dict(zip(range(1, len(v)+1), v)), 'score':
-        #         score, 'count': p.count, 'new': False, 'lemgram': '',
-        #         'partOfSpeech': pos}
-        # table = p(*v)          # Instantiate table with vars from analysis
-        # for form, msd in table:
-        #     for tag in msd:
-        #         infl['WordForms'].append({'writtenForm': form,
-        #                                   'msd': tag[1]})
-        # out.append(infl)
-        # if debug:
-        #     logging.debug("Members: %s" %
-        #                   ", ".join([p(*[var[1] for var in vs])[0][0]
-        #                              for vs in p.var_insts]))
     return out
-
-
-#def format_simple_inflection(lexconf, ans, pos=''):
-#    " format an inflection and report whether anything has been printed "
-#    out = []
-#    for paradigm, words, analyses in ans:
-#        for aindex, (score, p, v) in enumerate(analyses):
-#            logging.debug('hej %s %s' % (aindex, v))
-#            res = make_table(lexconf, p, v, score, pos)
-#            if res is not None:
-#                out.append((score, res))
-#    out.sort(reverse=True, key=lambda x: x[0])
-#    return [o[1] for o in out]
 
 
 def make_table(lexconf, paradigm, v, score, pos, lemgram=''):
     try:
-        #logging.debug('v %s %s' % (v, type(v)))
+        # logging.debug('v %s %s' % (v, type(v)))
         infl = {'paradigm': paradigm.name, 'WordForms': [],
                 'variables': dict(zip(range(1, len(v)+1), v)),
                 'score': score, 'count': paradigm.count,
@@ -148,7 +115,7 @@ def make_table(lexconf, paradigm, v, score, pos, lemgram=''):
                                           'msd': tag[1]})
 
         infl['baseform'] = get_baseform_infl(lexconf, infl)
-        #logging.debug('could use paradigm %s' % paradigm)
+        # logging.debug('could use paradigm %s' % paradigm)
         return infl
     except Exception as e:
         # fails if the inflection does not work (instantiation fails)
@@ -328,7 +295,7 @@ def make_identifier(lexconf, baseform, pos, lexicon='', field='', mode='', defau
 
     for _id in func(baseform, pos):
         if check_identifier(_id, field, lexicon, mode, fail=False):
-           return _id
+            return _id
 
     raise e.MflException("Could not come up with an identifier for %s, %s in lexicon %s" %
                          (baseform, pos, lexicon),
@@ -404,6 +371,7 @@ def read_restriction(lexconf):
 def get_bucket(bucket, res, lexconf):
     return res['aggregations']['q_statistics'][bucket]['buckets']
 
+
 def get_bucket_count(bucket, res, lexconf):
     print(res["aggregations"]["q_statistics"][bucket])
     return res["aggregations"]["q_statistics"][bucket]["value"]
@@ -415,6 +383,7 @@ def get_classbucket(iclass, res, lexconf):
 
 def get_classcount(iclass, res, lexconf):
     return get_bucket_count(lexconf['inflectionalclass'][iclass], res, lexconf)
+
 
 def firstform(table):
     return table.split(',')[0].split('|')[0]
