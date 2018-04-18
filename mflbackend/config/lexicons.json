@@ -5,10 +5,12 @@
   },
   {
   "name": "saldomp",
-  "pos":  ["vb", "abm", "nn"]
-  }
+  "pos":  ["vb", "abm", "nn"],
+  "open":  true
+  },
   {
   "name": "votiska",
-  "pos":  ["nn"]
+  "pos":  ["nn"],
+  "open":  true
   }
 ]
