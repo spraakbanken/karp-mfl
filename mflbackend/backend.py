@@ -4,11 +4,11 @@ from flask_cors import CORS
 import json
 import logging
 import sys
-
-sys.path.append('/home/malin/Spraak/pextract/sbextract/src')
+import configmanager as C
+sys.path.append(C.config['paradigmextract'])
 import morphparser as mp
 import pextract as pex
-
+# Must be imported after pextract is found
 import handleparadigms as handle
 import helpers
 
@@ -27,10 +27,9 @@ def doc():
 @app.route('/lexicon/<lex>')
 def lexiconinfo(lex=''):
     " Give information about existing lexicons and their configs "
-    # lex = request.args.get('lexicon', lex)
     if not lex:
         res = []
-        for l in json.load(open('config/lexicons.json')):
+        for l in C.config['all_lexicons']:
             lex = {}
             lex['name'] = l['name']
             lex['open'] = l.get('open', False)
@@ -80,6 +79,8 @@ def paradigminfo(paradigm=''):
 def all_pos():
     " Show all part of speech tags that the lexicon use "
     lexicon = request.args.get('lexicon', 'saldomp')
+    lexconf = helpers.get_lexiconconf(lexicon)
+    helpers.authenticate(lexconf, 'read')
     # TODO also check in lexicon and give combined info about
     # which exist and which that have paradigms?
     logging.debug(dir(paradigmdict[lexicon]))
@@ -171,13 +172,15 @@ def inflect():
     table = request.args.get('table', '')
     pos = helpers.read_one_pos(lexconf)
     ppriorv = float(request.args.get('pprior', lexconf["pprior"]))
+    # no call to karp, must check auth
+    helpers.authenticate(lexconf, 'read')
     firstform = helpers.firstform(table)
     lemgram = helpers.make_identifier(lexconf, firstform, pos)
     paras, numex, lms = helpers.relevant_paradigms(paradigmdict, lexicon, pos)
     print('got %s paradigms for %s %s' % (len(paras), lexicon, pos))
     ans = handle.inflect_table(table,
-                               [paras, numex, lms, config["print_tables"],
-                                config["debug"], ppriorv],
+                               [paras, numex, lms, C.config["print_tables"],
+                                C.config["debug"], ppriorv],
                                lexconf, pos=pos, lemgram=lemgram)
     #logging.debug('ans')
     if 'paradigm' in ans:
@@ -473,7 +476,7 @@ def add_table():
 
     logging.debug('fitting', fittingparadigms)
     ans = mp.test_paradigms(pex_table, fittingparadigms, numex, lms,
-                            config["print_tables"], config["debug"],
+                            C.config["print_tables"], C.config["debug"],
                             lexconf["pprior"], returnempty=False,
                             match_all=True)
     if not is_new and len(ans) < 1:
@@ -530,7 +533,7 @@ def addcandidates():
         logging.debug('inflect forms %s msd %s' % pex_table)
         restrict_to_baseform = helpers.read_restriction(lexconf)
         res = mp.test_paradigms(pex_table, paras, numex, lms,
-                                config["print_tables"], config["debug"],
+                                C.config["print_tables"], C.config["debug"],
                                 ppriorv, returnempty=False,
                                 baseform=restrict_to_baseform)
         to_save.append(helpers.make_candidate(lexconf['candidatelexiconName'],
@@ -611,7 +614,7 @@ def recomputecandiadtes():
             logging.debug('inflect forms %s msd %s' % pex_table)
             restrict_to_baseform = helpers.read_restriction(lexconf)
             res = mp.test_paradigms(pex_table, paras, numex, lms,
-                                    config["print_tables"], config["debug"],
+                                    C.config["print_tables"], C.config["debug"],
                                     ppriorv, returnempty=False,
                                     baseform=restrict_to_baseform)
             to_save = helpers.make_candidate(lexconf['candidatelexiconName'],
@@ -678,19 +681,13 @@ def handle_invalid_usage(error):
                 "code": "unexpected error"}, 500
 
 
-# TODO how to set these??
 # For saldomp, i have increased pprior a lot, from 1.0 to 5.0
-config = {"print_tables": False,
-          "kbest": 10,
-          "debug": False,
-          "choose": False,
-          }
 
 
 if __name__ == '__main__':
     paradigmdict = {}
     snabb = sys.argv[-1] == '--snabb'
-    for lex in json.load(open('config/lexicons.json')):
+    for lex in C.config['all_lexicons']:
         lexconf = helpers.get_lexiconconf(lex['name'])
         paradigmdict[lex['name']] = {}
         if not snabb:
