@@ -549,6 +549,9 @@ def addcandidates():
         forms, pos = table.strip().split('\t')
         forms = forms.split(',')
         baseform = forms[0]
+        if '|' in baseform:
+            baseform = baseform.split('|')[0]
+            forms = [baseform] + forms
         lemgram = helpers.make_identifier(lexconf, baseform, pos, default=True)
         paras, numex, lms = helpers.relevant_paradigms(paradigmdict, lexicon, pos)
         pex_table = helpers.tableize(','.join(forms), add_tags=False)
