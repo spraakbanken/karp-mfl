@@ -1,4 +1,5 @@
 import base64
+import configmanager as C
 import errors as e
 from flask import request
 import json
@@ -17,7 +18,7 @@ KARP_BACKEND = 'http://localhost:8081/app/'
 
 def get_lexiconconf(lexicon):
     try:
-        return json.load(open('config/%s.json' % lexicon))
+        return json.load(open(C.config['lexiconpath'][lexicon]))
     except Exception as err:
         logging.exception(err)
         raise e.MflException("Could not open lexicon %s" % lexicon,
@@ -227,8 +228,9 @@ def lmf_tableize(table, paradigm=None, pos='', lemgram='', score=0):
     table = table.split(',')
     obj = {'score': score, 'paradigm': '', 'new': True}
     if paradigm is not None:
-        obj['variables'] = paradigm.var_insts[0]
+        obj['variables'] = [v for v in paradigm.var_insts[0] if v[0] not in [0, '0']]
         obj['paradigm'] = paradigm.name
+        obj['pattern'] = paradigm.pattern()
     wfs = []
     for l in table:
         if '|' in l:
@@ -246,7 +248,7 @@ def lmf_tableize(table, paradigm=None, pos='', lemgram='', score=0):
     return obj
 
 
-def tableize(table, add_tags=True, fill_tags=True):
+def tableize(table, add_tags=True, fill_tags=True, identifier=''):
     thistable, thesetags = [], []
     table = table.split(',')
     # if len(table[0].split('|')) < 2 or table[0].split('|') != "identifier":
@@ -254,6 +256,9 @@ def tableize(table, add_tags=True, fill_tags=True):
     #     thistag = [("msd", "identifier")] # if add_tags else ''
     #     thesetags.append(thistag)
 
+    if identifier:
+        thistable.append(identifier)
+        thesetags.append([("msd", "identifier")])
     for l in table:
         if '|' in l:
             form, tag = l.split('|')
@@ -417,8 +422,6 @@ def firstform(table):
 
 def give_info(lexicon, identifier, id_field, mode, resource):
     " Show information for the word infobox "
-    lexconf = get_lexiconconf(lexicon)
-    authenticate(lexconf, 'read')
     q = 'extended||and|%s.search|equals|%s' %\
         (id_field, identifier)
     res = karp_query('query', {'q': q}, mode=mode, resource=resource)
@@ -440,11 +443,11 @@ def authenticate(lexconf={}, action='read'):
     postdata = {"include_open_resources": "true"}
     if auth is not None:
         user, pw = auth.username, auth.password
-        server = config['AUTH_SERVER']
-        mdcode = user + pw + config['SECRET_KEY']
+        server = C.config['AUTH_SERVER']
+        mdcode = user + pw + C.config['SECRET_KEY']
         postdata["checksum"] = md5(mdcode.encode('utf8')).hexdigest()
     else:
-        server = config['AUTH_RESOURCES']
+        server = C.config['AUTH_RESOURCES']
 
     data = json.dumps(postdata).encode('utf8')
     logging.debug('ask %s, data %s' % (server, postdata))
@@ -461,9 +464,3 @@ def authenticate(lexconf={}, action='read'):
             raise e.MflException("Action %s not allowed in lexicon %s" %
                                  (action, lexconf['lexiconName']),
                                  code="authentication", status=401)
-
-
-config = {"AUTH_RESOURCES": "http://localhost:8082/app/resources",
-          "AUTH_SERVER": "http://localhost:8082/app/authenticate",
-          "SECRET_KEY": "secret"
-          }

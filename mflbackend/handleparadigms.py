@@ -77,7 +77,7 @@ def inflect_table(table, settings, lexconf, pos='', lemgram='', kbest=10):
                #'analyzes': res[1][0]}
     else:
         print('invent!', len(res))
-        pex_table = helpers.tableize(table, add_tags=True)
+        pex_table = helpers.tableize(table, add_tags=True, identifier=lemgram)
         #print('pex',pex, dir(pex))
         paradigm = pex.learnparadigms([pex_table])[0]
         logging.debug('learned %s' % paradigm)
