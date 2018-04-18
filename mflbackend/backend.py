@@ -33,7 +33,7 @@ def lexiconinfo(lex=''):
         for l in json.load(open('config/lexicons.json')):
             lex = {}
             lex['name'] = l['name']
-            lex['open'] = l['name'] in open_lex
+            lex['open'] = l.get('open', False)
             res.append(lex)
         return jsonify({"lexicons": res})
     else:
@@ -63,6 +63,7 @@ def paradigminfo(paradigm=''):
     short = short in [True, 'true', 'True']
     lexconf = helpers.get_lexiconconf(lexicon)
     # TODO lexconf for extractParadigm should not be needed, same for all
+    print('lexconf', lexconf)
     obj = helpers.give_info(lexicon, paradigm, lexconf['extractparadigm'],
                     lexconf['paradigmMode'], lexconf["paradigmlexiconName"])
     if short:
