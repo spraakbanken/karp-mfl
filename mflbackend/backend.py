@@ -252,6 +252,22 @@ def inflectcandidate():
                                                  pos,
                                                  possible_p=[inflect['uuid']])
         ans.append(helpers.make_table(lexconf, paras[0], var_inst, 0, pos, lemgram=lemgram))
+
+    if not candidate['CandidateParadigms']:
+        table = helpers.tableize_obj(candidate, add_tags=True, identifier=lemgram)
+        print('table', table)
+        #pex_table = helpers.tableize(table, add_tags=True, identifier=lemgram)
+        paradigm = pex.learnparadigms([table])[0]
+        obj = {'score': 0, 'paradigm': '', 'new': True}
+        if paradigm is not None:
+            obj['variables'] = [v for v in paradigm.var_insts[0] if v[0] not in [0, '0']]
+            obj['paradigm'] = paradigm.name
+            obj['pattern'] = paradigm.pattern()
+        obj['WordForms'] = candidate['WordForms']
+        obj['identifier'] = lemgram
+        obj['partOfSpeech'] = pos
+        obj['count'] = 0
+        ans = [obj]
     return jsonify({"Results": ans})
 
 
