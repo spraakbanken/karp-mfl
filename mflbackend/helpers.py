@@ -107,12 +107,15 @@ def make_table(lexconf, paradigm, v, score, pos, lemgram=''):
                 'score': score, 'count': paradigm.count,
                 'new': False, 'partOfSpeech': pos,
                 'identifier': lemgram}
-        logging.debug('%s:, %s' % (paradigm.name, v))
+        # logging.debug('%s:, %s' % (paradigm.name, v))
         table = paradigm(*v)  # Instantiate table with vars from analysis
+        logging.debug('table %s' % (table))
         for form, msd in table:
             for tag in msd:
                 infl['WordForms'].append({'writtenForm': form,
                                           'msd': tag[1]})
+            if not msd:
+                infl['WordForms'].append({'writtenForm': form})
 
         infl['baseform'] = get_baseform_infl(lexconf, infl)
         # logging.debug('could use paradigm %s' % paradigm)
@@ -235,7 +238,7 @@ def tableize(table, add_tags=True, fill_tags=True, identifier=''):
         if add_tags or tag:
             thesetags.append([("msd", tag)])
         elif fill_tags:
-            thesetags.append('')
+            thesetags.append([])
     return (thistable, thesetags)
 
 
@@ -257,7 +260,7 @@ def tableize_obj(obj, add_tags=True, fill_tags=True, identifier=''):
 
 def relevant_paradigms(paradigmdict, lexicon, pos, possible_p=[]):
     try:
-        all_paras, numex, lms = paradigmdict[lexicon].get(pos, ({}, 0, None))
+        all_paras, numex, lms, alpha = paradigmdict[lexicon].get(pos, ({}, 0, None))
         if possible_p:
             all_paras = [all_paras[p] for p in possible_p if p in all_paras]
         else:

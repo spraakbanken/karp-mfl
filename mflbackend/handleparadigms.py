@@ -15,7 +15,7 @@ def load_paradigms(paradigms):
 
 
 def add_paradigm(presource, lresource, pid, paradigm, paradigms, identifier,
-                 pos, classes, table):
+                 pos, classes, table, lexconf):
     logging.debug('id %s, para %s.\n classes %s, identifier %s' %
                   (pid, paradigm, classes, identifier))
     paradigm.set_id(pid)
@@ -26,11 +26,17 @@ def add_paradigm(presource, lresource, pid, paradigm, paradigms, identifier,
     paradigm._entries = 1
     for key, val in classes.items():
         paradigm.add_class(key, [val])
-    logging.debug('uuid', puuid)
-    # print(paradigm.members)
-    # print(paradigm.var_insts)
+    logging.debug('uuid %s' % puuid)
     # Add to our in memory paradigms
-    paradigms[puuid] = paradigm
+    if lresource not in paradigms:
+        paradigms[lresource] = {}
+    if pos not in paradigms[lresource]:
+        paradigms[lresource][pos] = {}
+    all_paras, numex, lms, alpha = paradigms[lresource].get(pos, ({}, 0, None))
+    alpha = mp.extend_alphabet(paradigm, alpha)
+    mp.lms_paradigm(paradigm, lms, alpha, lexconf["ngramorder"], lexconf["ngramprior"])
+    all_paras[puuid] = paradigm
+    paradigms[lresource][pos] = (all_paras, numex+1, lms, alpha)
     helpers.karp_add(paradigm.jsonify(), resource=presource, _id=puuid)
     helpers.karp_add(table, resource=lresource)
 
@@ -54,11 +60,14 @@ def add_word_to_paradigm(presource, lresource, lemgram, inst, classes,
 
 def update_paradigm(pid, paradigm, paradigms):
     # TODO send_to_karp()
+    # update language model
     paradigms[pid] = paradigm
 
 
 def remove_paradigm(pid, paradigms):
     # TODO send_to_karp()
+    # decrease count
+    # remove from language model
     del paradigms[pid]
 
 
