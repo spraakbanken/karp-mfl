@@ -63,7 +63,7 @@ def paradigminfo(paradigm=''):
     short = short in [True, 'true', 'True']
     lexconf = helpers.get_lexiconconf(lexicon)
     # TODO lexconf for extractParadigm should not be needed, same for all
-    print('lexconf', lexconf)
+    # print('lexconf', lexconf)
     obj = helpers.give_info(lexicon, paradigm, lexconf['extractparadigm'],
                             lexconf['paradigmMode'],
                             lexconf["paradigmlexiconName"])
@@ -180,7 +180,7 @@ def inflect():
     firstform = helpers.firstform(table)
     lemgram = helpers.make_identifier(lexconf, firstform, pos)
     paras, numex, lms = helpers.relevant_paradigms(paradigmdict, lexicon, pos)
-    print('got %s paradigms for %s %s' % (len(paras), lexicon, pos))
+    # print('got %s paradigms for %s %s' % (len(paras), lexicon, pos))
     ans = handle.inflect_table(table,
                                [paras, numex, lms, C.config["print_tables"],
                                 C.config["debug"], ppriorv],
@@ -255,12 +255,11 @@ def inflectcandidate():
 
     if not candidate['CandidateParadigms']:
         table = helpers.tableize_obj(candidate, add_tags=True, identifier=lemgram)
-        print('table', table)
         #pex_table = helpers.tableize(table, add_tags=True, identifier=lemgram)
         paradigm = pex.learnparadigms([table])[0]
         obj = {'score': 0, 'paradigm': '', 'new': True}
         if paradigm is not None:
-            obj['variables'] = [v for v in paradigm.var_insts[0] if v[0] not in [0, '0']]
+            obj['variables'] = [var for ix, var in para.var_insts[0][:1]]
             obj['paradigm'] = paradigm.name
             obj['pattern'] = paradigm.pattern()
         obj['WordForms'] = candidate['WordForms']
@@ -334,7 +333,7 @@ def compile():
         helpers.multi_query(lexconf, search_f.split(','), querystr.split(','), query)
         search_f = ''
         querystr = ''
-    print('query is now', query)
+    # print('query is now', query)
 
     search_f = lexconf.get(search_f, search_f)
     if pos:
@@ -458,7 +457,7 @@ def add_table():
         if not field:
             raise e.MflException("Both identifier, partOfSpeech and paradigm must be given!",
                                  code="unknown_%s" % name)
-    classes = request.args.get('class', '')
+    classes = request.args.get('class', '') or request.args.get('classes', '')
     is_new = request.args.get('new')
     is_new = is_new in ['True', 'true', True]
     try:
@@ -496,7 +495,8 @@ def add_table():
                                  lexconf['paradigmlexiconName'],
                                  lexconf['paradigmMode'])
 
-    logging.debug('fitting %s'  % fittingparadigms)
+    logging.debug('fitting %s' % fittingparadigms)
+    logging.debug('pex_table %s %s' % pex_table)
     ans = mp.test_paradigms(pex_table, fittingparadigms, numex, lms,
                             C.config["print_tables"], C.config["debug"],
                             lexconf["pprior"], returnempty=False,
@@ -509,12 +509,14 @@ def add_table():
 
     if not ans:
         # print(ans)
+        pex_table = helpers.tableize(table, add_tags=True, identifier=identifier)
         para = pex.learnparadigms([pex_table])[0]
         # print('para is', para)
-        v = para.var_insts
+        v = [var for ix, var in para.var_insts[0][:1]]
         handle.add_paradigm(lexconf['paradigmlexiconName'],
-                            lexconf['lexiconName'], paradigm, para, paras,
-                            identifier, pos, classes, wf_table)
+                            lexconf['lexiconName'], paradigm, para,
+                            paradigmdict, identifier, pos, classes, wf_table,
+                            lexconf)
     else:
         # TODO used to be ans[0][0], see slack 13:26 12/4
         score, para, v = ans[0]
@@ -614,10 +616,10 @@ def recomputecandiadtes():
     lexconf = helpers.get_lexiconconf(lexicon)
     postags = helpers.read_pos(lexconf)
     ppriorv = float(request.args.get('pprior', lexconf["pprior"]))
-    print('postags', postags)
+    # print('postags', postags)
     counter = 0
     for pos in postags:
-        print('pos', pos)
+        # print('pos', pos)
         q = 'extended||and|%s.search|equals|%s' % (lexconf['pos'], pos)
         res = helpers.karp_query('query', query={'q': q},
                                  mode=lexconf['candidateMode'],
@@ -662,18 +664,18 @@ def update_model(lexicon, pos, paradigmdict, lexconf):
     paras = read_paradigms(lexconf['paradigmlexiconName'], pos,
                            lexconf['paradigmMode'])
     logging.debug('memorize %s paradigms??' % len(paras))
-    paras, numex, lms = mp.build(paras, lexconf["ngramorder"],
-                                 lexconf["ngramprior"],
-                                 lexicon=lexconf['paradigmlexiconName'],
-                                 inpformat='json',
-                                 pos=pos,
-                                 small=False)
+    paras, numex, lms, alphabet = mp.build(paras, lexconf["ngramorder"],
+                                           lexconf["ngramprior"],
+                                           lexicon=lexconf['paradigmlexiconName'],
+                                           inpformat='json',
+                                           pos=pos,
+                                           small=False)
     logging.debug('memorize %s paradigms' % len(paras))
     paradigms = {}
     for para in paras:
         paradigms[para.uuid] = para
     # print('keys', paradigms.keys())
-    paradigmdict[lexicon][pos] = (paradigms, numex, lms)
+    paradigmdict[lexicon][pos] = (paradigms, numex, lms, alphabet)
 
 
 logging.basicConfig(stream=sys.stderr, level='DEBUG')
