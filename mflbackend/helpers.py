@@ -450,4 +450,4 @@ def authenticate(lexconf={}, action='read'):
         if not permissions.get(action, False):
             raise e.MflException("Action %s not allowed in lexicon %s" %
                                  (action, lexconf['lexiconName']),
-                                 code="authentication", status=401)
+                                 code="authentication", status_code=401)

@@ -259,7 +259,7 @@ def inflectcandidate():
         paradigm = pex.learnparadigms([table])[0]
         obj = {'score': 0, 'paradigm': '', 'new': True}
         if paradigm is not None:
-            obj['variables'] = [var for ix, var in para.var_insts[0][:1]]
+            obj['variables'] = [var for ix, var in paradigm.var_insts[0][:1]]
             obj['paradigm'] = paradigm.name
             obj['pattern'] = paradigm.pattern()
         obj['WordForms'] = candidate['WordForms']
@@ -287,6 +287,7 @@ def listing():
         res = helpers.karp_query('statlist',
                                  {'q': query,
                                   'buckets': classname+'.bucket'},
+                                 resource=lexconf['lexiconName'],
                                  mode=lexconf['lexiconMode'])
         return jsonify({"compiled_on": classname,
                         "list": res['stat_table'],
@@ -298,6 +299,7 @@ def listing():
         res = helpers.karp_query('statlist',
                                  {'q': query,
                                   'buckets': lexconf["baseform"]+'.bucket'},
+                                 resource=lexconf['lexiconName'],
                                  mode=lexconf['lexiconMode'])
         return jsonify({"compiled_on": "wf",
                         "list": res['stat_table'],
@@ -308,6 +310,7 @@ def listing():
         res = helpers.karp_query('statlist',
                                  {'q': query,
                                   'buckets': lexconf["extractparadigm"]+'.bucket'},
+                                 resource=lexconf['lexiconName'],
                                  mode=lexconf['lexiconMode'])
         return jsonify({"compiled_on": "paradigm",
                         "list": res['stat_table'],
