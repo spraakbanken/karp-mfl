@@ -23,5 +23,5 @@
 "possible_lexiconFields": [],
 "src": "config.saolp_convert",
 "wsauth_name": "saolp",
-"restrict_to_baseform": true
+"restrict_to_baseform": false
 }

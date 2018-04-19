@@ -199,10 +199,12 @@ def inflectlike():
     lexicon = request.args.get('lexicon', 'saldomp')
     lexconf = helpers.get_lexiconconf(lexicon)
     word = request.args.get('wordform', '')
+    pos = helpers.read_one_pos(lexconf)
     like = request.args.get('like')
     logging.debug('like %s' % like)
     ppriorv = float(request.args.get('pprior', lexconf["pprior"]))
-    pos = helpers.identifier2pos(lexconf, like)
+    if not pos:
+        pos = helpers.identifier2pos(lexconf, like)
     lemgram = helpers.make_identifier(lexconf, word, pos)
     q = 'extended||and|%s.search|equals|%s' % ('first-attest', like)
     res = helpers.karp_query('statlist',
@@ -266,7 +268,7 @@ def inflectcandidate():
         obj['identifier'] = lemgram
         obj['partOfSpeech'] = pos
         obj['count'] = 0
-        ans = [obj]
+        ans = [helpers.show_inflected(obj)]
     return jsonify({"Results": ans})
 
 

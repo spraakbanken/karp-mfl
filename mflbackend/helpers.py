@@ -107,7 +107,7 @@ def make_table(lexconf, paradigm, v, score, pos, lemgram=''):
                 'score': score, 'count': paradigm.count,
                 'new': False, 'partOfSpeech': pos,
                 'identifier': lemgram}
-        # logging.debug('%s:, %s' % (paradigm.name, v))
+        logging.debug('%s:, %s' % (paradigm.name, v))
         table = paradigm(*v)  # Instantiate table with vars from analysis
         logging.debug('table %s' % (table))
         for form, msd in table:
@@ -119,12 +119,17 @@ def make_table(lexconf, paradigm, v, score, pos, lemgram=''):
 
         infl['baseform'] = get_baseform_infl(lexconf, infl)
         # logging.debug('could use paradigm %s' % paradigm)
-        return infl
+        return show_inflected(lexconf, infl)
     except Exception as e:
         # fails if the inflection does not work (instantiation fails)
         logging.debug('could not use paradigm %s' % paradigm.name)
         logging.exception(e)
         return None
+
+
+def show_inflected(lexconf, entry):
+    func = extra_src(lexconf, 'show_inflected', lambda x: x)
+    return func(entry)
 
 
 # TODO lexicon specific
@@ -194,7 +199,7 @@ def extra_src(lexconf, funcname, default):
         return default
 
 
-def lmf_tableize(table, paradigm=None, pos='', lemgram='', score=0):
+def lmf_tableize(lexconf, table, paradigm=None, pos='', lemgram='', score=0):
     table = table.split(',')
     obj = {'score': score, 'paradigm': '', 'new': True}
     if paradigm is not None:
@@ -214,7 +219,7 @@ def lmf_tableize(table, paradigm=None, pos='', lemgram='', score=0):
     obj['partOfSpeech'] = pos
     obj['count'] = 0
     obj['identifier'] = lemgram
-    return obj
+    return show_inflected(lexconf, obj)
 
 
 def tableize(table, add_tags=True, fill_tags=True, identifier=''):

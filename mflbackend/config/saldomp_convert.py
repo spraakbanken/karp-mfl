@@ -12,6 +12,7 @@ def get_baseform(entry={}, lemgram=''):
 
 
 def get_pos(lemgram):
+    print('get pos', lemgram)
     return re.search('.*\.\.(.*?)\.', lemgram).group(1)
 
 
@@ -32,6 +33,7 @@ def make_overview(obj):
 
 def lmf_wftableize(paradigm, table, classes={}, baseform='', identifier='',
                    pos='', resource=''):
+    " Url table format -> LMF format"
     table = table.split(',')
     obj = {'lexiconName': resource}
     wfs = []
@@ -64,6 +66,7 @@ def yield_identifier(baseform, pos):
 
 
 def show_wordentry(entry):
+    " LMF -> MFL format "
     result = {}
     form = entry.get("FormRepresentations", [{}])[0]
     result['bklass'] = form.get("bklass", "")

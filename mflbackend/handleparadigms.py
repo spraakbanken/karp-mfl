@@ -91,6 +91,6 @@ def inflect_table(table, settings, lexconf, pos='', lemgram='', kbest=10):
         pex_table = helpers.tableize(table, add_tags=True, identifier=lemgram)
         paradigm = pex.learnparadigms([pex_table])[0]
         logging.debug('learned %s' % paradigm)
-        ans = {'Results': [helpers.lmf_tableize(table, paradigm=paradigm,
+        ans = {'Results': [helpers.lmf_tableize(lexconf, table, paradigm=paradigm,
                                                 pos=pos, lemgram=lemgram)]}
     return ans
