@@ -25,6 +25,7 @@ def make_overview(obj):
 
 def lmf_wftableize(paradigm, table, classes={}, baseform='', identifier='',
                    pos='', resource=''):
+    " Url table format -> LMF format"
     table = table.split(',')
     obj = {'lexiconName': resource}
     wfs = []
@@ -55,6 +56,7 @@ def yield_identifier(baseform, pos):
 
 
 def show_wordentry(entry):
+    " LMF -> MFL format "
     entry['identifier'] = entry.get("lemgram", "")
     if 'lemgram' in entry:
         del entry['lemgram']
