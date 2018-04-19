@@ -433,11 +433,12 @@ def authenticate(lexconf={}, action='read'):
         server = C.config['AUTH_SERVER']
         mdcode = user + pw + C.config['SECRET_KEY']
         postdata["checksum"] = md5(mdcode.encode('utf8')).hexdigest()
+        postdata["username"] = user
+        postdata["password"] = pw
     else:
         server = C.config['AUTH_RESOURCES']
 
-    data = json.dumps(postdata).encode('utf8')
-    logging.debug('ask %s, data %s' % (server, postdata))
+    data = urllib.parse.urlencode(postdata).encode()
     response = urllib.request.urlopen(server, data).read().decode('utf8')
     auth_response = json.loads(response)
     lexitems = auth_response.get("permitted_resources", {})
@@ -446,7 +447,6 @@ def authenticate(lexconf={}, action='read'):
                 if per['read']]
     else:
         permissions = lexitems.get("lexica", {}).get(lexconf['wsauth_name'], {})
-        logging.debug('permissions %s' % permissions)
         if not permissions.get(action, False):
             raise e.MflException("Action %s not allowed in lexicon %s" %
                                  (action, lexconf['lexiconName']),
