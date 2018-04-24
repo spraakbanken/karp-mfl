@@ -205,7 +205,7 @@ def lmf_tableize(lexconf, table, paradigm=None, pos='', lemgram='', score=0):
     if paradigm is not None:
         obj['variables'] = dict([var for var in paradigm.var_insts[0][1:]])
         obj['paradigm'] = paradigm.name
-        obj['pattern'] = paradigm.pattern()
+        obj['pattern'] = paradigm.jsonify()
     wfs = []
     for l in table:
         if '|' in l:
