@@ -141,7 +141,7 @@ def inflectclass():
     paras, numex, lms = helpers.relevant_paradigms(paradigmdict, lexicon,
                                                    pos, possible_p)
     # TODO what if there are no variables?
-    var_inst = sorted([(key, val) for key, val in request.args.items()
+    var_inst = sorted([(int(key), val) for key, val in request.args.items()
                        if key.isdigit()])
     if classname == "paradigm" and var_inst:
         # Special case: '?classname=paradigm&classval=p14_oxe..nn.1?1=katt&2=a'
@@ -149,7 +149,6 @@ def inflectclass():
         if len(paras) < 1 or len(possible_p) < 1:
             raise e.MflException("Cannot find paradigm %s" % classval,
                                  code="unknown_paradigm")
-        var_inst.sort()
         var_inst = [val for key, val in var_inst]
         logging.debug('look for %s as %s' % (classval, pos))
         table = helpers.make_table(lexconf, paras[0], var_inst, 0, pos, lemgram)
@@ -249,7 +248,12 @@ def inflectcandidate():
     lemgram = helpers.make_identifier(lexconf, candidate['baseform'], pos)
     ans = []
     for inflect in candidate['CandidateParadigms']:
-        var_inst = inflect['VariableInstances'].values()
+        #var_inst = inflect['VariableInstances'].items()
+        var_inst = []
+        for varname, var in inflect['VariableInstances'].items():
+            if varname.isdigit():
+                var_inst.append((int(varname), var))
+        var_inst = [var for key, var in sorted(var_inst)]
         paras, n, l = helpers.relevant_paradigms(paradigmdict, lexicon,
                                                  pos,
                                                  possible_p=[inflect['uuid']])
@@ -261,7 +265,7 @@ def inflectcandidate():
         paradigm = pex.learnparadigms([table])[0]
         obj = {'score': 0, 'paradigm': '', 'new': True}
         if paradigm is not None:
-            obj['variables'] = [var for ix, var in paradigm.var_insts[0][:1]]
+            obj['variables'] = [var for ix, var in paradigm.var_insts[0][1:]]
             obj['paradigm'] = paradigm.name
             obj['pattern'] = paradigm.pattern()
         obj['WordForms'] = candidate['WordForms']
@@ -369,13 +373,12 @@ def compile():
                                    mode=lexconf['lexiconMode'])
         res = helpers.karp_query('statistics',
                                  {'q': query,
-                                  'size': size,
+                                  'size': start+size,
                                   'buckets': ','.join(['%s.bucket' % b for b in buckets])},
                                  resource=lexconf['lexiconName'],
                                  mode=lexconf['lexiconMode'])
         ans = []
-        # TODO give a total count
-        for pbucket in helpers.get_classbucket(classname, res, lexconf):
+        for pbucket in helpers.get_classbucket(classname, res, lexconf)[int(start):]:
             if extra:
                 pcount = len(pbucket[lexconf['extractparadigmpath']]['buckets'])
                 ans.append([pbucket["key"], pcount, pbucket["doc_count"]])
@@ -385,7 +388,7 @@ def compile():
         logging.debug('extra? %s' % extra)
         return jsonify({"compiled_on": classname, "stats": ans,
                         "fields": ["paradigm", "entries"],
-                        "count": helpers.get_classcount(classname, count, lexconf)})
+                        "total": helpers.get_classcount(classname, count, lexconf)})
 
     elif compile_f == "wf":
         mode = lexconf['lexiconMode']
@@ -517,6 +520,7 @@ def add_table():
         pex_table = helpers.tableize(table, add_tags=True, identifier=identifier)
         para = pex.learnparadigms([pex_table])[0]
         # print('para is', para)
+        # TODO bug? should be 1:
         v = [var for ix, var in para.var_insts[0][:1]]
         handle.add_paradigm(lexconf['paradigmlexiconName'],
                             lexconf['lexiconName'], paradigm, para,
