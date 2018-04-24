@@ -267,7 +267,7 @@ def inflectcandidate():
         if paradigm is not None:
             obj['variables'] = [var for ix, var in paradigm.var_insts[0][1:]]
             obj['paradigm'] = paradigm.name
-            obj['pattern'] = paradigm.pattern()
+            obj['pattern'] = paradigm.jsonify()
         obj['WordForms'] = candidate['WordForms']
         obj['identifier'] = lemgram
         obj['partOfSpeech'] = pos
