@@ -330,6 +330,8 @@ def compile():
     querystr  = request.args.get('q', '')  # querystring
     search_f  = request.args.get('s', '')  # searchfield
     compile_f = request.args.get('c', '')  # searchfield
+    isfilter = request.args.get('filter', '')  # filter the hits?
+    isfilter = isfilter in ['true', 'True', True]
     lexicon = request.args.get('lexicon', 'saldomp')
     lexconf = helpers.get_lexiconconf(lexicon)
     pos = helpers.read_pos(lexconf)
@@ -352,7 +354,10 @@ def compile():
         classname = request.args.get('classname', '')
         if querystr:
             s_field = search_f or classname
-            query.append('and|%s|equals|%s' % (s_field, querystr))
+            operator = 'equals' if not isfilter else 'regexp'
+            if isfilter:
+                querystr = '.*'+querystr+'.*'
+            query.append('and|%s|%s|%s' % (s_field, operator, querystr))
         if query:
             query = 'extended||' + '||'.join(query)
         else:
@@ -397,7 +402,8 @@ def compile():
         #else:
         #    s_field = search_f
         ans = helpers.compile_list(query, s_field, querystr, lexicon,
-                                   lexconf["show"], size, start, mode)
+                                   lexconf["show"], size, start, mode,
+                                   isfilter)
         out, fields = [], []
 
         def default(obj):
@@ -423,7 +429,7 @@ def compile():
         lexicon = lexconf['paradigmlexiconName']
         mode = lexconf['paradigmMode']
         ans = helpers.compile_list(query, s_field, querystr, lexicon, show,
-                                   size, start, mode)
+                                   size, start, mode, isfilter)
         res = []
         iclasses = []
         for hit in ans["ans"]:
