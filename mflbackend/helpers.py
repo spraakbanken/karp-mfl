@@ -284,8 +284,8 @@ def load_paradigms(es_result, lexconf):
 
 
 def compile_list(query, searchfield, querystr, lexicon, show,
-                 size, start, mode):
-    query = search_q(query, searchfield, querystr, lexicon)
+                 size, start, mode, isfilter=False):
+    query = search_q(query, searchfield, querystr, lexicon, isfilter=isfilter)
     res = karp_query('minientry',
                      {'q': query, 'show': show, 'size': size,
                       'start': start, 'mode': mode,
@@ -325,10 +325,13 @@ def make_identifier(lexconf, baseform, pos, lexicon='', field='', mode='', defau
                          code="id_generation")
 
 
-def search_q(query, searchfield, q, lexicon):
+def search_q(query, searchfield, q, lexicon, isfilter=False):
     if q:
+        operator = 'equals' if not isfilter else 'regexp'
+        if isfilter:
+            q = '.*'+q+'.*'
         logging.debug('q is %s' % q)
-        query.append('and|%s.search|equals|%s' % (searchfield, q))
+        query.append('and|%s.search|%s|%s' % (searchfield, operator, q))
     if query:
         query = 'extended||' + '||'.join(query)
     else:
