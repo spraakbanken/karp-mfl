@@ -18,8 +18,8 @@ def make_overview(obj):
     lemgram = obj.get("lemgram", "")
     pos = obj.get("partOfSpeech", "")
     paradigm = obj.get("paradigm", "")
-    out = [base, pos, lemgram, bklass, paradigm]
-    fields = ["baseform", "partOfSpeech", "identifier", "bklass", "paradigm"]
+    out = [lemgram, base, pos, bklass, paradigm]
+    fields = ["identifier", "baseform", "partOfSpeech", "bklass", "paradigm"]
     return out, fields
 
 

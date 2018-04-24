@@ -26,8 +26,8 @@ def make_overview(obj):
     pos = form.get("partOfSpeech", "")
     paradigm = form.get("paradigm", "")
     fm_paradigm = form.get("fm_paradigm", "")
-    out = [base, pos, inherent, lemgram, bklass, fm_paradigm, paradigm]
-    fields = ["baseform", "partOfSpeech", "inherent", "identifier", "bklass", "fm_paradigm", "paradigm"]
+    out = [lemgram, base, pos, inherent, bklass, fm_paradigm, paradigm]
+    fields = ["identifier", "baseform", "partOfSpeech", "inherent", "bklass", "fm_paradigm", "paradigm"]
     return out, fields
 
 
