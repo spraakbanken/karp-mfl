@@ -16,6 +16,11 @@ def get_pos(lemgram):
     return re.search('.*\.\.(.*?)\.', lemgram).group(1)
 
 
+def get_paradigm(entry):
+    form = entry.get("FormRepresentations", [{}])[0]
+    return form.get("paradigm", "")
+
+
 def make_overview(obj):
     form = obj["FormRepresentations"][0]
     print('form', form)
