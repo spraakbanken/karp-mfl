@@ -24,6 +24,9 @@ def get_baseform(entry={}, lemgram=''):
     return 'default'
 
 
+def get_paradigm(entry):
+    return entry.get("paradigm", "")
+
 # def get_pos(lemgram):
     # TODO must ask karp about this
     # pass

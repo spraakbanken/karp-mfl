@@ -1,14 +1,5 @@
 [
   {
-  "name": "saolp",
-  "pos":  ["subst."]
-  },
-  {
-  "name": "saldomp",
-  "pos":  ["vb", "abm", "nn"],
-  "open":  true
-  },
-  {
   "name": "votiska",
   "pos":  ["nn"],
   "open":  true

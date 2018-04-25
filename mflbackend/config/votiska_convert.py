@@ -12,6 +12,11 @@ def get_baseform(entry={}, lemgram=''):
 def get_pos(lemgram):
     return re.search('.*\.\.(.*?)\.', lemgram).group(1)
 
+
+def get_paradigm(entry):
+    return entry.get("paradigm", "")
+
+
 def make_overview(obj):
     bklass = obj.get("bklass", "")
     base = obj.get("baseform", "")
@@ -45,7 +50,7 @@ def lmf_wftableize(paradigm, table, classes={}, baseform='', identifier='',
     obj['baseform'] = baseform
     obj['paradigm'] = paradigm
     for key, val in classes.items():
-        form[key] = val
+        obj[key] = val
 
     return obj
 
