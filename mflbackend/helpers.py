@@ -40,12 +40,10 @@ def karp_bulkadd(data, resource='saldomp'):
 
 
 def karp_delete(_id, resource='saldomp'):
-    # TODO must use password!
     return karp_request("delete/%s/%s" % (resource, _id))
 
 
 def karp_update(uuid, data, resource='saldomp'):
-    # TODO must use password!
     data = {'doc': data, 'message': 'Mfl generated paradigm'}
     # print('data', data)
     # print('uuid', uuid)
@@ -54,7 +52,6 @@ def karp_update(uuid, data, resource='saldomp'):
 
 
 def karp_query(action, query, mode='external', resource='saldomp'):
-    # TODO must use password!
     if 'mode' not in query:
         query['mode'] = mode
     if 'resource' not in query and 'lexiconName' not in query:
@@ -265,8 +262,9 @@ def tableize_obj(obj, add_tags=True, fill_tags=True, identifier=''):
 
 def relevant_paradigms(paradigmdict, lexicon, pos, possible_p=[]):
     try:
-        all_paras, numex, lms, alpha = paradigmdict[lexicon].get(pos, ({}, 0, None))
+        all_paras, numex, lms, alpha = paradigmdict[lexicon].get(pos, ({}, 0, None, ''))
         if possible_p:
+            # print('search for %s (%s)' % (possible_p[0], all_paras))
             all_paras = [all_paras[p] for p in possible_p if p in all_paras]
         else:
             all_paras = list(all_paras.values())
@@ -296,12 +294,44 @@ def compile_list(query, searchfield, querystr, lexicon, show,
     return {"ans": ans, "total": res["hits"]["total"]}
 
 
-def check_identifier(_id, field, resource, mode, fail=True):
+def get_current_paradigm(_id, pos, lexconf, paradigmdict):
+    field = lexconf['identifier']
+    q = {'size': 1, 'q': 'extended||and|%s.search|equals|%s' %
+         ('first-attest', _id),
+         'show': '_id'}
+    res = karp_query('query', q, mode=lexconf['paradigmMode'],
+                     resource=lexconf['paradigmlexiconName'])
+    if not res['hits']['total'] > 0:
+        raise e.MflException("Identifier %s not found" % _id,
+                             code="unknown_%s" % field)
+
+    p_id = res['hits']['hits'][0]['_source']['_uuid']
+    logging.debug('p_id is %s' % p_id)
+    paras, numex, lms = relevant_paradigms(paradigmdict, lexconf['lexiconName'],
+                                           pos, possible_p=[p_id])
+    if not paras:
+        raise e.MflException("Paradigm %s not found" % p_id,
+                             code="unknown_paradigm")
+    return paras[0]
+
+
+def get_es_identifier(_id, field, resource, mode):
+    q = {'size': 1, 'q': 'extended||and|%s.search|equals|%s' % (field, _id)}
+    res = karp_query('query', q, mode=mode, resource=resource)
+    if not res['hits']['total'] > 0:
+        raise e.MflException("Identifier %s not found" % _id,
+                             code="unknown_%s" % field)
+    return res['hits']['hits'][0]['_id']
+
+
+def check_identifier(_id, field, resource, mode, unique=True, fail=True):
     q = {'size': 0, 'q': 'extended||and|%s.search|equals|%s' % (field, _id)}
     res = karp_query('query', q, mode=mode, resource=resource)
     used = res['hits']['total'] > 0
-    if used and fail:
-        raise e.MflException("Identifier %s already in use" % _id,
+    ok = (used and not unique) or (not used and unique)
+    if not ok and fail:
+        text = 'already in use' if unique else 'not found'
+        raise e.MflException("Identifier %s %s" % (_id, text),
                              code="unique_%s" % field)
     return not used
 
@@ -388,7 +418,7 @@ def read_pos(lexconf):
 
 def read_restriction(lexconf):
     restrict = request.args.get('restrict_to_baseform')
-    print('restrict???', restrict)
+    # print('restrict???', restrict)
     if restrict is None:
         return lexconf['restrict_to_baseform']
     return restrict in ['True', 'true', True]
@@ -399,7 +429,7 @@ def get_bucket(bucket, res, lexconf):
 
 
 def get_bucket_count(bucket, res, lexconf):
-    print(res["aggregations"]["q_statistics"][bucket])
+    # print(res["aggregations"]["q_statistics"][bucket])
     return res["aggregations"]["q_statistics"][bucket]["value"]
 
 

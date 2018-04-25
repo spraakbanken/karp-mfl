@@ -50,7 +50,17 @@ def wordinfo(word=''):
     lexconf = helpers.get_lexiconconf(lexicon)
     obj = helpers.give_info(lexicon, identifier, lexconf['identifier'],
                             lexconf['lexiconMode'], lexconf["lexiconName"])
-    return jsonify(helpers.format_entry(lexconf, obj))
+    lexobj = helpers.format_entry(lexconf, obj)
+    paradigm = lexobj['paradigm']
+    paraobj = helpers.give_info(lexicon, paradigm, lexconf['extractparadigm'],
+                                lexconf['paradigmMode'],
+                                lexconf["paradigmlexiconName"])
+    lexobj['paradigm_entries'] = paraobj.get('_entries', [])
+    for v in paraobj.get('VariableInstances', []):
+        if v.get('first-attest') == lexobj['identifier']:
+            lexobj['variables'] = v
+            break
+    return jsonify(lexobj)
 
 
 @app.route('/paradigminfo')
@@ -248,7 +258,6 @@ def inflectcandidate():
     lemgram = helpers.make_identifier(lexconf, candidate['baseform'], pos)
     ans = []
     for inflect in candidate['CandidateParadigms']:
-        #var_inst = inflect['VariableInstances'].items()
         var_inst = []
         for varname, var in inflect['VariableInstances'].items():
             if varname.isdigit():
@@ -257,11 +266,13 @@ def inflectcandidate():
         paras, n, l = helpers.relevant_paradigms(paradigmdict, lexicon,
                                                  pos,
                                                  possible_p=[inflect['uuid']])
-        ans.append(helpers.make_table(lexconf, paras[0], var_inst, 0, pos, lemgram=lemgram))
+        # the paradigm might be removed, then skip it
+        if paras:
+            ans.append(helpers.make_table(lexconf, paras[0], var_inst, 0, pos,
+                                          lemgram=lemgram))
 
     if not candidate['CandidateParadigms']:
         table = helpers.tableize_obj(candidate, add_tags=True, identifier=lemgram)
-        #pex_table = helpers.tableize(table, add_tags=True, identifier=lemgram)
         paradigm = pex.learnparadigms([table])[0]
         obj = {'score': 0, 'paradigm': '', 'new': True}
         if paradigm is not None:
@@ -327,8 +338,8 @@ def listing():
 
 @app.route('/compile')
 def compile():
-    querystr  = request.args.get('q', '')  # querystring
-    search_f  = request.args.get('s', '')  # searchfield
+    querystr = request.args.get('q', '')  # querystring
+    search_f = request.args.get('s', '')  # searchfield
     compile_f = request.args.get('c', '')  # searchfield
     isfilter = request.args.get('filter', '')  # filter the hits?
     isfilter = isfilter in ['true', 'True', True]
@@ -344,7 +355,6 @@ def compile():
         helpers.multi_query(lexconf, search_f.split(','), querystr.split(','), query)
         search_f = ''
         querystr = ''
-    # print('query is now', query)
 
     search_f = lexconf.get(search_f, search_f)
     if pos:
@@ -397,10 +407,7 @@ def compile():
 
     elif compile_f == "wf":
         mode = lexconf['lexiconMode']
-        #if querystr:
         s_field = search_f or lexconf["baseform"]
-        #else:
-        #    s_field = search_f
         ans = helpers.compile_list(query, s_field, querystr, lexicon,
                                    lexconf["show"], size, start, mode,
                                    isfilter)
@@ -454,94 +461,39 @@ def renameparadigm():
     return "Not implemented"
 
 
+@app.route('/updatetable')
+def update_table():
+    identifier = request.args.get('identifier', '')
+    lexicon = request.args.get('lexicon', 'saldomp')
+    lexconf = helpers.get_lexiconconf(lexicon)
+    pos = helpers.read_one_pos(lexconf)
+    old_para = helpers.get_current_paradigm(identifier, pos, lexconf, paradigmdict)
+
+    wf_table, para, v, classes = handle.make_new_table(paradigmdict)
+    handle.remove_word_from_paradigm(identifier, pos, old_para, lexconf, paradigmdict)
+
+    karp_id = helpers.get_es_identifier(identifier,
+                                        lexconf['identifier'],
+                                        lexconf['lexiconName'],
+                                        lexconf['lexiconMode'])
+    helpers.karp_update(karp_id, wf_table, resource=lexconf['lexiconName'])
+    return jsonify({'paradigm': para.name, 'identifier': identifier,
+                    'var_inst': dict(enumerate(v, 1)), 'classes': classes,
+                    'pattern': para.jsonify(), 'partOfSpeech': pos,
+                    'members': para.count})
+
+
 @app.route('/addtable')
 def add_table():
     # TODO see config for needed and possible fields
     # or is that not needed?
-    lexicon = request.args.get('lexicon', 'saldomp')
-    lexconf = helpers.get_lexiconconf(lexicon)
-    table = request.args.get('table', '')
-    pos = helpers.read_one_pos(lexconf)
-    paradigm = request.args.get('paradigm', '')
-    # check that the table's identier is unique
     identifier = request.args.get('identifier', '')
-    helpers.check_identifier(identifier, lexconf['identifier'],
-                             lexconf['lexiconName'], lexconf['lexiconMode'])
-    for name, field in [('identifier', identifier), ('paradigm', paradigm), ('partOfSpeech', pos)]:
-        if not field:
-            raise e.MflException("Both identifier, partOfSpeech and paradigm must be given!",
-                                 code="unknown_%s" % name)
-    classes = request.args.get('class', '') or request.args.get('classes', '')
-    is_new = request.args.get('new')
-    is_new = is_new in ['True', 'true', True]
-    try:
-        logging.debug('make classes: %s' % classes)
-        if classes:
-            classes = dict([c.split(':') for c in classes.split(',')])
-        else:
-            classes = {}
-    except Exception as e1:
-        logging.warning('Could not parse classes')
-        logging.error(e1)
-        raise e.MflException("Could not parse classes. Format should be 'classname:apa,classname2:bepa'" % (classes),
-                             code="unparsable_class")
-    paras, numex, lms = helpers.relevant_paradigms(paradigmdict, lexicon, pos)
-    if is_new and paradigm in [p.name for p in paras]:
-        raise e.MflException("Paradigm name %s is already used" % (paradigm),
-                             code="unique_paradigm")
+    wf_table, para, v, classes = handle.make_new_table(paradigmdict, newword=True)
 
-    pex_table = helpers.tableize(table, add_tags=False)
-    wf_table = helpers.lmf_wftableize(lexconf, paradigm, table, classes,
-                                      baseform='', identifier=identifier,
-                                      pos=pos, resource=lexconf['lexiconName'])
-    if not is_new:
-        logging.debug('not new, look for %s' % paradigm)
-        fittingparadigms = [p for p in paras if p.p_id == paradigm]
-        if not fittingparadigms:
-            raise e.MflException("Could not find paradigm %s" % paradigm,
-                                 code="unknown_paradigm")
-
-    else:
-        # TODO If an paradigm is already fitting, refuse to add as new?
-        fittingparadigms = paras
-        # check that this is a new name
-        helpers.check_identifier(paradigm, 'MorphologicalPatternID',
-                                 lexconf['paradigmlexiconName'],
-                                 lexconf['paradigmMode'])
-
-    logging.debug('fitting %s' % fittingparadigms)
-    logging.debug('pex_table %s %s' % pex_table)
-    ans = mp.test_paradigms(pex_table, fittingparadigms, numex, lms,
-                            C.config["print_tables"], C.config["debug"],
-                            lexconf["pprior"], returnempty=False,
-                            match_all=True)
-    if not is_new and len(ans) < 1:
-        # print('ans', ans)
-        logging.warning("Could not inflect %s as %s" % (table, paradigm))
-        raise e.MflException("Table can not belong to paradigm %s" % (paradigm),
-                             code="inflect_problem")
-
-    if not ans:
-        # print(ans)
-        pex_table = helpers.tableize(table, add_tags=True, identifier=identifier)
-        para = pex.learnparadigms([pex_table])[0]
-        # print('para is', para)
-        # TODO bug? should be 1:
-        v = [var for ix, var in para.var_insts[0][:1]]
-        handle.add_paradigm(lexconf['paradigmlexiconName'],
-                            lexconf['lexiconName'], paradigm, para,
-                            paradigmdict, identifier, pos, classes, wf_table,
-                            lexconf)
-    else:
-        # TODO used to be ans[0][0], see slack 13:26 12/4
-        score, para, v = ans[0]
-        handle.add_word_to_paradigm(lexconf['paradigmlexiconName'],
-                                    lexconf['lexiconName'], identifier, v,
-                                    classes, para, wf_table)
-
+    helpers.karp_add(wf_table, resource=lexconf['lexiconName'])
     return jsonify({'paradigm': para.name, 'identifier': identifier,
                     'var_inst': dict(enumerate(v, 1)), 'classes': classes,
-                    'pattern': para.pattern(), 'partOfSpeech': pos,
+                    'pattern': para.jsonify(), 'partOfSpeech': pos,
                     'members': para.count})
 
 
