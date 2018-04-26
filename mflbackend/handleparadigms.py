@@ -150,6 +150,7 @@ def make_new_table(paradigmdict, newword=False):
     pos = helpers.read_one_pos(lexconf)
     paradigm = request.args.get('paradigm', '')
     identifier = request.args.get('identifier', '')
+    baseform = request.args.get('baseform', '')
     # check that the table's identier is unique
     helpers.check_identifier(identifier, lexconf['identifier'],
                              lexconf['lexiconName'], lexconf['lexiconMode'],
@@ -180,7 +181,7 @@ def make_new_table(paradigmdict, newword=False):
 
     pex_table = helpers.tableize(table, add_tags=False)
     wf_table = helpers.lmf_wftableize(lexconf, paradigm, table, classes,
-                                      baseform='', identifier=identifier,
+                                      baseform=baseform, identifier=identifier,
                                       pos=pos, resource=lexconf['lexiconName'])
     if not is_new:
         logging.debug('not new, look for %s' % paradigm)
