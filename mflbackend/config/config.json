@@ -4,6 +4,7 @@
  "kbest": 10,
  "debug": false,
  "choose": false,
+ "default": "votiska",
  "AUTH_RESOURCES": "http://localhost:8082/app/resources",
  "AUTH_SERVER": "http://localhost:8082/app/authenticate",
  "SECRET_KEY": "secret",

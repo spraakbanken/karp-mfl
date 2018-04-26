@@ -12,6 +12,34 @@ import urllib.request
 import uuid
 
 
+def es_total(res):
+    return res['hits']['total']
+
+
+def es_first_source(res):
+    return res['hits']['hits'][0]['_source']
+
+
+def es_first_id(res):
+    return res['hits']['hits'][0]['_id']
+
+
+def es_all_source(res):
+    return [hit['_source'] for hit in res['hits']['hits']]
+
+
+def es_get_hits(res):
+    return res['hits']['hits']
+
+
+def es_get_id(hit):
+    return hit['_id']
+
+
+def es_get_source(hit):
+    return hit['_source']
+
+
 def get_lexiconconf(lexicon):
     try:
         return json.load(open(C.config['lexiconpath'][lexicon]))
@@ -213,6 +241,8 @@ def lmf_tableize(lexconf, table, paradigm=None, pos='', lemgram='', score=0):
         wfs.append({'writtenForm': form, 'msd': tag})
 
     obj['WordForms'] = wfs
+    func = extra_src(lexconf, 'get_baseform', '')
+    obj['baseform'] = func(obj)
     obj['partOfSpeech'] = pos
     obj['count'] = 0
     obj['identifier'] = lemgram
@@ -276,7 +306,7 @@ def relevant_paradigms(paradigmdict, lexicon, pos, possible_p=[]):
 
 
 def load_paradigms(es_result, lexconf):
-    paras = [hit['_source'] for hit in es_result['hits']['hits']]
+    paras = es_all_source(es_result)
     paradigms = P.load_json(paras)
     return paradigms
 
@@ -288,10 +318,8 @@ def compile_list(query, searchfield, querystr, lexicon, show,
                      {'q': query, 'show': show, 'size': size,
                       'start': start, 'mode': mode,
                       'resource': lexicon})
-    ans = []
-    for hit in res["hits"]["hits"]:
-        ans.append(hit["_source"])
-    return {"ans": ans, "total": res["hits"]["total"]}
+    ans = es_all_source(res)
+    return {"ans": ans, "total": es_total(res)}
 
 
 def get_current_paradigm(_id, pos, lexconf, paradigmdict):
@@ -301,11 +329,11 @@ def get_current_paradigm(_id, pos, lexconf, paradigmdict):
          'show': '_id'}
     res = karp_query('query', q, mode=lexconf['paradigmMode'],
                      resource=lexconf['paradigmlexiconName'])
-    if not res['hits']['total'] > 0:
+    if not es_total(res) > 0:
         raise e.MflException("Identifier %s not found" % _id,
                              code="unknown_%s" % field)
 
-    p_id = res['hits']['hits'][0]['_source']['_uuid']
+    p_id = es_first_source(res)['_uuid']
     logging.debug('p_id is %s' % p_id)
     paras, numex, lms = relevant_paradigms(paradigmdict, lexconf['lexiconName'],
                                            pos, possible_p=[p_id])
@@ -318,16 +346,16 @@ def get_current_paradigm(_id, pos, lexconf, paradigmdict):
 def get_es_identifier(_id, field, resource, mode):
     q = {'size': 1, 'q': 'extended||and|%s.search|equals|%s' % (field, _id)}
     res = karp_query('query', q, mode=mode, resource=resource)
-    if not res['hits']['total'] > 0:
+    if not es_total(res) > 0:
         raise e.MflException("Identifier %s not found" % _id,
                              code="unknown_%s" % field)
-    return res['hits']['hits'][0]['_id']
+    return es_first_id(res)
 
 
 def check_identifier(_id, field, resource, mode, unique=True, fail=True):
     q = {'size': 0, 'q': 'extended||and|%s.search|equals|%s' % (field, _id)}
     res = karp_query('query', q, mode=mode, resource=resource)
-    used = res['hits']['total'] > 0
+    used = es_total(res) > 0
     ok = (used and not unique) or (not used and unique)
     if not ok and fail:
         text = 'already in use' if unique else 'not found'
@@ -450,8 +478,8 @@ def give_info(lexicon, identifier, id_field, mode, resource):
     q = 'extended||and|%s.search|equals|%s' %\
         (id_field, identifier)
     res = karp_query('query', {'q': q}, mode=mode, resource=resource)
-    if res['hits']['total'] > 0:
-        return res['hits']['hits'][0]['_source']
+    if es_total(res) > 0:
+        return es_first_source(res)
     return {}
 
 

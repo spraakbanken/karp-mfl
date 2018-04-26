@@ -11,6 +11,8 @@ import pextract as pex
 # Must be imported after pextract is found
 import handleparadigms as handle
 import helpers
+import parsecandidates as pc
+import parseparadigms as pp
 
 app = Flask(__name__)
 CORS(app)
@@ -31,9 +33,7 @@ def lexiconinfo(lex=''):
     if not lex:
         res = []
         for l in C.config['all_lexicons']:
-            lex = {}
-            lex['name'] = l['name']
-            lex['open'] = l.get('open', False)
+            lex = {'name': l['name'], 'open': l.get('open', False)}
             res.append(lex)
         return jsonify({"lexicons": res})
     else:
@@ -45,21 +45,17 @@ def lexiconinfo(lex=''):
 @app.route('/wordinfo/<word>')
 def wordinfo(word=''):
     " Show information for the word infobox "
-    lexicon = request.args.get('lexicon', 'saldomp')
+    lexicon = request.args.get('lexicon', C.config['default'])
     identifier = word or request.args.get('identifier')
     lexconf = helpers.get_lexiconconf(lexicon)
     obj = helpers.give_info(lexicon, identifier, lexconf['identifier'],
                             lexconf['lexiconMode'], lexconf["lexiconName"])
     lexobj = helpers.format_entry(lexconf, obj)
-    paradigm = lexobj['paradigm']
-    paraobj = helpers.give_info(lexicon, paradigm, lexconf['extractparadigm'],
+    # Add info about paradigm_entries and variable instances
+    paraobj = helpers.give_info(lexicon, lexobj['paradigm'], pp.id_field,
                                 lexconf['paradigmMode'],
                                 lexconf["paradigmlexiconName"])
-    lexobj['paradigm_entries'] = paraobj.get('_entries', [])
-    for v in paraobj.get('VariableInstances', []):
-        if v.get('first-attest') == lexobj['identifier']:
-            lexobj['variables'] = v
-            break
+    pp.word_add_parainfo(lexobj, paraobj)
     return jsonify(lexobj)
 
 
@@ -67,30 +63,24 @@ def wordinfo(word=''):
 @app.route('/paradigminfo/<paradigm>')
 def paradigminfo(paradigm=''):
     " Show information for the paradigm infobox "
-    lexicon = request.args.get('lexicon', 'saldomp')
+    lexicon = request.args.get('lexicon', C.config['default'])
     paradigm = request.args.get('paradigm', paradigm)
     short = request.args.get('short', '')
     short = short in [True, 'true', 'True']
     lexconf = helpers.get_lexiconconf(lexicon)
-    # TODO lexconf for extractParadigm should not be needed, same for all
     # print('lexconf', lexconf)
-    obj = helpers.give_info(lexicon, paradigm, lexconf['extractparadigm'],
+    obj = helpers.give_info(lexicon, paradigm, pp.id_field,
                             lexconf['paradigmMode'],
                             lexconf["paradigmlexiconName"])
     if short:
-        short_obj = {}
-        short_obj['MorphologicalPatternID'] = obj['MorphologicalPatternID']
-        short_obj['partOfSpeech'] = obj['_partOfSpeech']
-        short_obj['entries'] = obj['_entries']
-        short_obj['TransformCategory'] = obj.get('TransformCategory', {})
-        obj = short_obj
+        obj = pp.make_short(obj)
     return jsonify(obj)
 
 
 @app.route('/partofspeech')
 def all_pos():
     " Show all part of speech tags that the lexicon use "
-    lexicon = request.args.get('lexicon', 'saldomp')
+    lexicon = request.args.get('lexicon', C.config['default'])
     lexconf = helpers.get_lexiconconf(lexicon)
     helpers.authenticate(lexconf, 'read')
     # TODO also check in lexicon and give combined info about
@@ -103,7 +93,7 @@ def all_pos():
 @app.route('/defaulttable')
 def defaulttable():
     " Show an empty table suiting the lexicon and part of speech "
-    lexicon = request.args.get('lexicon', 'saldomp')
+    lexicon = request.args.get('lexicon', C.config['default'])
     lexconf = helpers.get_lexiconconf(lexicon)
     pos = helpers.read_one_pos(lexconf)
     q = 'extended||and|%s.search|equals|%s' % (lexconf['pos'], pos)
@@ -129,7 +119,7 @@ def defaulttable():
 @app.route('/inflectclass')
 def inflectclass():
     " Inflect a word according to a user defined category "
-    lexicon = request.args.get('lexicon', 'saldomp')
+    lexicon = request.args.get('lexicon', C.config['default'])
     lexconf = helpers.get_lexiconconf(lexicon)
     word = request.args.get('wordform', '')
     ppriorv = float(request.args.get('pprior', lexconf["pprior"]))
@@ -141,9 +131,9 @@ def inflectclass():
         % (classname, classval, lexconf['pos'], pos)
     res = helpers.karp_query('statlist',
                              {'q': q,
+                              'buckets': '_id',
                               'mode': lexconf['paradigmMode'],
-                              'resource': lexconf['paradigmlexiconName'],
-                              'buckets': '_id'
+                              'resource': lexconf['paradigmlexiconName']
                               }
                              )
     possible_p = [line[0] for line in res['stat_table']]
@@ -179,7 +169,7 @@ def inflectclass():
 @app.route('/inflect')
 def inflect():
     " Inflect a word or table "
-    lexicon = request.args.get('lexicon', 'saldomp')
+    lexicon = request.args.get('lexicon', C.config['default'])
     lexconf = helpers.get_lexiconconf(lexicon)
     table = request.args.get('table', '')
     pos = helpers.read_one_pos(lexconf)
@@ -195,17 +185,13 @@ def inflect():
                                 C.config["debug"], ppriorv],
                                lexconf, pos=pos, lemgram=lemgram)
     # logging.debug('ans')
-    if 'paradigm' in ans:
-        ans['paradigm'] = str(ans['paradigm'])
-    elif 'analyzes' in ans:
-        del ans['analyzes']  # don't return this
     return jsonify(ans)
 
 
 @app.route('/inflectlike')
 def inflectlike():
     " Inflect a word similarly to another word "
-    lexicon = request.args.get('lexicon', 'saldomp')
+    lexicon = request.args.get('lexicon', C.config['default'])
     lexconf = helpers.get_lexiconconf(lexicon)
     word = request.args.get('wordform', '')
     pos = helpers.read_one_pos(lexconf)
@@ -237,41 +223,40 @@ def inflectlike():
         result = helpers.format_inflection(lexconf, res, pos=pos, lemgram=lemgram)
     else:
         result = []
-    ans = {"Results": result}
-    return jsonify(ans)
+    return jsonify({"Results": result})
 
 
 @app.route('/inflectcandidate')
 def inflectcandidate():
-    lexicon = request.args.get('lexicon', 'saldomp')
+    lexicon = request.args.get('lexicon', C.config['default'])
     lexconf = helpers.get_lexiconconf(lexicon)
     identifier = request.args.get('identifier', '')
     q = 'extended||and|%s.search|equals|%s' % ('identifier', identifier)
     res = helpers.karp_query('query', query={'q': q},
                              mode=lexconf['candidateMode'],
                              resource=lexconf['candidatelexiconName'])
-    if res['hits']['total'] < 1:
+    if helpers.es_total(res) < 1:
         raise e.MflException("Could not find candidate %s" % identifier,
                              code="unknown_candidate")
-    candidate = res['hits']['hits'][0]['_source']
-    pos = candidate['partOfSpeech']
-    lemgram = helpers.make_identifier(lexconf, candidate['baseform'], pos)
+    candidate = helpers.es_first_source(res)
+    pos = pc.get_pos(candidate)
+    lemgram = helpers.make_identifier(lexconf, pc.get_baseform(candidate), pos)
     ans = []
-    for inflect in candidate['CandidateParadigms']:
+    for inflect in pc.candidateparadigms(candidate):
         var_inst = []
-        for varname, var in inflect['VariableInstances'].items():
+        for varname, var in pc.inflectionvariables(inflect):
             if varname.isdigit():
                 var_inst.append((int(varname), var))
         var_inst = [var for key, var in sorted(var_inst)]
         paras, n, l = helpers.relevant_paradigms(paradigmdict, lexicon,
                                                  pos,
-                                                 possible_p=[inflect['uuid']])
+                                                 possible_p=[pc.get_uuid(inflect)])
         # the paradigm might be removed, then skip it
         if paras:
             ans.append(helpers.make_table(lexconf, paras[0], var_inst, 0, pos,
                                           lemgram=lemgram))
 
-    if not candidate['CandidateParadigms']:
+    if not pc.candidateparadigms(candidate):
         table = helpers.tableize_obj(candidate, add_tags=True, identifier=lemgram)
         paradigm = pex.learnparadigms([table])[0]
         obj = {'score': 0, 'paradigm': '', 'new': True}
@@ -279,7 +264,7 @@ def inflectcandidate():
             obj['variables'] = [var for ix, var in paradigm.var_insts[0][1:]]
             obj['paradigm'] = paradigm.name
             obj['pattern'] = paradigm.jsonify()
-        obj['WordForms'] = candidate['WordForms']
+        obj['WordForms'] = pc.get_wordforms(candidate)
         obj['identifier'] = lemgram
         obj['partOfSpeech'] = pos
         obj['count'] = 0
@@ -291,47 +276,51 @@ def inflectcandidate():
 def listing():
     q = request.args.get('q', '')  # querystring
     s = request.args.get('c', '*')  # searchfield
-    lexicon = request.args.get('lexicon', 'saldomp')
+    lexicon = request.args.get('lexicon', C.config['default'])
+    size = request.args.get('size', '100')
     lexconf = helpers.get_lexiconconf(lexicon)
     pos = helpers.read_pos(lexconf)
     query = []
     if pos:
-        query.append('and|%s|startswith|%s' % (lexconf["pos"], '|'.join(pos)))
+        query.append('and|%s|equals|%s' % (lexconf["pos"], '|'.join(pos)))
 
     if s == 'class':
         classname = request.args.get('classname', '')
         query = helpers.search_q(query, classname, q, lexicon)
         res = helpers.karp_query('statlist',
                                  {'q': query,
+                                  'size': size,
                                   'buckets': classname+'.bucket'},
                                  resource=lexconf['lexiconName'],
                                  mode=lexconf['lexiconMode'])
         return jsonify({"compiled_on": classname,
                         "list": res['stat_table'],
-                        "fields": ["entries"]})
+                        "fields": [classname, "entries"]})
 
-    if s == "wf":
+    if s in ["wf", "wordform"]:
         # TODO this is probably not correct, due to ES approx
         query = helpers.search_q(query, lexconf["baseform"], q, lexicon)
         res = helpers.karp_query('statlist',
                                  {'q': query,
+                                  'size': size,
                                   'buckets': lexconf["baseform"]+'.bucket'},
                                  resource=lexconf['lexiconName'],
                                  mode=lexconf['lexiconMode'])
-        return jsonify({"compiled_on": "wf",
+        return jsonify({"compiled_on": "wordform",
                         "list": res['stat_table'],
-                        "fields": ["entries"]})
+                        "fields": ["baseform", "entries"]})
 
     elif s == "paradigm":
         query = helpers.search_q(query, lexconf["extractparadigm"], q, lexicon)
         res = helpers.karp_query('statlist',
                                  {'q': query,
+                                  'size': size,
                                   'buckets': lexconf["extractparadigm"]+'.bucket'},
                                  resource=lexconf['lexiconName'],
                                  mode=lexconf['lexiconMode'])
         return jsonify({"compiled_on": "paradigm",
                         "list": res['stat_table'],
-                        "fields": ["entries"]})
+                        "fields": ["paradigm", "entries"]})
     else:
         return "Don't know what to do"
 
@@ -343,7 +332,7 @@ def compile():
     compile_f = request.args.get('c', '')  # searchfield
     isfilter = request.args.get('filter', '')  # filter the hits?
     isfilter = isfilter in ['true', 'True', True]
-    lexicon = request.args.get('lexicon', 'saldomp')
+    lexicon = request.args.get('lexicon', C.config['default'])
     lexconf = helpers.get_lexiconconf(lexicon)
     pos = helpers.read_pos(lexconf)
     size = request.args.get('size', '100')
@@ -358,7 +347,7 @@ def compile():
 
     search_f = lexconf.get(search_f, search_f)
     if pos:
-        query.append('and|%s|startswith|%s' % (lexconf["pos"], '|'.join(pos)))
+        query.append('and|%s|equals|%s' % (lexconf["pos"], '|'.join(pos)))
 
     if compile_f == 'class':
         classname = request.args.get('classname', '')
@@ -402,10 +391,10 @@ def compile():
 
         logging.debug('extra? %s' % extra)
         return jsonify({"compiled_on": classname, "stats": ans,
-                        "fields": ["paradigm", "entries"],
+                        "fields": [classname, "paradigm", "entries"],
                         "total": helpers.get_classcount(classname, count, lexconf)})
 
-    elif compile_f == "wf":
+    elif compile_f in ["wf", "wordform"]:
         mode = lexconf['lexiconMode']
         s_field = search_f or lexconf["baseform"]
         ans = helpers.compile_list(query, s_field, querystr, lexicon,
@@ -421,18 +410,18 @@ def compile():
             row, fields = func(obj)
             out.append(row)
 
-        return jsonify({"compiled_on": "wordforms", "stats": out,
+        return jsonify({"compiled_on": "wordform", "stats": out,
                         "fields": fields, "total": ans["total"]})
 
     elif compile_f == "paradigm":
         # TODO no need to look in config for this, it should always be the same
         # if querystr:
-        s_field = search_f or lexconf["extractparadigm"]
+        s_field = search_f or pp.id_field
         # else:
         #     s_field = search_f
-        show = ','.join([lexconf['extractparadigm'],
-                         'TransformCategory',
-                         '_entries'])
+        show = ','.join([pp.id_field,
+                         pp.transform_field,
+                         pp.entries])
         lexicon = lexconf['paradigmlexiconName']
         mode = lexconf['paradigmMode']
         ans = helpers.compile_list(query, s_field, querystr, lexicon, show,
@@ -441,14 +430,14 @@ def compile():
         iclasses = []
         for hit in ans["ans"]:
             iclasses = []  # only need one instance
-            stats = [hit['MorphologicalPatternID']]
+            stats = [hit[pp.id_field]]
             for iclass in lexconf['inflectionalclass'].keys():
-                stats.append(len(hit['TransformCategory'].get(iclass, [])))
+                stats.append(len(pp.get_transformcat(hit, iclass)))
                 iclasses.append(iclass)
-            stats.append(hit['_entries'])
+            stats.append(pp.get_entries(hit))
             res.append(stats)
         return jsonify({"compiled_on": "paradigm", "stats": res,
-                        "fields": iclasses+['entries'], "total": ans["total"]})
+                        "fields": ['paradigm']+iclasses+['entries'], "total": ans["total"]})
 
     else:
         raise e.MflException("Don't know what to do", code="unknown_action")
@@ -464,7 +453,7 @@ def renameparadigm():
 @app.route('/updatetable')
 def update_table():
     identifier = request.args.get('identifier', '')
-    lexicon = request.args.get('lexicon', 'saldomp')
+    lexicon = request.args.get('lexicon', C.config['default'])
     lexconf = helpers.get_lexiconconf(lexicon)
     pos = helpers.read_one_pos(lexconf)
     old_para = helpers.get_current_paradigm(identifier, pos, lexconf, paradigmdict)
@@ -487,6 +476,8 @@ def update_table():
 def add_table():
     # TODO see config for needed and possible fields
     # or is that not needed?
+    lexicon = request.args.get('lexicon', C.config['default'])
+    lexconf = helpers.get_lexiconconf(lexicon)
     identifier = request.args.get('identifier', '')
     wf_table, para, v, classes = handle.make_new_table(paradigmdict, newword=True)
 
@@ -506,7 +497,7 @@ def addcandidates():
     data = request.get_data().decode()  # decode from bytes
     logging.debug('data %s' % data)
     tables = data.split('\n')
-    lexicon = request.args.get('lexicon', 'saldomp')
+    lexicon = request.args.get('lexicon', C.config['default'])
     lexconf = helpers.get_lexiconconf(lexicon)
     ppriorv = float(request.args.get('pprior', lexconf["pprior"]))
     to_save = []
@@ -541,45 +532,43 @@ def addcandidates():
 
 @app.route('/candidatelist')
 def candidatelist():
-    lexicon = request.args.get('lexicon', 'saldomp')
+    lexicon = request.args.get('lexicon', C.config['default'])
     lexconf = helpers.get_lexiconconf(lexicon)
     pos = helpers.read_pos(lexconf)
     q = 'extended||and|%s.search|equals|%s' % (lexconf['pos'], '|'.join(pos))
     res = helpers.karp_query('query', query={'q': q},
                              mode=lexconf['candidateMode'],
                              resource=lexconf['candidatelexiconName'])
-    return jsonify({"candidates": [hit['_source'] for hit in res['hits']['hits']]})
+    return jsonify({"candidates": helpers.es_all_source(res)})
 
 
 @app.route('/removecandidate')
-@app.route('/removecandidate/<_id>')
 def removecandidate(_id=''):
     ''' Either use this with the ES id:
-        /removecandidate/ABC83Z
+        /removecandidate?es_identifier=ABC83Z
         or with the lexcion's identifiers
         /removecandidate?identifier=katt..nn.1
     '''
-    lexicon = request.args.get('lexicon', 'saldomp')
+    lexicon = request.args.get('lexicon', C.config['default'])
     lexconf = helpers.get_lexiconconf(lexicon)
-    if not _id:
-        try:
-            identifier = request.args.get('identifier', '')
-            q = 'extended||and|%s.search|equals|%s' % ('identifier', identifier)
-            res = helpers.karp_query('query', query={'q': q},
-                                     mode=lexconf['candidateMode'],
-                                     resource=lexconf['candidatelexiconName'])
-            _id = res['hits']['hits'][0]['_id']
-        except Exception as e1:
-            logging.error(e1)
-            raise e.MflException("Could not find candidate %s" % identifier,
-                                 code="unknown_candidate")
+    try:
+        identifier = request.args.get('identifier', '')
+        q = 'extended||and|%s.search|equals|%s' % ('identifier', identifier)
+        res = helpers.karp_query('query', query={'q': q},
+                                 mode=lexconf['candidateMode'],
+                                 resource=lexconf['candidatelexiconName'])
+        _id = helpers.es_first_id(res)
+    except Exception as e1:
+        logging.error(e1)
+        raise e.MflException("Could not find candidate %s" % identifier,
+                             code="unknown_candidate")
     return jsonify({"deleted": helpers.karp_delete(_id, lexconf['candidatelexiconName'])})
 
 
 @app.route('/recomputecandidates')
 # ￼`'/recomputecandidates?pos=nn&lexicon=saldomp'`
 def recomputecandiadtes():
-    lexicon = request.args.get('lexicon', 'saldomp')
+    lexicon = request.args.get('lexicon', C.config['default'])
     lexconf = helpers.get_lexiconconf(lexicon)
     postags = helpers.read_pos(lexconf)
     ppriorv = float(request.args.get('pprior', lexconf["pprior"]))
@@ -592,9 +581,9 @@ def recomputecandiadtes():
                                  mode=lexconf['candidateMode'],
                                  resource=lexconf['candidatelexiconName'])
         paras, numex, lms = helpers.relevant_paradigms(paradigmdict, lexicon, pos)
-        for hit in res['hits']['hits']:
-            _id = hit['_id']
-            table = hit['_source']
+        for hit in helpers.es_get_hits(res):
+            _id = helpers.es_get_id(hit)
+            table = helpers.es_get_source(hit)
             logging.debug('table %s' % table)
             forms = [table['baseform']]
             for wf in table.get('WordForms', []):
@@ -624,7 +613,7 @@ def read_paradigms(lexicon, pos, mode):
     # get all paradigms from ES
     query = {'size': 10000, 'q': 'extended||and|pos|equals|%s' % pos}
     res = helpers.karp_query('query', query, mode=mode, resource=lexicon)
-    return [hit['_source'] for hit in res['hits']['hits']]
+    return helpers.es_all_source(res)
 
 
 def update_model(lexicon, pos, paradigmdict, lexconf):
