@@ -612,7 +612,8 @@ def recomputecandiadtes():
 def read_paradigms(lexicon, pos, mode):
     # get all paradigms from ES
     query = {'size': 10000, 'q': 'extended||and|pos|equals|%s' % pos}
-    res = helpers.karp_query('query', query, mode=mode, resource=lexicon)
+    user = C.config.get('DBPASS', '')
+    res = helpers.karp_query('query', query, mode=mode, resource=lexicon, user=user)
     return helpers.es_all_source(res)
 
 
