@@ -79,7 +79,7 @@ def karp_update(uuid, data, resource='saldomp'):
                         data=json.dumps(data).encode('utf8'))
 
 
-def karp_query(action, query, mode='external', resource='saldomp'):
+def karp_query(action, query, mode='external', resource='saldomp', user=''):
     if 'mode' not in query:
         query['mode'] = mode
     if 'resource' not in query and 'lexiconName' not in query:
@@ -90,24 +90,27 @@ def karp_query(action, query, mode='external', resource='saldomp'):
     logging.debug('query %s %s' % (query, type(query)))
     params = urllib.parse.urlencode(query)
     logging.debug('ask karp %s %s' % (action, params))
-    return karp_request("%s?%s" % (action, params))
+    return karp_request("%s?%s" % (action, params), user=user)
 
 
-def karp_request(action, data=None):
+def karp_request(action, data=None, user=''):
     q = "%s/%s" % (C.config['KARP_BACKEND'], action)
 
-    try:
-        auth = request.authorization
-        user, pw = auth.username, auth.password
-    except:
-        user, pw = 'mfl', 'mfl'
-    userpw = '%s:%s' % (user, pw)
+    if user:
+       userpw = user
+    else:
+        try:
+            auth = request.authorization
+            user, pw = auth.username, auth.password
+        except:
+            
+            user, pw = 'mfl', 'mfl'
+        userpw = '%s:%s' % (user, pw)
     basic = base64.b64encode(userpw.encode())
     req = urllib.request.Request(q, data=data)
     req.add_header('Authorization', 'Basic %s' % basic.decode())
 
     logging.debug('send %s' % q)
-    logging.debug('headers %s' % req.headers)
     response = urllib.request.urlopen(req).read().decode('utf8')
     return json.loads(response)
 
