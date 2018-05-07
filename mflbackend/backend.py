@@ -155,6 +155,8 @@ def inflect():
     lexconf = helpers.get_lexiconconf(lexicon)
     table = request.args.get('table', '')
     pos = helpers.read_one_pos(lexconf)
+    strict = request.args.get('strict', '')
+    strict = strict in [True, 'true', 'True']
     ppriorv = float(request.args.get('pprior', lexconf["pprior"]))
     # no call to karp, must check auth
     helpers.authenticate(lexconf, 'read')
@@ -164,8 +166,8 @@ def inflect():
     # print('got %s paradigms for %s %s' % (len(paras), lexicon, pos))
     ans = handle.inflect_table(table,
                                [paras, numex, lms, C.config["print_tables"],
-                                C.config["debug"], ppriorv],
-                               lexconf, pos=pos, lemgram=lemgram)
+                                C.config["debug"], ppriorv], lexconf, pos=pos,
+                               lemgram=lemgram, match_all=strict)
     # logging.debug('ans')
     return jsonify(ans)
 
