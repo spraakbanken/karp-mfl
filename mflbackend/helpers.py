@@ -131,7 +131,7 @@ def make_table(lexconf, paradigm, v, score, pos, lemgram=''):
         # logging.debug('v %s %s' % (v, type(v)))
         infl = {'paradigm': paradigm.name, 'WordForms': [],
                 'variables': dict(zip(range(1, len(v)+1), v)),
-                'score': score, 'count': paradigm.count,
+                'score': score, 'paradigm_entries': paradigm.count,
                 'new': False, 'partOfSpeech': pos,
                 'identifier': lemgram}
         logging.debug('%s:, %s' % (paradigm.name, v))
@@ -272,7 +272,7 @@ def lmf_tableize(lexconf, table, paradigm=None, pos='', lemgram='', score=0):
     func = extra_src(lexconf, 'get_baseform', '')
     obj['baseform'] = func(obj)
     obj['partOfSpeech'] = pos
-    obj['count'] = 0
+    obj['paradigm_entries'] = 0
     obj['identifier'] = lemgram
     return show_inflected(lexconf, obj)
 
