@@ -93,25 +93,7 @@ def all_pos():
 @app.route('/defaulttable')
 def defaulttable():
     " Show an empty table suiting the lexicon and part of speech "
-    lexicon = request.args.get('lexicon', C.config['default'])
-    lexconf = helpers.get_lexiconconf(lexicon)
-    pos = helpers.read_one_pos(lexconf)
-    q = 'extended||and|%s.search|equals|%s' % (lexconf['pos'], pos)
-    res = helpers.karp_query('statlist',
-                             {'q': q,
-                              'mode': lexconf['lexiconMode'],
-                              'resource': lexconf['lexiconName'],
-                              'buckets': lexconf['msd']+'.bucket'
-                              }
-                             )
-
-    wfs = []
-    for tag in res['stat_table']:
-        wfs.append({'writtenForm': '', 'msd': tag[0]})
-    if not wfs:
-        wfs.append({'writtenForm': '', 'msd': ''})
-
-    ans = {'WordForms': wfs, 'partOfSpeech': pos}
+    ans = helpers.get_defaulttable()
     return jsonify(ans)
 
 

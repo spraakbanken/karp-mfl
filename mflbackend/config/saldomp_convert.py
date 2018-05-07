@@ -83,3 +83,11 @@ def show_wordentry(entry):
     result['fm_paradigm'] = form.get("fm_paradigm", "")
     result['WordForms'] = entry.get('WordForms', [])
     return result
+
+
+def defaulttable(pos):
+    lookup = {
+        'nn': ["sg indef nom", "sg indef gen", "sg def nom", "sg def gen",
+               "pl indef nom", "pl indef gen", "pl def nom", "pl def gen"]
+    }
+    return lookup.get(pos, [])

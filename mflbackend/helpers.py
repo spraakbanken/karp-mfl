@@ -159,6 +159,32 @@ def show_inflected(lexconf, entry):
     return func(entry)
 
 
+def get_defaulttable():
+    lexicon = request.args.get('lexicon', C.config['default'])
+    lexconf = get_lexiconconf(lexicon)
+    pos = read_one_pos(lexconf)
+    func = extra_src(lexconf, 'defaulttable', lambda x: [])
+    stattable = func(pos)
+    if not stattable:
+        q = 'extended||and|%s.search|equals|%s' % (lexconf['pos'], pos)
+        res = karp_query('statlist',
+                         {'q': q,
+                          'mode': lexconf['lexiconMode'],
+                          'resource': lexconf['lexiconName'],
+                          'buckets': lexconf['msd']+'.bucket'
+                          }
+                         )
+        stattable = (tag[0] for tag in res['stat_table'])
+    wfs = []
+    for tag in stattable:
+        wfs.append({'writtenForm': '', 'msd': tag})
+
+    if not wfs:
+        wfs.append({'writtenForm': '', 'msd': ''})
+
+    return {'WordForms': wfs, 'partOfSpeech': pos}
+
+
 # TODO lexicon specific
 def lmf_wftableize(lexconf, paradigm, table, classes={}, baseform='',
                    identifier='', pos='', resource=''):
