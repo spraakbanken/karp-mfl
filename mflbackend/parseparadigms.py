@@ -1,9 +1,11 @@
 id_field = 'MorphologicalPatternID'
 transform_field = 'TransformCategory'
 varinst_field = 'VariableInstances'
+top_varinst = 'Top_VariableInstances'
 entries = '_entries'
 firstattest = 'first-attest'
 pos_field = '_partOfSpeech'
+karp_pos = 'pos'
 
 
 def get_transformcat(hit, iclass):
@@ -22,10 +24,15 @@ def word_add_parainfo(lexobj, paraobj):
             break
 
 
+def show_short():
+    return [id_field, karp_pos, entries, transform_field, top_varinst]
+
+
 def make_short(obj):
     short_obj = {}
-    short_obj['MorphologicalPatternID'] = obj[id_field]
+    short_obj[id_field] = obj[id_field]
     short_obj['partOfSpeech'] = obj[pos_field]
     short_obj['entries'] = obj[entries]
-    short_obj['TransformCategory'] = obj.get(transform_field, {})
-    return
+    short_obj[transform_field] = obj.get(transform_field, {})
+    short_obj[top_varinst] = obj.get(top_varinst, {})
+    return obj

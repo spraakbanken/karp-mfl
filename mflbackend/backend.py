@@ -69,11 +69,11 @@ def paradigminfo(paradigm=''):
     short = short in [True, 'true', 'True']
     lexconf = helpers.get_lexiconconf(lexicon)
     # print('lexconf', lexconf)
+    show = pp.show_short() if short else []
     obj = helpers.give_info(lexicon, paradigm, pp.id_field,
                             lexconf['paradigmMode'],
-                            lexconf["paradigmlexiconName"])
-    if short:
-        obj = pp.make_short(obj)
+                            lexconf["paradigmlexiconName"],
+                            show=show)
     return jsonify(obj)
 
 
@@ -479,6 +479,7 @@ def add_table():
     lexicon = request.args.get('lexicon', C.config['default'])
     lexconf = helpers.get_lexiconconf(lexicon)
     identifier = request.args.get('identifier', '')
+    pos = helpers.read_one_pos(lexconf)
     wf_table, para, v, classes = handle.make_new_table(paradigmdict, newword=True)
 
     helpers.karp_add(wf_table, resource=lexconf['lexiconName'])
