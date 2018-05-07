@@ -103,7 +103,6 @@ def karp_request(action, data=None, user=''):
             auth = request.authorization
             user, pw = auth.username, auth.password
         except:
-            
             user, pw = 'mfl', 'mfl'
         userpw = '%s:%s' % (user, pw)
     basic = base64.b64encode(userpw.encode())
@@ -476,11 +475,16 @@ def firstform(table):
     return table.split(',')[0].split('|')[0]
 
 
-def give_info(lexicon, identifier, id_field, mode, resource):
+def give_info(lexicon, identifier, id_field, mode, resource, show=[]):
     " Show information for the word infobox "
     q = 'extended||and|%s.search|equals|%s' %\
         (id_field, identifier)
-    res = karp_query('query', {'q': q}, mode=mode, resource=resource)
+    body = {'q': q}
+    request = 'query'
+    if show:
+        body['show'] = ','.join(show)
+        request = 'minientry'
+    res = karp_query(request, body, mode=mode, resource=resource)
     if es_total(res) > 0:
         return es_first_source(res)
     return {}
