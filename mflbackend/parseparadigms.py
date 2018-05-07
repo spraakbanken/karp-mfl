@@ -1,5 +1,6 @@
 id_field = 'MorphologicalPatternID'
 transform_field = 'TransformCategory'
+transform_set = 'TransformSet'
 varinst_field = 'VariableInstances'
 top_varinst = 'Top_VariableInstances'
 entries = '_entries'
@@ -25,7 +26,7 @@ def word_add_parainfo(lexobj, paraobj):
 
 
 def show_short():
-    return [id_field, karp_pos, entries, transform_field, top_varinst]
+    return [id_field, karp_pos, entries, transform_field, top_varinst, transform_set]
 
 
 def make_short(obj):
