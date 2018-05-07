@@ -66,3 +66,21 @@ def show_wordentry(entry):
     if 'lemgram' in entry:
         del entry['lemgram']
     return entry
+
+
+def defaulttable(pos):
+    lookup = {
+        'nn': ["singular nominative", "plural nominative",
+               "singular genitive", "plural genitive",
+               "singular partitive", "plural partitive",
+               "singular illative", "plural illative",
+               "singular inessive", "plural inessive",
+               "singular elative", "plural elative",
+               "singular allative", "plural allative",
+               "singular adessive", "plural adessive",
+               "singular ablative", "plural ablative",
+               "singular translative", "plural translative",
+               "singular terminative", "plural terminative",
+               "singular comitative", "plural comitative"]
+    }
+    return lookup.get(pos, [])
