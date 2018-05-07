@@ -116,7 +116,7 @@ def remove_paradigm(paradigm, resource, paradigmdict, pos, lresource):
     paradigmdict[lresource][pos] = all_paras, numex-1, lms, alpha
 
 
-def inflect_table(table, settings, lexconf, pos='', lemgram='', kbest=10):
+def inflect_table(table, settings, lexconf, pos='', lemgram='', kbest=10, match_all=False):
     baseform = helpers.read_restriction(lexconf)
     fill_tags = '|' in table
     pex_table = helpers.tableize(table, add_tags=False, fill_tags=fill_tags)
@@ -125,7 +125,8 @@ def inflect_table(table, settings, lexconf, pos='', lemgram='', kbest=10):
     res = []
     if settings[0]:
         # print('got some paradigms', len(settings[0]))
-        res = mp.test_paradigms(pex_table, *settings, returnempty=False, baseform=baseform)
+        res = mp.test_paradigms(pex_table, *settings, returnempty=False,
+                                baseform=baseform, match_all=match_all)
     # logging.debug('res %s' % res)
     if res:
         # print('got some results', len(res))
