@@ -45,6 +45,7 @@ def lmf_wftableize(paradigm, table, classes={}, baseform='', identifier='',
             form = l
             tag = ''
         show = not tag.startswith('*')
+        # tag = tag[1:] if tag.startswith('*') else tag
         wfs.append({'writtenForm': form, 'msd': tag, 'show': show})
         if not baseform:
             baseform = form
@@ -71,7 +72,7 @@ def show_inflected(entry):
     print('hello', entry)
     for wf in entry.get('WordForms', []):
         if 'show' not in wf:
-            wf['show'] = not wf.get('tag', '').startswith('*')
+            wf['show'] = not wf.get('msd', '').startswith('*')
     return entry
 
 
