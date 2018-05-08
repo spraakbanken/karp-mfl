@@ -8,5 +8,7 @@
  "AUTH_RESOURCES": "http://localhost:8082/app/resources",
  "AUTH_SERVER": "http://localhost:8082/app/authenticate",
  "SECRET_KEY": "secret",
- "KARP_BACKEND": "http://localhost:8081/app/"
+ "KARP_BACKEND": "http://localhost:8081/app/",
+ "tmpfile": "paradigmtmp.json",
+ "DBPASS": "user:pwd"
 }
