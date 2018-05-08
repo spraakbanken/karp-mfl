@@ -44,6 +44,7 @@ def lmf_wftableize(paradigm, table, classes={}, baseform='', identifier='',
         else:
             form = l
             tag = ''
+        # TODO will change in the future, make better structure for msd
         show = not tag.startswith('*')
         # tag = tag[1:] if tag.startswith('*') else tag
         wfs.append({'writtenForm': form, 'msd': tag, 'show': show})
@@ -73,9 +74,20 @@ def show_inflected(entry):
     for wf in entry.get('WordForms', []):
         if 'show' not in wf:
             wf['show'] = not wf.get('msd', '').startswith('*')
+        # TODO will change in the future, make better structure for msd
+        # if wf.get('msd', '').startswith('*'):
+        #     wf['msd'] = wf['msd'][1:]
     return entry
 
 
 def show_wordentry(entry):
     " LMF -> MFL format "
     return entry
+
+
+def defaulttable(pos):
+    lookup = {
+        'subst.': ["NCUSNI", "NCUSGI", "NCUSND", "NCUSGD", "NCUPNI", "NCUPGI", "NCUPND", "NCUPGD"]
+    }
+    return lookup.get(pos, [])
+
