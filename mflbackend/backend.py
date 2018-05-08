@@ -442,7 +442,7 @@ def update_table():
     pos = helpers.read_one_pos(lexconf)
     old_para = helpers.get_current_paradigm(identifier, pos, lexconf, paradigmdict)
 
-    wf_table, para, v, classes = handle.make_new_table(paradigmdict)
+    identifer, wf_table, para, v, classes = handle.make_new_table(lexconf, paradigmdict)
     handle.remove_word_from_paradigm(identifier, pos, old_para, lexconf, paradigmdict)
 
     karp_id = helpers.get_es_identifier(identifier,
@@ -462,9 +462,8 @@ def add_table():
     # or is that not needed?
     lexicon = request.args.get('lexicon', C.config['default'])
     lexconf = helpers.get_lexiconconf(lexicon)
-    identifier = request.args.get('identifier', '')
     pos = helpers.read_one_pos(lexconf)
-    wf_table, para, v, classes = handle.make_new_table(paradigmdict, newword=True)
+    identifier, wf_table, para, v, classes = handle.make_new_table(lexconf, paradigmdict, newword=True)
 
     helpers.karp_add(wf_table, resource=lexconf['lexiconName'])
     return jsonify({'paradigm': para.name, 'identifier': identifier,

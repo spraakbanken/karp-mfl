@@ -144,7 +144,7 @@ def inflect_table(table, settings, lexconf, pos='', lemgram='', kbest=10, match_
     return ans
 
 
-def make_new_table(paradigmdict, newword=False):
+def make_new_table(lexconf, paradigmdict, newword=False):
     lexicon = request.args.get('lexicon', 'saldomp')
     lexconf = helpers.get_lexiconconf(lexicon)
     table = request.args.get('table', '')
@@ -153,9 +153,18 @@ def make_new_table(paradigmdict, newword=False):
     identifier = request.args.get('identifier', '')
     baseform = request.args.get('baseform', '')
     # check that the table's identier is unique
-    helpers.check_identifier(identifier, lexconf['identifier'],
-                             lexconf['lexiconName'], lexconf['lexiconMode'],
-                             unique=newword)
+    # if it is new: make sure that it doesn't already exists.
+    #    otherwise: construct a new one
+    # if it is not new: make sure that it does exists.
+    #    otherwise: fail
+    ok = helpers.check_identifier(identifier, lexconf['identifier'],
+                                  lexconf['lexiconName'], lexconf['lexiconMode'],
+                                  unique=newword, fail=not newword)
+    if not ok:
+        logging.debug('identifier %s not ok' % (identifier))
+        word = baseform or helpers.get_baseform(lexconf, identifier)
+        identifier = helpers.make_identifier(lexconf, word, pos)
+        logging.debug('\t...use %s' % (identifier))
 
     for name, field in [('identifier', identifier), ('paradigm', paradigm), ('partOfSpeech', pos)]:
         if not field:
@@ -235,4 +244,4 @@ def make_new_table(paradigmdict, newword=False):
                              identifier, v, classes, para, wf_table,
                              paradigmdict, lexconf['lexiconName'], pos)
 
-    return wf_table, para, v, classes
+    return identifier, wf_table, para, v, classes
