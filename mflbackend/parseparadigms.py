@@ -10,7 +10,7 @@ karp_pos = 'pos'
 
 
 def get_transformcat(hit, iclass):
-    return hit[transform_field].get(iclass, [])
+    return hit.get(transform_field, {}).get(iclass, [])
 
 
 def get_entries(hit):

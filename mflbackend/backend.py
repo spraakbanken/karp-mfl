@@ -602,9 +602,10 @@ def read_paradigms(lexicon, pos, mode):
     return helpers.es_all_source(res)
 
 
-def update_model(lexicon, pos, paradigmdict, lexconf):
-    paras = read_paradigms(lexconf['paradigmlexiconName'], pos,
-                           lexconf['paradigmMode'])
+def update_model(lexicon, pos, paradigmdict, lexconf, paras=None):
+    if paras is None:
+       paras = read_paradigms(lexconf['paradigmlexiconName'], pos,
+                              lexconf['paradigmMode'])
     logging.debug('memorize %s paradigms??' % len(paras))
     paras, numex, lms, alphabet = mp.build(paras, lexconf["ngramorder"],
                                            lexconf["ngramprior"],
@@ -646,7 +647,27 @@ def handle_invalid_usage(error):
                 "code": "unexpected error"}, 500
 
 
-# For saldomp, i have increased pprior a lot, from 1.0 to 5.0
+def prepare_restart():
+    new_paradigms = {}
+    for lex in C.config['all_lexicons']:
+        lexconf = helpers.get_lexiconconf(lex['name'])
+        new_paradigms[lex['name']] = {}
+        for pos in lex['pos']:
+            paras = read_paradigms(lexconf['paradigmlexiconName'], pos,
+                                    lexconf['paradigmMode'])
+            new_paradigms[lex['name']][pos] = paras
+
+    json.dump(new_paradigms, open(C.config['tmpfile'], 'w'))
+
+
+def offline_restart():
+    tmpparadigmdict = json.load(open(C.config['tmpfile']))
+    for lex, plex in tmpparadigmdict.items():
+        lexconf = helpers.get_lexiconconf(lex)
+        paradigmdict[lex] = {}
+        for pos, paras in plex.items():
+            # pparas = P.load_json(paras, lex=lex, pos=pos)
+            update_model(lex, pos, paradigmdict, lexconf, paras=paras)
 
 
 def start():
@@ -658,13 +679,22 @@ def start():
 
 paradigmdict = {}
 
+# For saldomp, i have increased pprior a lot, from 1.0 to 5.0
 if __name__ == '__main__':
-    paradigmdict = {}
     snabb = sys.argv[-1] == '--snabb'
-    for lex in C.config['all_lexicons']:
-        lexconf = helpers.get_lexiconconf(lex['name'])
-        paradigmdict[lex['name']] = {}
-        if not snabb:
-            for pos in lex['pos']:
-                update_model(lex['name'], pos, paradigmdict, lexconf)
-    app.run(threaded=True)
+    offline = sys.argv[-1] == '--offline'
+    dump = sys.argv[-1] == '--dump'
+    if dump:
+        prepare_restart()
+    else:
+        paradigmdict = {}
+        if offline:
+            offline_restart()
+        else:
+            for lex in C.config['all_lexicons']:
+                lexconf = helpers.get_lexiconconf(lex['name'])
+                paradigmdict[lex['name']] = {}
+                if not snabb:
+                    for pos in lex['pos']:
+                        update_model(lex['name'], pos, paradigmdict, lexconf)
+        app.run(threaded=True)
