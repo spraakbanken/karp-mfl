@@ -26,7 +26,8 @@ def word_add_parainfo(lexobj, paraobj):
 
 
 def show_short():
-    return [id_field, karp_pos, entries, transform_field, top_varinst, transform_set]
+    return [id_field, karp_pos, entries, transform_field, top_varinst,
+            transform_set]
 
 
 def make_short(obj):

@@ -57,7 +57,7 @@ def lmf_wftableize(paradigm, table, classes={}, baseform='', identifier='',
     obj['baseform'] = baseform
     obj['paradigm'] = paradigm
     for key, val in classes.items():
-        form[key] = val
+        obj[key] = val
 
     return obj
 
