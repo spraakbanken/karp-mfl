@@ -398,11 +398,7 @@ def compile():
                         "fields": fields, "total": ans["total"]})
 
     elif compile_f == "paradigm":
-        # TODO no need to look in config for this, it should always be the same
-        # if querystr:
         s_field = search_f or pp.id_field
-        # else:
-        #     s_field = search_f
         show = ','.join([pp.id_field,
                          pp.transform_field,
                          pp.entries])
@@ -421,7 +417,8 @@ def compile():
             stats.append(pp.get_entries(hit))
             res.append(stats)
         return jsonify({"compiled_on": "paradigm", "stats": res,
-                        "fields": ['paradigm']+iclasses+['entries'], "total": ans["total"]})
+                        "fields": ['paradigm']+iclasses+['entries'],
+                        "total": ans["total"]})
 
     else:
         raise e.MflException("Don't know what to do", code="unknown_action")
@@ -463,7 +460,8 @@ def add_table():
     lexicon = request.args.get('lexicon', C.config['default'])
     lexconf = helpers.get_lexiconconf(lexicon)
     pos = helpers.read_one_pos(lexconf)
-    identifier, wf_table, para, v, classes = handle.make_new_table(lexconf, paradigmdict, newword=True)
+    res = handle.make_new_table(lexconf, paradigmdict, newword=True)
+    identifier, wf_table, para, v, classes = res
 
     helpers.karp_add(wf_table, resource=lexconf['lexiconName'])
     return jsonify({'paradigm': para.name, 'identifier': identifier,
@@ -603,8 +601,8 @@ def read_paradigms(lexicon, pos, mode):
 
 def update_model(lexicon, pos, paradigmdict, lexconf, paras=None):
     if paras is None:
-       paras = read_paradigms(lexconf['paradigmlexiconName'], pos,
-                              lexconf['paradigmMode'])
+        paras = read_paradigms(lexconf['paradigmlexiconName'], pos,
+                               lexconf['paradigmMode'])
     logging.debug('memorize %s paradigms??' % len(paras))
     paras, numex, lms, alphabet = mp.build(paras, lexconf["ngramorder"],
                                            lexconf["ngramprior"],
@@ -653,7 +651,7 @@ def prepare_restart():
         new_paradigms[lex['name']] = {}
         for pos in lex['pos']:
             paras = read_paradigms(lexconf['paradigmlexiconName'], pos,
-                                    lexconf['paradigmMode'])
+                                   lexconf['paradigmMode'])
             new_paradigms[lex['name']][pos] = paras
 
     json.dump(new_paradigms, open(C.config['tmpfile'], 'w'))

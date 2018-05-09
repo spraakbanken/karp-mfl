@@ -50,7 +50,6 @@ def get_lexiconconf(lexicon):
 
 
 def karp_add(data, resource='saldomp', _id=None):
-    # TODO must use password!
     data = {'doc': data, 'message': 'Mfl generated paradigm'}
     if _id:
         return karp_request("readd/%s/%s" % (resource, _id),
@@ -61,7 +60,6 @@ def karp_add(data, resource='saldomp', _id=None):
 
 
 def karp_bulkadd(data, resource='saldomp'):
-    # TODO must use password!
     data = {'doc': data, 'message': 'Mfl candidate list'}
     return karp_request("addbulk/%s" % resource,
                         data=json.dumps(data).encode('utf8'))
@@ -97,7 +95,7 @@ def karp_request(action, data=None, user=''):
     q = "%s/%s" % (C.config['KARP_BACKEND'], action)
 
     if user:
-       userpw = user
+        userpw = user
     else:
         try:
             auth = request.authorization
@@ -185,7 +183,6 @@ def get_defaulttable():
     return {'WordForms': wfs, 'partOfSpeech': pos}
 
 
-# TODO lexicon specific
 def lmf_wftableize(lexconf, paradigm, table, classes={}, baseform='',
                    identifier='', pos='', resource=''):
     def default(paradigm, table, classes, baseform, identifier, pos, reosource):
@@ -363,7 +360,8 @@ def get_current_paradigm(_id, pos, lexconf, paradigmdict):
 
     p_id = es_first_source(res)['_uuid']
     logging.debug('p_id is %s' % p_id)
-    paras, numex, lms = relevant_paradigms(paradigmdict, lexconf['lexiconName'],
+    paras, numex, lms = relevant_paradigms(paradigmdict,
+                                           lexconf['lexiconName'],
                                            pos, possible_p=[p_id])
     if not paras:
         raise e.MflException("Paradigm %s not found" % p_id,

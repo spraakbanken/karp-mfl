@@ -8,22 +8,6 @@ import uuid
 import morphparser as mp
 import pextract as pex
 
-#########
-# Remove these?
-def update_paradigm(pid, paradigm, paradigms):
-    # TODO send_to_karp()
-    # update language model
-    paradigms[pid] = paradigm
-
-
-def reload_paradigms(paradigms):
-    pass
-
-
-def load_paradigms(paradigms):
-    pass
-#########
-
 
 def add_paradigm(presource, lresource, pid, paradigm, paradigms, identifier,
                  pos, classes, table, lexconf):
@@ -101,7 +85,8 @@ def remove_word_from_paradigm(identifier, pos, paradigm, lexconf, paradigms):
     logging.debug('new count %s' % paradigm.count)
     if paradigm.count > 0:
         # TODO remove from alphabet
-        helpers.karp_update(paradigm.uuid, paradigm.jsonify(), resource=lexconf['paradigmlexiconName'])
+        helpers.karp_update(paradigm.uuid, paradigm.jsonify(),
+                            resource=lexconf['paradigmlexiconName'])
     else:
         remove_paradigm(paradigm, lexconf['paradigmlexiconName'], paradigms,
                         pos, lexconf['lexiconName'])
@@ -158,7 +143,8 @@ def make_new_table(lexconf, paradigmdict, newword=False):
     # if it is not new: make sure that it does exists.
     #    otherwise: fail
     ok = helpers.check_identifier(identifier, lexconf['identifier'],
-                                  lexconf['lexiconName'], lexconf['lexiconMode'],
+                                  lexconf['lexiconName'],
+                                  lexconf['lexiconMode'],
                                   unique=newword, fail=not newword)
     if not ok:
         logging.debug('identifier %s not ok' % (identifier))
@@ -166,7 +152,9 @@ def make_new_table(lexconf, paradigmdict, newword=False):
         identifier = helpers.make_identifier(lexconf, word, pos)
         logging.debug('\t...use %s' % (identifier))
 
-    for name, field in [('identifier', identifier), ('paradigm', paradigm), ('partOfSpeech', pos)]:
+    required = [('identifier', identifier), ('paradigm', paradigm),
+                ('partOfSpeech', pos)]
+    for name, field in required:
         if not field:
             raise e.MflException("Both identifier, partOfSpeech and paradigm must be given!",
                                  code="unknown_%s" % name)
@@ -201,7 +189,6 @@ def make_new_table(lexconf, paradigmdict, newword=False):
                                  code="unknown_paradigm")
 
     else:
-        # TODO If an paradigm is already fitting, refuse to add as new?
         fittingparadigms = paras
         # check that this is a new name
         helpers.check_identifier(paradigm, 'MorphologicalPatternID',
@@ -215,30 +202,24 @@ def make_new_table(lexconf, paradigmdict, newword=False):
                             lexconf["pprior"], returnempty=False,
                             match_all=True)
     if not is_new and len(ans) < 1:
-        # print('ans', ans)
         logging.warning("Could not inflect %s as %s" % (table, paradigm))
         raise e.MflException("Table can not belong to paradigm %s" % (paradigm),
                              code="inflect_problem")
     if is_new and len(ans) > 0:
-        # print('ans', ans)
         logging.warning("Could inflect %s as %s" % (table, ans[0][1].p_id))
         raise e.MflException("Table should belong to paradigm %s" % (ans[0][1].p_id),
                              code="inflect_problem")
 
     if not ans:
-        # print(ans)
         pex_table = helpers.tableize(table, add_tags=False, identifier=identifier)
         para = pex.learnparadigms([pex_table])[0]
-        # print('para is', para)
-        # TODO bug? should be 1:
-        v = [var for ix, var in para.var_insts[0][:1]]
+        v = [var for ix, var in para.var_insts[0][1:]]
         add_paradigm(lexconf['paradigmlexiconName'],
                      lexconf['lexiconName'], paradigm, para,
                      paradigmdict, identifier, pos, classes, wf_table,
                      lexconf)
 
     else:
-        # TODO used to be ans[0][0], see slack 13:26 12/4
         score, para, v = ans[0]
         add_word_to_paradigm(lexconf['paradigmlexiconName'],
                              identifier, v, classes, para, wf_table,
