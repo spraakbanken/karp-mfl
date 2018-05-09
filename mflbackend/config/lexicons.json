@@ -1,0 +1,17 @@
+[
+  {
+  "name": "saolp",
+  "pos":  ["subst."],
+  "open":  false
+  },
+  {
+  "name": "saldomp",
+  "pos":  ["nn"],
+  "open":  true
+  },
+  {
+  "name": "votiska",
+  "pos":  ["nn"],
+  "open":  true
+  }
+]
