@@ -32,7 +32,7 @@ def get_paradigm(entry):
     # pass
 
 
-def lmf_wftableize(paradigm, table, classes={}, baseform='', identifier='',
+def karp_wftableize(paradigm, table, classes={}, baseform='', identifier='',
                    pos='', resource=''):
     " Url table format -> LMF format"
     table = table.split(',')

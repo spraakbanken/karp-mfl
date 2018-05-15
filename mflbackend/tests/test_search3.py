@@ -344,7 +344,7 @@ def addtable():
     paradigm = 'p6_brännässla..nn.1'
     q0, res0 = call('paradigminfo/'+urllib.parse.quote(paradigm), lexparams)
     oldcount = res0['_entries']
-    _id = 'labbedissa..nn.2'
+    _id = 'labbedissa..nn.7'
     classes = 'bklass:9'
     pos = 'nn'
     base = 'labbedissa'
@@ -376,12 +376,12 @@ def addtable():
 def addtable2():
     # saldomp
     lexparams = {'lexicon': 'saldomp'}
-    paradigm = 'p6_test..nn.1'
-    _id = 'klabbedissa..nn.1'
+    paradigm = 'p6_test..nn.4'
+    _id = 'klabbedissa..nn.2'
     classes = 'bklass:9'
     pos = 'nn'
     base = 'klabbedissa'
-    table = 'klabbedissa|sg indef nom,klabbedissan|sg def nom,klabbedissor|pl indef nom,klabbedissorna|pl def nom'
+    table = 'klabbedisssa|sg indef nom,klabbedissan|sg def nom,klabbedissor|pl indef nom,klabbedissorna|pl def nom'
     params = {'table': table, 'pos': pos, 'lexicon': 'saldomp',
               'identifier': _id, 'classes': classes, 'paradigm': paradigm,
               'baseform': base, 'new': True}
@@ -410,7 +410,7 @@ def updatetable():
     # saldomp
     lexparams = {'lexicon': 'saldomp'}
     paradigm = 'p6_test..nn.1'
-    _id = 'labbedissa..nn.2'
+    _id = 'labbedissa..nn.7'
     classes = 'bklass:9'
     pos = 'nn'
     base = 'labbedissa'
@@ -435,13 +435,14 @@ def updatetable():
     q2, res2 = call('paradigminfo/'+paradigm, lexparams)
     assert_it(res2['_entries'], new_count)
     for iclass, val in classes_dict.items():
+        print('look for', iclass, val)
         assert val in res2['TransformCategory'][iclass], res2['TransformCategory'][iclass]
     q3, res3 = call('wordinfo/'+_id, lexparams)
     q6, res6 = call('paradigminfo/'+urllib.parse.quote(old_para), lexparams)
     if oldcount == 1:
         assert_it(res6, {})
     else:
-        assert_it(res6['paradigm'], paradigm)
+        assert_it(res6['MorphologicalPatternID'], paradigm)
         assert_it(res6['_entries'], oldcount-1)
 
     params = {'like': _id, 'wordform': base, 'pos': pos, 'lexicon': 'saldomp'}
