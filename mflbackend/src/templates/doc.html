@@ -12,16 +12,23 @@ Pilotversion av morfologilabbet
 <h2>Available calls to the backend</h2>
 <table>
   <tr><td><b>Public calls:</b></td></tr>
-  <tr><td> <a href="#lexicon">lexicon</a></td><td> Visa information om ett eller alla lexikon <td> </td></tr>
-  <tr><td> <a href="#paradigminfo">paradigminfo</a></td><td> Visa information om ett paradigm, till inforutan <td> </td></tr>
-  <tr><td> <a href="#partofspeech">partOfSpeech</a></td><td> Visa information om en eller alla ordklasser <td> </td></tr>
-  <tr><td> <a href="#inflect">inflect</a></td><td> Ge mig förslag på hur ordet X kan böjas<td> </td></tr>
-  <tr><td> <a href="#inflectlike">inflectlike</a></td><td> Böj ordet X på samma sätt som ordet Z böjs </td></tr>
-  <tr><td> <a href="#inflectclass">inflectclass</a></td><td> Böj ordet X enligt deklination Y  </td></tr>
-  <tr><td> <a href="#addtable">addtable</a></td><td>  Spara tabell </td></tr>
-  <tr><td> <a href="#compile">compile</a></td><td>  Visa sammanställd information om ord, böjningsklasser...</td></tr>
-  <tr><td> <a href="#list">list</a></td><td>  Visa enkel information om ord, böjningsklasser...</td></tr>
-  <tr><td> <a href="#defaulttable">defaulttable</a></td><td>  Visa en tom böjningstabell </td></tr>
+  <tr><td> <a href="#lexicon">lexicon</a></td><td> Show information about one or all lexicons <td> </td></tr>
+  <tr><td> <a href="#wordinfo">wordinfo</a></td><td> Show information about a word entry, for the infobox <td> </td></tr>
+  <tr><td> <a href="#paradigminfo">paradigminfo</a></td><td> Show information about a paradigm, for the infobox <td> </td></tr>
+  <tr><td> <a href="#partofspeech">partOfSpeech</a></td><td> SHow information about one or all word classes <td> </td></tr>
+  <tr><td> <a href="#defaulttable">defaulttable</a></td><td> Show a standard inflection table with empy word forms<td> </td></tr>
+  <tr><td> <a href="#inflect">inflect</a></td><td> Give suggestions for the inflection table of one or many word form<td> </td></tr>
+  <tr><td> <a href="#inflectlike">inflectlike</a></td><td> Inflect the word X as Z is inflected </td></tr>
+  <tr><td> <a href="#inflectclass">inflectclass</a></td><td> Inflect the word X according to the inflection class Y  </td></tr>
+  <tr><td> <a href="#inflectcandidate">inflectcandidate</a></td><td> Inflect a known candidate  </td></tr>
+  <tr><td> <a href="#compile">compile</a></td><td>  Show compiled information about words, inflectional classes...</td></tr>
+  <tr><td> <a href="#list">list</a></td><td>  Show simple information about words, inflectional classes...</td></tr>
+  <tr><td> <a href="#addtable">addtable</a></td><td>  Save table </td></tr>
+  <tr><td> <a href="#updatetable">updatetable</a></td><td>  Update a word entry's inflection </td></tr>
+  <tr><td> <a href="#addcandidates">addcandidates</a></td><td>  Add a list of candidates </td></tr>
+  <tr><td> <a href="#candidatelist">candidatelist</a></td><td>  Show list of saved candidates </td></tr>
+  <tr><td> <a href="#removecandidate">removecandidate</a></td><td>  Remove a candidate from the list </td></tr>
+  <tr><td> <a href="#recomputecandidates">recomputecandidates</a></td><td>  Recompute the paradigm assignments </td></tr>
 
 </table>
 
@@ -41,7 +48,10 @@ Result:
 /lexicon
 {
   "lexicons": [
-    "saldomp"
+  {
+   "name": "saldomp",
+   "open": true
+   }
   ]
 }
 /lexicon/saldomp
@@ -80,6 +90,49 @@ NB! The information given here might change!
 
 </pre>
 
+<a name="wordinfo"/>
+<h3>wordinfo</h3>
+<p>
+Available query parameters:
+<table>
+  <tr><td>'lexicon': </td><td> the lexicon</td></tr>
+  <tr><td>'identifier':</td><td> the word's identifier.</td></tr>
+</table>
+<p>
+Examples:
+<ul>
+  <li><a href="{{url}}wordinfo?identifier=katt..nn.1&lexicon=saldomp"><pre>{{url}}wordinfo?identifier=katt..nn.1</pre></a>
+  <li><a href="{{url}}wordinfo/katt..nn.1?lexicon=saldomp"><pre>{{url}}wordinfo/katt..nn.1"></pre></a>
+</ul>
+
+<p>
+Result:
+<pre>
+{
+  "WordForms": [
+    {
+      "msd": "sg indef nom", 
+      "writtenForm": "katt"
+    }, 
+    {
+      "msd": "sg indef gen", 
+      "writtenForm": "katts"
+    }, 
+    ...
+  ], 
+  "baseform": "katt", 
+  "bklass": "3", 
+  "fm_paradigm": "nn_3u_film", 
+  "identifier": "katt..nn.1", 
+  "inherent": "u", 
+  "paradigm": "p1_\u00f6verfart..nn.1", 
+  "paradigm_entries": 13565, 
+  "partOfSpeech": "nn", 
+  "variables": {
+    "1": "katt", 
+    "first-attest": "katt..nn.1"
+  }
+  </pre>
 
 <a name="paradigminfo"/>
 <h3>paradigminfo</h3>
@@ -87,13 +140,14 @@ NB! The information given here might change!
 Available query parameters:
 <table>
   <tr><td>'lexicon': </td><td> the lexicon</td></tr>
-  <tr><td>'short':</td><td> show minimal information. Default: false </td></tr>
+  <tr><td>'paradigm': </td><td> the paradigm's identifier</td></tr>
+  <tr><td>'short':</td><td> don't show more then 5 example words. Default: false </td></tr>
 </table>
 <p>
 Examples:
 <ul>
-  <li><a href="{{url}}paradigminfo/p15_pryd..av.1"><pre>{{url}}paradigminfo/p15_pryd..av.1</pre></a>
-  <li><a href="{{url}}paradigminfo/p15_pryd..av.1?short=true"><pre>{{url}}paradigminfo/p15_pryd..av.1?short=true</pre></a>
+  <li><a href="{{url}}paradigminfo/p101_odalbonde..nn.1?lexicon=saldomp"><pre>{{url}}paradigminfo/p101_odalbonde..nn.1</pre></a>
+  <li><a href="{{url}}paradigminfo/p101_odalbonde..nn.1?short=true&lexicon=saldomp"><pre>{{url}}paradigminfo/p101_odalbonde..nn.1?short=true</pre></a>
 </ul>
 
 <p>
@@ -101,36 +155,32 @@ Result:
 <pre>
 Short version:
 {
-"MorphologicalPatternID": "p15_pryd..av.1", 
+  "MorphologicalPatternID": "p101_odalbonde..nn.1", 
+  "Top_VariableInstances": [
+    {
+      "1": "odalb", 
+      "2": "nde", 
+      "first-attest": "odalbonde..nn.1"
+    }, 
+    {
+      "1": "k\u00f6ttb", 
+      "2": "nde", 
+      "first-attest": "k\u00f6ttbonde..nn.1"
+    }, 
+    ...
+  ], 
   "TransformCategory": {
     "bklass": [
-      ""
+      "7"
     ], 
     "fm_paradigm": [
-      "av_1_bred", 
-      "av_1_brydd"
-    ]
-  }, 
-  "entries": 95, 
-  "partOfSpeech": "av"
-}
-
-Long version:
-{
-  "MorphologicalPatternID": "p15_pryd..av.1", 
-  "TransformCategory": {
-    "bklass": [
-      ""
-    ], 
-    "fm_paradigm": [
-      "av_1_bred", 
-      "av_1_brydd"
+      "nn_4u_bonde"
     ]
   }, 
   "TransformSet": [
     {
       "GrammaticalFeatures": {
-        "msd": "pos indef sg u nom"
+        "msd": "sg indef nom"
       }, 
       "Process": [
         {
@@ -141,28 +191,27 @@ Long version:
         {
           "operator": "addAfter", 
           "processType": "pextractAddConstant", 
-          "stringValue": "d"
+          "stringValue": "o"
+        }, 
+        {
+          "operator": "addAfter", 
+          "processType": "pextractAddVariable", 
+          "variableNum": "2"
         }
       ]
     }, 
     {
       "GrammaticalFeatures": {
-        "msd": "pos indef sg u gen"
+        "msd": "sg indef gen"
       }, 
       "Process": [
-        {
-          "operator": "addAfter", 
-          "processType": "pextractAddVariable", 
-          "variableNum": "1"
-        }, 
-        {
-          "operator": "addAfter", 
-          "processType": "pextractAddConstant", 
-          "stringValue": "ds"
-        }
+      ...
       ]
-    }
-  ]
+    }, 
+    ...
+  ], 
+  "_entries": 21, 
+  "_partOfSpeech": "nn"
 }
 </pre>
 
@@ -191,6 +240,20 @@ Result:
 }
 </pre>
 
+<a name="defaulttable"/>
+<h3>Defaulttable</h3>
+<p>
+Available query parameters:
+<table>
+  <tr><td>'lexicon': </td><td> the lexicon </td></tr>
+  <tr><td>'partOfSpeech':</td><td> the part of speech </td></tr>
+</table>
+
+<p>
+Examples:
+<ul>
+  <li><a href="{{url}}defaulttable?partOfSpeech=nn&lexicon=saldomp"><pre>{{url}}defaulttable?partOfSpeech=nn</pre></a>
+</ul>
 
 <a name="inflect"/>
 <h3>inflect</h3>
@@ -202,15 +265,16 @@ Available query parameters:
   <tr><td>'partOfSpeech':</td><td> the part of speech </td></tr>
   <tr><td>'pprior':</td><td> the pprior value to pextract: how much weight to give the frequency of the paradigms. Default: </td></tr>
   <tr><td>'restrict_to_baseform':</td><td> Should the first form in the given table also be the first form in the resulting table? Default: given by lexicon config</td></tr>
+  <tr><td>'strict':</td><td> Don't allow other forms to be added? Default: false</td></tr>
 </table>
 
 <p>
 Examples:
 <ul>
   <li><pre>{{url}}inflect?table=word(|tag)[word|tag]*</pre>
-  <li><a href="{{url}}inflect?table=apa,apan"><pre>{{url}}inflect?table=apa,apan</pre></a>
-  <li><a href="{{url}}inflect?table=apa,apan|pl+indef+nom"><pre>{{url}}inflect?table=apa,apan|pl indef nom</pre></a>
-  <li><a href="{{url}}inflect?table=apa,apan|pl+indef+nom,apor"><pre>{{url}}inflect?table=apa,apan|pl indef nom,apor</pre></a>
+  <li><a href="{{url}}inflect?table=apa,apan&lexicon=saldomp"><pre>{{url}}inflect?table=apa,apan</pre></a>
+  <li><a href="{{url}}inflect?table=apa,apan|pl+indef+nom&lexicon=saldomp"><pre>{{url}}inflect?table=apa,apan|pl indef nom</pre></a>
+  <li><a href="{{url}}inflect?table=apa,apan|pl+indef+nom,apor&lexicon=saldomp"><pre>{{url}}inflect?table=apa,apan|pl indef nom,apor</pre></a>
 </ul>
 
 <p>
@@ -227,8 +291,9 @@ Result:
         ...
       ],
       "paradigm": "paradigm_name"
+      "identifier": "the word's identifier", 
       "baseform": "computed baseform",
-      "count": #other words in this paradigm,
+      "paradigm_entries": #other words in this paradigm,
       "new": true/false (is this a new paradigm)
       "partOfSpeech": pos,
       "score": score,
@@ -258,7 +323,7 @@ Available query parameters:
 <p>
 Examples:
 <ul>
-  <li><a href="{{url}}inflectclass?wordform=apa&classname=bklass&amp;classval=3"><pre>{{url}}inflectclass?wordform=apa&amp;classname=bklass&amp;classval=3</pre></a>
+  <li><a href="{{url}}inflectclass?wordform=apa&classname=bklass&amp;classval=3&lexicon=saldomp"><pre>{{url}}inflectclass?wordform=apa&amp;classname=bklass&amp;classval=3</pre></a>
 </ul>
 
 <p>
@@ -284,17 +349,14 @@ Result:
       ], 
       "paradigm": "paradigm_name"
       "baseform": "computed baseform",
-      "count": #other words in this paradigm,
+      "identifier": "the word's identifier", 
+      "paradigm_entries": #other words in this paradigm,
       "new": true/false (is this a new paradigm)
       "partOfSpeech": pos,
       "score": score,
       "variables": {
         "1": "first_variable_instance",
         ...
-      }
-    }, 
-    {
-      "WordForms": [...]
       }
 }
 </pre>
@@ -311,12 +373,13 @@ Available query parameters:
   <tr><td>'like':</td><td> inflect like this lemgram</td></tr>
   <tr><td>'partOfSpeech':</td><td> the part of speech </td></tr>
   <tr><td>'restrict_to_baseform':</td><td> Should the first form in the given table also be the first form in the resulting table? Default: given by lexicon config</td></tr>
+  <tr><td>'pprior':</td><td> the pprior value to pextract: how much weight to give the frequency of the paradigms. Default: </td></tr>
 </table>
 
 <p>
 Examples:
 <ul>
-  <li><a href="{{url}}inflectlike?wordform=apa&like=katt..nn.1"><pre>{{url}}inflectlike?wordform=apa&amp;like=katt..nn.13</pre></a>
+  <li><a href="{{url}}inflectlike?wordform=apa&like=katt..nn.1&lexicon=saldomp"><pre>{{url}}inflectlike?wordform=apa&amp;like=katt..nn.13</pre></a>
 </ul>
 
 <p>
@@ -342,7 +405,8 @@ Result:
       ],
       "paradigm": "paradigm_name"
       "baseform": "computed baseform",
-      "count": #other words in this paradigm,
+      "identifier": "the word's identifier", 
+      "paradigm_entries": #other words in this paradigm,
       "new": true/false (is this a new paradigm)
       "partOfSpeech": pos,
       "score": score,
@@ -358,6 +422,57 @@ Result:
 </pre>
 
 
+<a name="inflectcandidate"/>
+<h3>inflectcandidate</h3>
+<p>
+Available query parameters:
+<table>
+  <tr><td>'lexicon': </td><td> the lexicon</td></tr>
+  <tr><td>'identifier':</td><td> the candidate's identifier </td></tr>
+</table>
+
+<p>
+Examples:
+<ul>
+  <li><pre>{{url}}inflectcandidate?identifier=XYS</pre>
+</ul>
+
+<p>
+Result:
+<pre>
+{
+  "Results": [
+    {
+      "WordForms": [
+        {
+          "msd": "sg indef nom",
+          "writtenForm": "apa"
+        },
+        {
+          "msd": "sg indef gen",
+          "writtenForm": "apas"
+        },
+        ...
+        {
+          "msd": "pl def gen",
+          "writtenForm": "apornas"
+        }
+      ],
+      "paradigm": "paradigm_name"
+      "baseform": "computed baseform",
+      "identifier": "a new, lexicon specific identifier for the word",
+      "paradigm_entries": #other words in this paradigm,
+      "new": true/false (is this a new paradigm)
+      "partOfSpeech": pos,
+      "score": score,
+      "variables": {
+        "1": "first_variable_instance",
+        ...
+      }
+    },
+
+</pre>
+
 <a name="addtable"/>
 <h3>addtable</h3>
 <p>
@@ -368,11 +483,12 @@ Available query parameters:
   <tr><td>'partOfSpeech':</td><td> the part of speech. Obligatory.  </td></tr>
   <tr><td>'paradigm':</td><td> the paradigm. Obligatory.   </td></tr>
   <tr><td>'identifier':</td><td> the word's identifier (lemgram). Obligatory.  </td></tr>
+  <tr><td>'baseform':</td><td> the word's baseform  </td></tr>
   <tr><td>'new':</td><td> is the paradigm an new paradigm?  </td></tr>
-  <tr><td>'class':</td><td> inflectional class  </td></tr>
+  <tr><td>'classes'/'class':</td><td> inflectional class  </td></tr>
 </table>
 
-A complete inflection table must be given. It must also match the given paradigm.
+The complete inflection table must be given. It must also match the given paradigm.
 
 Examples:
 <ul>
@@ -389,10 +505,147 @@ Result:
   "var_inst": {"1": "a", "2": "or"},
   "classes": {"bkass": "1", "fm_paradigm": "uu_1katt"},
   "pattern": "1::msd=sg indef nom#1+s::msd=sg indef gen#1+n::msd=sg def nom\t0=officer..nn.1,,1=officer",
-  "partOfSpeech": "nn"
+  "partOfSpeech": "nn",
+  "members": the number of word beloning to this paradigm
 }
 </pre>
 
+<a name="updatetable"/>
+<h3>updatetable</h3>
+<p>
+Available query parameters:
+<table>
+  <tr><td>'lexicon': </td><td> the lexicon. Obligatory. </td></tr>
+  <tr><td>'table':</td><td> the inflection table. Obligatory.  </td></tr>
+  <tr><td>'partOfSpeech':</td><td> the part of speech. Obligatory.  </td></tr>
+  <tr><td>'paradigm':</td><td> the paradigm. Obligatory.   </td></tr>
+  <tr><td>'identifier':</td><td> the word's identifier (lemgram). Obligatory.  </td></tr>
+  <tr><td>'baseform':</td><td> the word's baseform  </td></tr>
+  <tr><td>'new':</td><td> is the paradigm an new paradigm?  </td></tr>
+  <tr><td>'classes'/'class':</td><td> inflectional class  </td></tr>
+</table>
+
+The complete inflection table must be given. It must also match the given paradigm.
+Each candidate will be given a identifier.
+
+Examples:
+<ul>
+  <li><pre>{{url}}updatetable/?table=word(|tag)[word(|tag)]*&amp;paradigm=p1_paradigmnamn</pre></a>
+  <li><pre>{{url}}updatetable?identifier=apa..nn.3&amp;table=apan|sg def nom,apor|pl indef nom&amp;paradigm=p4_apa&amp;class=bklass:1,fm_paradigm=uu_1_katt&amp;new=true"></pre></a>
+</ul>
+
+<p>
+Result:
+<pre>
+{
+  "paradigm": paradigmName,
+  "identifier": identifier,
+  "var_inst": {"1": "a", "2": "or"},
+  "classes": {"bkass": "1", "fm_paradigm": "uu_1katt"},
+  "pattern": "1::msd=sg indef nom#1+s::msd=sg indef gen#1+n::msd=sg def nom\t0=officer..nn.1,,1=officer",
+  "partOfSpeech": "nn",
+  "members": the number of word beloning to this paradigm
+}
+</pre>
+
+<a name="addcandidates"/>
+<h3>addcandidates</h3>
+<p>
+POST. Available query parameters:
+<table>
+  <tr><td>'lexicon': </td><td> the lexicon. Obligatory. </td></tr>
+  <tr><td>'pprior':</td><td> the pprior value to pextract: how much weight to give the frequency of the paradigms. Default: </td></tr>
+</table>
+
+Input data:
+<pre>
+katt\tnn
+hund,hunden\tnn
+se,såg|pret\tvb
+</pre>
+
+Will try to figure out the inflection table for each candidate, like in the inflect call and save
+the result.
+
+<p>
+Result:
+<pre>
+{
+  "saved": the list of saved candidates,
+  "candidatelexiconName": the name of the ES resource where the candidates are saved
+}
+</pre>
+
+<a name="Candidatelist"/>
+<h3>candidatelist</h3>
+<p>
+See all saved candidates.
+Available query parameters:
+<table>
+  <tr><td>'lexicon': </td><td> the lexicon </td></tr>
+  <tr><td>'partOfSpeech':</td><td> the part of speech </td></tr>
+</table>
+
+<p>
+Examples:
+<ul>
+  <li><a href="{{url}}candidatelist?lexicon=votiska"><pre>{{url}}andidatelist?lexicon=votiska</pre></a>
+</ul>
+<p>
+Result:
+<pre>
+{
+  "candidates": the list of saved candidates
+}
+</pre>
+
+
+<a name="Removecandidate"/>
+<h3>removecandidate</h3>
+<p>
+Remove a candidate.
+Available query parameters:
+<table>
+  <tr><td>'lexicon': </td><td> the lexicon </td></tr>
+  <tr><td>'identifier':</td><td> the word's identifier. Obligatory.  </td></tr>
+</table>
+
+<p>
+Examples:
+<ul>
+  <li><pre>{{url}}removecandidate?lexicon=votiska&identifier=XYZ</pre>
+</ul>
+<p>
+Result:
+<pre>
+{
+  "deleted": true/false
+}
+</pre>
+
+<a name="Recomputecandidates"/>
+<h3>recomputecandidates</h3>
+<p>
+Recompute the paradigm assignments for all saved candidates
+Available query parameters:
+<table>
+  <tr><td>'lexicon': </td><td> the lexicon </td></tr>
+  <tr><td>'partOfSpeech':</td><td> the part of speech </td></tr>
+  <tr><td>'pprior':</td><td> the pprior value to pextract: how much weight to give the frequency of the paradigms. Default: </td></tr>
+</table>
+
+<p>
+Examples:
+<ul>
+  <li><pre>{{url}}recomputeparadigms?lexicon=votiska&partOfSpeech=nn</pre>
+</ul>
+<p>
+Result (NB! The count in the result might be erroneous):
+<pre>
+{
+  "updated": how many candidates have been updated
+}
+</pre>
 
 <a name="Compile"/>
 <h3>compile</h3>
@@ -404,8 +657,9 @@ Available query parameters:
   <tr><td>'q':</td><td>  the querystring. Optional</td></tr>
   <tr><td>'s': </td><td></td>the search field. Default: same as the c field </tr>
   <tr><td>'partOfSpeech':</td><td> the part of speech </td></tr>
-  <tr><td>'size':</td><td> the number of hits to show </td></tr>
-  <tr><td>'start':</td><td> start showing hit number </td></tr>
+  <tr><td>'size':</td><td> the number of hits to show. Default: 100 </td></tr>
+  <tr><td>'start':</td><td> start showing hit number. Default: 0 </td></tr>
+  <tr><td>'filter':</td><td> search for the query string as a substring. Default: false </td></tr>
 
   If s == "class":
   <tr><td>'extra':</td><td> show extra information. Default: true </td></tr>
@@ -415,12 +669,14 @@ Available query parameters:
 <p>
 Examples:
 <ul>
-  <li><a href="{{url}}compile?c=wf&q=katt"><pre>{{url}}compile?c=wf&amp;q=katt</pre></a>
-  <li><a href="{{url}}compile?c=paradigm&q=p15_pryd..av.1"><pre>{{url}}compile?c=paradigm&amp;q=p15_pryd..av.1</pre></a>
-  <li><a href="{{url}}compile?c=class&q=3&classname=bklass"><pre>{{url}}compile?c=class&amp;q=3&classname=bklass</pre></a>
-  <li><a href="{{url}}compile?c=wf&q=p1_överfart..nn.1&s=paradigm"><pre>{{url}}compile?c=wf&amp;q=p1_överfart..nn.1&s=paradigm</pre></a>
-  <li><a href="{{url}}compile?c=paradigm&s=bklass&q=1"><pre>{{url}}compile?c=paradigm&amp;s=bklass&q=1</pre></a>
-  <li><a href="{{url}}compile?c=class&classname=bklass&q=bok&s=wf"><pre>{{url}}compile?c=class&amp;classname=bklass&q=bok&s=wf</pre></a>
+  <li><a href="{{url}}compile?c=wf&q=katt&lexicon=saldomp"><pre>{{url}}compile?c=wf&amp;q=katt</pre></a>
+  <li><a href="{{url}}compile?c=wf&q=katt&filter=true&lexicon=saldomp"><pre>{{url}}compile?c=wf&amp;q=katt&amp;filter=true</pre></a>
+  <li><a href="{{url}}compile?c=wf&s=wf,paradigm&q=katt,namnskylt&filter=true&lexicon=saldomp"><pre>{{url}}compile?c=wf&amp;s=wf,paradigm&amp;q=katt,namnsklyt&amp;filter=true</pre></a>
+  <li><a href="{{url}}compile?c=paradigm&q=p15_pryd..av.1&lexicon=saldomp"><pre>{{url}}compile?c=paradigm&amp;q=p15_pryd..av.1</pre></a>
+  <li><a href="{{url}}compile?c=class&q=3&classname=bklass&lexicon=saldomp"><pre>{{url}}compile?c=class&amp;q=3&classname=bklass</pre></a>
+  <li><a href="{{url}}compile?c=wf&q=p1_överfart..nn.1&s=paradigm&lexicon=saldomp"><pre>{{url}}compile?c=wf&amp;q=p1_överfart..nn.1&s=paradigm</pre></a>
+  <li><a href="{{url}}compile?c=paradigm&s=bklass&q=1&lexicon=saldomp"><pre>{{url}}compile?c=paradigm&amp;s=bklass&q=1</pre></a>
+  <li><a href="{{url}}compile?c=class&classname=bklass&q=bok&s=wf&lexicon=saldomp"><pre>{{url}}compile?c=class&amp;classname=bklass&q=bok&s=wf</pre></a>
 </ul>
 
 
@@ -441,24 +697,9 @@ Available query parameters:
 <p>
 Examples:
 <ul>
-  <li><a href="{{url}}list?s=wf"><pre>{{url}}list?s=wf&amp;q=katt</pre></a>
-  <li><a href="{{url}}list?s=paradigm"><pre>{{url}}list?s=paradigm&amp;q=p15_pryd..av.1</pre></a>
-  <li><a href="{{url}}list?s=class&q=3&classname=bklass"><pre>{{url}}list?s=class&amp;q=3&classname=bklass</pre></a>
+  <li><a href="{{url}}list?c=wf"><pre>{{url}}list?c=wf</pre></a>
+  <li><a href="{{url}}list?c=paradigm"><pre>{{url}}list?c=paradigm</pre></a>
+  <li><a href="{{url}}list?c=class&q=3&classname=bklass"><pre>{{url}}list?c=class&amp;q=3&classname=bklass</pre></a>
 </ul>
 
 
-<a name="defaulttable"/>
-<h3>Defaulttable</h3>
-<p>
-Available query parameters:
-<table>
-  <tr><td>'lexicon': </td><td> the lexicon </td></tr>
-  <tr><td>'partOfSpeech':</td><td> the part of speech </td></tr>
-</table>
-
-NB! The order of the forms are currently alhpabetical
-<p>
-Examples:
-<ul>
-  <li><a href="{{url}}defaulttable?partOfSpeech=nn"><pre>{{url}}defaulttable?partOfSpeech=nn</pre></a>
-</ul>
