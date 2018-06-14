@@ -7,7 +7,7 @@ För att svara på hur ett ord av en viss ordklass böjs behöver mfl-backenden 
 alla relevanta (dvs. ofta alla) paradigm till sitt orakel (dvs. pardigmextract).
 Oraklet genererar det givna ordets tabell för varje paradigm, samt sorterar dem
 i sannolikhetsordning.  När paradigmen används i paradigmextract representeras
-de i paradigmsextracts egna externa format, motsvarande klassen Paradigm i filen
+de i paradigmsextracts egna format, motsvarande klassen Paradigm i filen
 src/paradigm.py (i paradigmextracts kod).
 
 För att undvika att hämta alla paradigm från Karp (dvs. ES-klustret) vid varje
