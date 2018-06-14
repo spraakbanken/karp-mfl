@@ -1,12 +1,12 @@
 import logging
 import uuid
 
-import configmanager as C
-import errors as errs
-import helpers
-import lexconfig
+import src.configmanager as C
+import src.errors as errs
+import src.helpers as helpers
+import src.lexconfig as lexconfig
 import morphparser as mp
-import parseparadigms as pp
+import src.parseparadigms as pp
 import pextract as pex
 
 

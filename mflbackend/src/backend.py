@@ -1,19 +1,19 @@
-import configmanager as C
-import errors as e
+import src.configmanager as C
+import src.errors as e
 from flask import Flask, jsonify, render_template, request
 from flask_cors import CORS
 import json
-import lexconfig
+import src.lexconfig as lexconfig
 import logging
 import sys
 sys.path.append(C.config['paradigmextract'])
 import morphparser as mp
 import pextract as pex
 # Must be imported after pextract is found
-import handleparadigms as handle
-import helpers
-import parsecandidates as pc
-import parseparadigms as pp
+import src.handleparadigms as handle
+import src.helpers as helpers
+import src.parsecandidates as pc
+import src.parseparadigms as pp
 
 app = Flask(__name__)
 CORS(app)

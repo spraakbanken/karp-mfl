@@ -9,9 +9,9 @@ import uuid
 from hashlib import md5
 from flask import request
 
-import configmanager as C
-import errors as errs
-import lexconfig
+import src.configmanager as C
+import src.errors as errs
+import src.lexconfig as lexconfig
 
 
 # Parsing results form ES #####################################################
@@ -565,7 +565,8 @@ def extra_src(lexicon, funcname, default):
         logging.debug('\n\ngo look in %s\n\n', classmodule)
         func = getattr(classmodule, funcname)
         return func
-    except:
+    except Exception as e:
+        logging.debug('Failed to load %s: %s', lexconf['src'], e)
         return default
 
 

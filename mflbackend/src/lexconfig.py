@@ -1,8 +1,8 @@
 import json
 import logging
 
-import configmanager as C
-import errors as e
+import src.configmanager as C
+import src.errors as e
 
 
 def get_lexiconconf(lexicon):
