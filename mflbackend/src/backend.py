@@ -544,8 +544,8 @@ def remove_table():
     return jsonify({'identifier': identifier, 'removed': True})
 
 
-# Not tested, add url when tested
-# @app.route('/removeparadigm')
+# TODO Not properly tested
+@app.route('/removeparadigm')
 def remove_paradigm():
     """
     Remove a paradigm.
@@ -553,6 +553,9 @@ def remove_paradigm():
     identifier = request.args.get('identifier', '')
     lexicon = request.args.get('lexicon', C.config['default'])
     lexconf = lexconfig.get_lexiconconf(lexicon)
+    force = request.args.get('force', False)
+    force = force in ['True', 'true', True]
+    logging.debug('force? %s', force)
     # para = helpers.get_current_paradigm(identifier, pos, lexconf, paradigmdict)
 
 
@@ -565,14 +568,14 @@ def remove_paradigm():
                              mode=lexconf['lexiconMode'])
 
     members = helpers.es_total(res)
-    if members == 0:
+    if members == 0 or force:
         pres = helpers.karp_query('query',
                                  {'q': query, 'size': 1},
                                  resource=lexconf['paradigmlexiconName'],
                                  mode=lexconf['paradigmMode'])
         karp_id = helpers.es_first_id(pres)
         # remove the paradigm
-        helpers.karp_delete(karp_id, resource=lexconf['lexiconName'])
+        helpers.karp_delete(karp_id, resource=lexconf['paradigmlexiconName'])
     else:
         err = 'Try to remove paradigm with %s members %s'
         logging.error(err, members, identifier)
