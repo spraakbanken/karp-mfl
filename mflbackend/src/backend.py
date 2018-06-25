@@ -489,7 +489,6 @@ def update_table():
     lexconf = lexconfig.get_lexiconconf(lexicon)
     pos = helpers.read_one_pos(lexconf)
     old_para = helpers.get_current_paradigm(identifier, pos, lexconf, paradigmdict)
-    lexicon = request.args.get('lexicon', 'saldomp')
     table = request.args.get('table', '')
     paradigm = request.args.get('paradigm', '')
     baseform = request.args.get('baseform', '')
@@ -519,6 +518,68 @@ def update_table():
                     'members': para.count})
 
 
+@app.route('/removetable')
+def remove_table():
+    """
+    Remove the  inflection table of a word (ie the whole entry).
+    Also remove the word from its paradigm.
+    """
+    identifier = request.args.get('identifier', '')
+    lexicon = request.args.get('lexicon', C.config['default'])
+    lexconf = lexconfig.get_lexiconconf(lexicon)
+    pos = helpers.read_one_pos(lexconf)
+    para = helpers.get_current_paradigm(identifier, pos, lexconf, paradigmdict)
+
+    # remove from the old paradigm
+    handle.remove_word_from_paradigm(lexicon, para, paradigmdict, identifier, pos)
+
+    # ask karp for the word's ID
+    karp_id = helpers.get_es_identifier(identifier,
+                                        lexconf['identifier'],
+                                        lexconf['lexiconName'],
+                                        lexconf['lexiconMode'])
+    # save the inflection table in karp
+    # TODO
+    helpers.karp_delete(karp_id, resource=lexconf['lexiconName'])
+    return jsonify({'identifier': identifier, 'removed': True})
+
+
+# Not tested, add url when tested
+# @app.route('/removeparadigm')
+def remove_paradigm():
+    """
+    Remove a paradigm.
+    """
+    identifier = request.args.get('identifier', '')
+    lexicon = request.args.get('lexicon', C.config['default'])
+    lexconf = lexconfig.get_lexiconconf(lexicon)
+    # para = helpers.get_current_paradigm(identifier, pos, lexconf, paradigmdict)
+
+
+    # see if the paradigm is empty
+    # TODO paradigm? look up
+    query = helpers.search_q([], lexconf["extractparadigm"], identifier, lexicon)
+    res = helpers.karp_query('query',
+                             {'q': query, 'size': 0},
+                             resource=lexconf['lexiconName'],
+                             mode=lexconf['lexiconMode'])
+
+    members = helpers.es_total(res)
+    if members == 0:
+        pres = helpers.karp_query('query',
+                                 {'q': query, 'size': 1},
+                                 resource=lexconf['paradigmlexiconName'],
+                                 mode=lexconf['paradigmMode'])
+        karp_id = helpers.es_first_id(pres)
+        # remove the paradigm
+        helpers.karp_delete(karp_id, resource=lexconf['lexiconName'])
+    else:
+        err = 'Try to remove paradigm with %s members %s'
+        logging.error(err, members, identifier)
+        raise e.MflException(err % (members, identifier))
+    return jsonify({'identifier': identifier, 'removed': True})
+
+
 @app.route('/addtable')
 def add_table():
     """
@@ -528,7 +589,6 @@ def add_table():
     lexicon = request.args.get('lexicon', C.config['default'])
     lexconf = lexconfig.get_lexiconconf(lexicon)
     pos = helpers.read_one_pos(lexconf)
-    lexicon = request.args.get('lexicon', 'saldomp')
     table = request.args.get('table', '')
     paradigm = request.args.get('paradigm', '')
     identifier = request.args.get('identifier', '')

@@ -1,41 +1,68 @@
-This is a pilot version of the backend for Morfologilabbet.
-It is under development and only for playing around.
+This is a pilot version of the backend for Morfologilabbet,
+Språkbanken's morphology lab.
 
-To run it:
+The code is under development.
+
+You can try the current full version of Morfologilabbet [here](https://spraakbanken.gu.se/morfologilabbet/).
+
+
+# To run it:
 
 * Download the repo `git clone git@github.com:spraakbanken/karp-mfl.git`
 
-## Install karp
-* Install [Docker](https://docs.docker.com/engine/installation/)
-* Download this repo `git clone https://github.com/spraakbanken/karp-docker.git`
-* `cd karp-docker` (and stay here for the next commands)
-* Change branch `git fetch && git branch es6`
-* Install karp-backend `git clone https://github.com/spraakbanken/karp-backend.git`
-* Change branch `cd karp-backend && git fetch && git branch es6 && cd ..`
+### Download paradigmextract
+`https://github.com/spraakbanken/paradigmextract`
 
-* Move mflkarpconf.zip from mflkarp to karp-backend
-* `unzip karp-backend/mflkarpconf.zip`
-* Run `installmflsaldom.sh`
-
-* Run `docker-compose build`
-* Run `docker-compose up -d`
-* `cd karp-backend`
-* Run `docker-compose run --rm  karp python offline.py --create_metadata`
-* Run `docker-compose run --rm karp python offline.py --create_mode karp test`
-* Run `docker-compose run --rm karp python offline.py --publish_mode karp test`
-* Test: `curl 'localhost:8081/app/'`
-
-  configer, mappingconfig, lexikon
+Test it:
+`python3 src/pextract.py < exempel.txt`
 
 
-## Install paradigmextract
-See https://github.com/spraakbanken/paradigmextract
+### Get a Karp backend
+Either use an external Karp, or set up your own:
 
-* `git clone git@github.com:spraakbanken/paradigmextract.git`
-* `cd paradigmextract && git fetch && git branch dev`
+Follow the instruction [here](https://github.com/spraakbanken/karp-docker),
+but use the branch `es6`!
+Skip the step "Setup Karps configurations". Instead do this:
+
+- Go to `karp-backend`
+- Get `example_mflkarpconfig.zip` (included in the mfl-repo under `testdata`),
+    put it in `/karp-backend`, unzip it.
+- Copy `config/lexiconconf.json` to `../dummyauth`.
+
+Continue following the instruttions on GitHub.
+
+Finally do:
+
+`docker-compose run --rm karp python offline.py --import_mode paradigms test`
+
+`docker-compose run --rm karp python offline.py --publish_mode paradigms test`
 
 
-## Create links from paradigmextract to mfl
- * go to `karp-mfl`
- * `mkdir pextract`
- * `link.sh /path/to/paradigmextract/src`
+
+### Get mfl-backend
+Go back to your mfl-backend.
+
+Open `config/config.json` and update it:
+
+ * update `paradigmextract` to the full path of your paradigmextract version
+
+If you run the default docker Karp setup, just leave the below fields as they are.
+
+ * karp_backend - set the address to the Karp you want to use
+ * DBPASS - login credentials for Karp. This is needed so that the mfl-backend can
+   read all paradigms from Karp on start-up.
+
+All calls from mfl-backend to Karp are authenticated by Karp itself, using the current
+user's credentials.
+But since the mfl-backend stores all paradigms internally, calls like
+`inflect` do not include Karp and are hence not authenticated. Therefore, the mfl-backend
+makes calls directly to the authentication server. To enable this, you need to set the
+following:
+ * SECRET_KEY - the authentication server's secret key
+ * AUTH_SERVER - the address to the server
+ * AUTH_RESOURCES - the address to the server for seeing open resoures
+
+
+Start your mfl backned on `localhost:5000` by running: `python3 backend.py`
+
+Test `curl localhost:5000`. This should show some documentation.

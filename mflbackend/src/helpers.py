@@ -422,7 +422,8 @@ def make_candidate(lexicon, identifier, table, paradigms, pos, kbest=5):
     obj['CandidateParadigms'] = []
     obj['WordForms'] = []
     # attested forms
-    for form in table[1:]:
+    wftable = table[1:] if len(table) > 1 else table
+    for form in wftable:
         if '|' in form:
             form, tag = form.split('|')
             wf = {'writtenForm': form, 'msd': tag}
