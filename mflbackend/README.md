@@ -20,8 +20,7 @@ Test it:
 ### Get a Karp backend
 Either use an external Karp, or set up your own:
 
-Follow the instruction [here](https://github.com/spraakbanken/karp-docker),
-but use the branch `es6`!
+Follow the instruction [here](https://github.com/spraakbanken/karp-docker).
 Skip the step "Setup Karps configurations". Instead do this:
 
 - Go to `karp-backend`
