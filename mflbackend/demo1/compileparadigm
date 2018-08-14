@@ -1,0 +1,40 @@
+url: '/compile?s=paradigm'
+
+Visar alla paradigm, med information om på antal klasser och ord.
+parametrar:
+  's' - ska vara paradigm
+  'lexicon' - vilket lexikon
+  'pos' - vilket ordklass
+  'size' - visa hur många träffar
+  'start' - börja lista träffarna från denna position
+  'q' - en restriktiv sökning
+
+
+{
+  "compiled_on": "paradigm", 
+  "fields": [
+    "bklass", 
+    "fm_paradgm", 
+    "entries"
+  ], 
+  "stats": [
+    [
+      "p100_rallarros..nn.1", 
+      1, 
+      1, 
+      22
+    ], 
+    [
+      "p101_odalbonde..nn.1", 
+      1, 
+      1, 
+      21
+    ], 
+    [
+      "p102_otrohetsdrama..nn.1", 
+      1, 
+      1, 
+      21
+    ]
+   ]
+}

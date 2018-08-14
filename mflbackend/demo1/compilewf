@@ -1,0 +1,94 @@
+url: '/compile?s=wf'
+
+Visar alla ord.
+parametrar:
+  's' - ska vara wf
+  'lexicon' - vilket lexikon
+  'pos' - vilket ordklass
+  'size' - visa hur många träffar
+  'start' - börja lista träffarna från denna position
+  'q' - en restriktiv sökning
+
+{
+  "_shards": {
+    "failed": 0, 
+    "skipped": 0, 
+    "successful": 5, 
+    "total": 5
+  }, 
+  "hits": {
+    "hits": [
+      {
+        "_id": "16mbPWIBLpXBCEpaMFNV", 
+        "_index": "external_test", 
+        "_score": null, 
+        "_source": {
+          "FormRepresentations": [
+            {
+              "bklass": "0", 
+              "inherent": "u", 
+              "lemgram": "proc..nna.2", 
+              "paradigm": "TeV..nna.1", 
+              "partOfSpeech": "nna"
+            }
+          ]
+        }, 
+        "_type": "lexicalentry", 
+        "sort": [
+          1, 
+          "\u0080\u4000\u0001", 
+          "%", 
+          "proc..nna.2"
+        ]
+      }, 
+      {
+        "_id": "IKqcPWIBLpXBCEpaJcIo", 
+        "_index": "external_test", 
+        "_score": null, 
+        "_source": {
+          "FormRepresentations": [
+            {
+              "lemgram": "o..kna.2", 
+              "paradigm": "o..kna.2", 
+              "partOfSpeech": "kna"
+            }
+          ]
+        }, 
+        "_type": "lexicalentry", 
+        "sort": [
+          1, 
+          "\u0080\u4000\u0001", 
+          "&", 
+          "o..kna.2"
+        ]
+      }, 
+      {
+        "_id": "zambPWIBLpXBCEpaNmLI", 
+        "_index": "external_test", 
+        "_score": null, 
+        "_source": {
+          "FormRepresentations": [
+            {
+              "lemgram": "pls..ppa.1", 
+              "paradigm": "inkl..ppa.1", 
+              "partOfSpeech": "ppa"
+            }
+          ]
+        }, 
+        "_type": "lexicalentry", 
+        "sort": [
+          1, 
+          "\u0080\u4000\u0001", 
+          "+", 
+          "pls..ppa.1"
+        ]
+      }, 
+    ], 
+    ...
+    :qa
+    "max_score": null, 
+    "total": 128036
+  }, 
+  "timed_out": false, 
+  "took": 55
+}

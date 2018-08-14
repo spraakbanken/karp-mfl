@@ -1,0 +1,45 @@
+url: '/compile?s=class&classname=fmparadigms'
+
+Visar alla klasser i en kategori.
+parametrar:
+  's' - kategorin att visa. lexikonspecfik
+  'lexicon' - vilket lexikon
+  'pos' - vilket ordklass
+  'size' - visa hur många träffar
+  'start' - börja lista träffarna från denna position
+  'q' - en restriktiv sökning
+
+{
+  "compiled_on": "fm_paradigm", 
+  "fields": [
+    "paradigm", 
+    "entries"
+  ], 
+  "stats": [
+    [
+      "nn_2u_mening", 
+      2, 
+      10177
+    ], 
+    [
+      "nn_0u_boskap", 
+      1, 
+      9079
+    ], 
+    [
+      "nn_5n_saldo", 
+      1, 
+      7565
+    ], 
+    [
+      "nn_3u_salong", 
+      1, 
+      5973
+    ], 
+    [
+      "nn_3u_karbid", 
+      2, 
+      5230
+    ], 
+  ]
+}

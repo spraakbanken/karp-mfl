@@ -1,0 +1,35 @@
+url: '/compile?s=class&classname=bklass'
+
+Visar alla klasser i en kategori.
+parametrar:
+  's' - kategorin att visa. lexikonspecfik
+  'lexicon' - vilket lexikon
+  'pos' - vilket ordklass
+  'size' - visa hur många träffar
+  'start' - börja lista träffarna från denna position
+  'q' - en restriktiv sökning
+
+{
+  "compiled_on": "bklass", 
+  "fields": [
+    "paradigm", 
+    "entries"
+  ], 
+  "stats": [
+    [
+      "0", 
+      87, 
+      18888
+    ], 
+    [
+      "3", 
+      57, 
+      17276
+    ], 
+    [
+      "2", 
+      57, 
+      16784
+    ]
+ ]
+}

@@ -1,0 +1,27 @@
+X word=apa&bklass=3&pos=nn
+   =>
+  word=apa&classname=bklass&class=3
+
+_entries kanske är mer intuitivt än _members
+ X ändra i konvertering
+   ändra i mappningar
+   kolla i backend.py om vi behöver ändra något
+
+kunna ändra paradigmnamn
+
+mer databas-agnostiskt svar på fler anrop,
+ - bara _source
+
+ - compile
+     {
+       "name": "nn_2u_mening",
+       "word_count": 10177,
+       "paradigm_count": 2
+     }
+
+
+compile?s=paradigm
+  -> för att göra paradigmlistaa
+  -> för att visa alternativ till "enligt kategori"
+
+vad behövs till info-boxen?

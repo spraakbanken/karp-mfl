@@ -1,0 +1,33 @@
+url: '/list?s=wf'
+
+Visar alla ord + antal.
+parametrar:
+  's' - ska vara wf
+  'lexicon' - vilket lexikon
+  'pos' - vilket ordklass
+  'q' - en restriktiv sökning
+
+
+  "compiled_on": "wf", 
+  "list": [
+    [
+      "bas", 
+      4
+    ], 
+    [
+      "lov", 
+      4
+    ], 
+    [
+      "pris", 
+      4
+    ], 
+    [
+      "bot", 
+      3
+    ], 
+    [
+      "brons", 
+      3
+    ] 
+    ]}

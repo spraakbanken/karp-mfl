@@ -1,0 +1,27 @@
+{
+"lexiconName": "saldomp",  // the name
+"lexiconMode": "external",  // the index/mode of the lexicon in karp
+"paradigmlexiconName": "saldompparadigms", // the lexicon name of the paradigms
+"paradigmMode": "saldompparadigms", // the index/mode where the paradigms are stored in karp
+"defaultpos": "nn", // the pos to use when no pos is specified by user
+  // specify all user defined inflectional classes.
+  // The key is the name of the class, and should correspond to a searchable field in karp
+  // The value is the json path to the (unanalyzed!) value in karp
+"inflectionalclass": {"bklass": "FormRepresentations.bklass", "fm_paradigm": "FormRepresentations.fm_paradigm.raw"},
+"extractparadigm": "paradigm", // the search field to use in karp to find the extract paradigm
+"extractparadigmpath": "FormRepresentations.paradigm.raw", // the json path to the (unanalyzed!) paradigm in karp
+"corpus": "suc3",  // which korp corpus to use for this lexicon
+"show": "lemgram,bklass,paradigm,pos,inherent", // which fields are of interest when showing a word/lemma
+"ngramorder": 3, // for pextract
+"ngramprior": 0.01, // for pextract
+"pprior": 4.0, // for pextract
+"pos": "pos", // the karp search field for partofspeech
+"msd": "msd", // the karp search field for msd
+"baseform": "baseformC", // the karp search field for the baseform
+"identifier": "lemgram", // the karp search field for the lemma identifier
+"needed_lexiconFields": ["lemgram", "pos"], // ?? this might be needed later on
+"possible_lexiconFields": ["bklass", "fm_paradigm"], //??  this might be needed later on
+"src": "config.saldomp_convert" // the path to a python file with lexicon specific code
+                                // such as conversions
+
+}

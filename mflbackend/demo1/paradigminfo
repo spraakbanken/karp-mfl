@@ -1,0 +1,455 @@
+url: /paradigminfo?paradigm=p15_pryd..av.1
+
+Visar information om ett paradigm
+
+parametrar:
+  paradigm - paradigmnamnet
+  lexicon - vilket lexikon
+  short - visa komprimerad version
+  
+Framtida tillägg i svaret:
+variabelrestriktioner
+  
+ Svar vid ingen träff:
+  {}
+
+Svar vid träff, short=true:
+{
+  "MorphologicalPatternID": "p15_pryd..av.1",
+  "TransformCategory": {
+    "bklass": [
+      ""
+    ], 
+    "fm_paradgm": [
+      "av_1_bred", 
+      "av_1_brydd"
+    ]
+  }, 
+  "entries": 95, 
+  "partOfSpeech": "av"
+}
+
+Svar vid träff, short=false:
+  {
+      "MorphologicalPatternID": "p15_pryd..av.1", 
+      "TransformCategory": [], 
+      "TransformSet": [
+        {
+          "GrammaticalFeatures": {
+            "msd": "pos indef sg u nom"
+          }, 
+          "Process": [
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddVariable", 
+              "variableNum": "1"
+            }, 
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddConstant", 
+              "stringValue": "d"
+            }
+          ], 
+          "TransformCategory": [], 
+          "feat": []
+        }, 
+        {
+          "GrammaticalFeatures": {
+            "msd": "pos indef sg u gen"
+          }, 
+          "Process": [
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddVariable", 
+              "variableNum": "1"
+            }, 
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddConstant", 
+              "stringValue": "ds"
+            }
+          ], 
+          "TransformCategory": [], 
+          "feat": []
+        }, 
+        {
+          "GrammaticalFeatures": {
+            "msd": "pos indef sg n nom"
+          }, 
+          "Process": [
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddVariable", 
+              "variableNum": "1"
+            }, 
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddConstant", 
+              "stringValue": "tt"
+            }
+          ], 
+          "TransformCategory": [], 
+          "feat": []
+        }, 
+        {
+          "GrammaticalFeatures": {
+            "msd": "pos indef sg n gen"
+          }, 
+          "Process": [
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddVariable", 
+              "variableNum": "1"
+            }, 
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddConstant", 
+              "stringValue": "tts"
+            }
+          ], 
+          "TransformCategory": [], 
+          "feat": []
+        }, 
+        {
+          "GrammaticalFeatures": {
+            "msd": "pos indef pl nom"
+          }, 
+          "Process": [
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddVariable", 
+              "variableNum": "1"
+            }, 
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddConstant", 
+              "stringValue": "da"
+            }
+          ], 
+          "TransformCategory": [], 
+          "feat": []
+        }, 
+        {
+          "GrammaticalFeatures": {
+            "msd": "pos indef pl gen"
+          }, 
+          "Process": [
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddVariable", 
+              "variableNum": "1"
+            }, 
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddConstant", 
+              "stringValue": "das"
+            }
+          ], 
+          "TransformCategory": [], 
+          "feat": []
+        }, 
+        {
+          "GrammaticalFeatures": {
+            "msd": "pos def sg no_masc nom"
+          }, 
+          "Process": [
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddVariable", 
+              "variableNum": "1"
+            }, 
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddConstant", 
+              "stringValue": "da"
+            }
+          ], 
+          "TransformCategory": [], 
+          "feat": []
+        }, 
+        {
+          "GrammaticalFeatures": {
+            "msd": "pos def sg no_masc gen"
+          }, 
+          "Process": [
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddVariable", 
+              "variableNum": "1"
+            }, 
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddConstant", 
+              "stringValue": "das"
+            }
+          ], 
+          "TransformCategory": [], 
+          "feat": []
+        }, 
+        {
+          "GrammaticalFeatures": {
+            "msd": "pos def sg masc nom"
+          }, 
+          "Process": [
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddVariable", 
+              "variableNum": "1"
+            }, 
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddConstant", 
+              "stringValue": "de"
+            }
+          ], 
+          "TransformCategory": [], 
+          "feat": []
+        }, 
+        {
+          "GrammaticalFeatures": {
+            "msd": "pos def sg masc gen"
+          }, 
+          "Process": [
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddVariable", 
+              "variableNum": "1"
+            }, 
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddConstant", 
+              "stringValue": "des"
+            }
+          ], 
+          "TransformCategory": [], 
+          "feat": []
+        }, 
+        {
+          "GrammaticalFeatures": {
+            "msd": "pos def pl nom"
+          }, 
+          "Process": [
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddVariable", 
+              "variableNum": "1"
+            }, 
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddConstant", 
+              "stringValue": "da"
+            }
+          ], 
+          "TransformCategory": [], 
+          "feat": []
+        }, 
+        {
+          "GrammaticalFeatures": {
+            "msd": "pos def pl gen"
+          }, 
+          "Process": [
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddVariable", 
+              "variableNum": "1"
+            }, 
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddConstant", 
+              "stringValue": "das"
+            }
+          ], 
+          "TransformCategory": [], 
+          "feat": []
+        }, 
+        {
+          "GrammaticalFeatures": {
+            "msd": "komp nom"
+          }, 
+          "Process": [
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddVariable", 
+              "variableNum": "1"
+            }, 
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddConstant", 
+              "stringValue": "dare"
+            }
+          ], 
+          "TransformCategory": [], 
+          "feat": []
+        }, 
+        {
+          "GrammaticalFeatures": {
+            "msd": "komp gen"
+          }, 
+          "Process": [
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddVariable", 
+              "variableNum": "1"
+            }, 
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddConstant", 
+              "stringValue": "dares"
+            }
+          ], 
+          "TransformCategory": [], 
+          "feat": []
+        }, 
+        {
+          "GrammaticalFeatures": {
+            "msd": "super indef nom"
+          }, 
+          "Process": [
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddVariable", 
+              "variableNum": "1"
+            }, 
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddConstant", 
+              "stringValue": "dast"
+            }
+          ], 
+          "TransformCategory": [], 
+          "feat": []
+        }, 
+        {
+          "GrammaticalFeatures": {
+            "msd": "super indef gen"
+          }, 
+          "Process": [
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddVariable", 
+              "variableNum": "1"
+            }, 
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddConstant", 
+              "stringValue": "dasts"
+            }
+          ], 
+          "TransformCategory": [], 
+          "feat": []
+        }, 
+        {
+          "GrammaticalFeatures": {
+            "msd": "super def no_masc nom"
+          }, 
+          "Process": [
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddVariable", 
+              "variableNum": "1"
+            }, 
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddConstant", 
+              "stringValue": "daste"
+            }
+          ], 
+          "TransformCategory": [], 
+          "feat": []
+        }, 
+        {
+          "GrammaticalFeatures": {
+            "msd": "super def no_masc gen"
+          }, 
+          "Process": [
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddVariable", 
+              "variableNum": "1"
+            }, 
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddConstant", 
+              "stringValue": "dastes"
+            }
+          ], 
+          "TransformCategory": [], 
+          "feat": []
+        }, 
+        {
+          "GrammaticalFeatures": {
+            "msd": "super def masc nom"
+          }, 
+          "Process": [
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddVariable", 
+              "variableNum": "1"
+            }, 
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddConstant", 
+              "stringValue": "daste"
+            }
+          ], 
+          "TransformCategory": [], 
+          "feat": []
+        }, 
+        {
+          "GrammaticalFeatures": {
+            "msd": "super def masc gen"
+          }, 
+          "Process": [
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddVariable", 
+              "variableNum": "1"
+            }, 
+            {
+              "operator": "addAfter", 
+              "processType": "pextractAddConstant", 
+              "stringValue": "dastes"
+            }
+          ], 
+          "TransformCategory": [], 
+          "feat": []
+        }
+      ], 
+      "VariableInstances": [
+        {
+          "1": "pry", 
+          "first-attest": "pryd..av.1"
+        }, 
+        {
+          "1": "vinr\u00f6", 
+          "first-attest": "vinr\u00f6d..av.1"
+        }, 
+        {
+          "1": "ultrar\u00f6", 
+          "first-attest": "ultrar\u00f6d..av.1"
+        }, 
+        {
+          "1": "tegelr\u00f6", 
+          "first-attest": "tegelr\u00f6d..av.1"
+        }, 
+        {
+          "1": "spr\u00f6", 
+          "first-attest": "spr\u00f6d..av.1"
+        }, 
+        {
+          "1": "soli", 
+          "first-attest": "solid..av.1"
+        }, 
+        {
+          "1": "skjutgla", 
+          "first-attest": "skjutglad..av.1"
+        }, 
+        {
+          "1": "skend\u00f6", 
+          "first-attest": "skend\u00f6d..av.1"
+        }
+      ], 
+      "_lexiconName": "saldompparadigms", 
+      "_members": 95, 
+      "_partOfSpeech": "av"
+}

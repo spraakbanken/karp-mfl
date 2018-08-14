@@ -1,0 +1,26 @@
+url: '/list?s=class&classname=bklass'
+
+Visar alla klasser i en kategori + deras antal.
+Bklasserna heter "0", "1", "2"...
+parametrar:
+  's' - kategorin att visa. lexikonspecfik
+  'lexicon' - vilket lexikon
+  'pos' - vilket ordklass
+  'q' - en restriktiv sökning
+{
+  "compiled_on": "bklass",
+  "list": [
+    [
+      "0",
+      18888
+    ],
+    [
+      "3",
+      17276
+    ],
+    [
+      "2",
+      16784
+    ]
+    ]}
+
