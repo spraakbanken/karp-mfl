@@ -1,13 +1,8 @@
 import logging
 import uuid
 
-import configmanager as C
-import errors as errs
-import helpers
-import lexconfig
-import morphparser as mp
-import parseparadigms as pp
-import pextract as pex
+from paradigmextract import morphparser as mp
+from paradigmextract import pextract as pex
 
 
 def add_paradigm(lexicon, pid, paradigm, paradigms, identifier, pos, classes):

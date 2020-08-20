@@ -1,5 +1,4 @@
 {
- "paradigmextract": "/home/malin/Spraak/pextract/sbextract/src",
  "print_tables": false,
  "kbest": 10,
  "debug": false,

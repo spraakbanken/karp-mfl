@@ -6,9 +6,9 @@ import json
 import lexconfig
 import logging
 import sys
-sys.path.append(C.config['paradigmextract'])
-import morphparser as mp
-import pextract as pex
+# sys.path.append(C.config['paradigmextract'])
+from paradigmextract import morphparser as mp
+from paradigmextract import pextract as pex
 # Must be imported after pextract is found
 import handleparadigms as handle
 import helpers
