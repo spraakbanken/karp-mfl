@@ -1,6 +1,8 @@
 {
     "include": [
+        "mflbackend",
         "mflbackend/mflbackend",
         "mflbackend/tests"
-    ]
+    ],
+    "venvPath": "./mflbackend/.venv"
 }
