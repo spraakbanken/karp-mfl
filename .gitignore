@@ -1,0 +1,18 @@
+# python
+__pycache__/
+*.pyc
+
+# virtual environments
+venv/
+.venv/
+
+# pytest
+.pytest_cache/
+
+
+# python packages
+*.egg-info/
+.eggs/
+
+# editor settings
+.vscode/
