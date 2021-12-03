@@ -1,0 +1,6 @@
+DirectoryIndex disabled
+Options -Indexes
+RewriteEngine On
+
+RewriteRule ^(.*)$ http://localhost:8086/$1 [P]
+Header edit* Location "http://localhost:8086/" "https://ws.spraakbanken.gu.se/ws/morfologilabbet/"
