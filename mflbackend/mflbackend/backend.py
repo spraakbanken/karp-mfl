@@ -402,7 +402,7 @@ def listing():
 
 
 @app.route("/compile")
-def compile():
+def _compile():
     """
     Make a compilation, possible filtered. Contains more information than /list
     Possible values to compile: class, wf/wordform, paradigm

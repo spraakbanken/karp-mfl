@@ -1,0 +1,560 @@
+{
+    "_shards": {
+        "failed": 0,
+        "skipped": 0,
+        "successful": 5,
+        "total": 5
+    },
+    "hits": {
+        "hits": [
+            {
+                "_id": "5126d4c8-3e77-11e8-b8be-94659c6b3e9c",
+                "_index": "votiskaparadigms_20180508",
+                "_score": null,
+                "_source": {
+                    "MorphologicalPatternID": "p1_ahkõrõ..nn.1",
+                    "Top_VariableInstances": [
+                        {
+                            "1": "ahkõr",
+                            "first-attest": "ahkõrõ..nn.1"
+                        },
+                        {
+                            "1": "akkun",
+                            "first-attest": "akkunõ..nn.1"
+                        },
+                        {
+                            "1": "ahav",
+                            "first-attest": "ahavõ..nn.1"
+                        },
+                        {
+                            "1": "tuttav",
+                            "first-attest": "tuttavõ..nn.1"
+                        },
+                        {
+                            "1": "nagl",
+                            "first-attest": "naglõ..nn.1"
+                        }
+                    ],
+                    "TransformSet": [
+                        {
+                            "GrammaticalFeatures": {
+                                "msd": "singular nominative"
+                            },
+                            "Process": [
+                                {
+                                    "operator": "addAfter",
+                                    "processType": "pextractAddVariable",
+                                    "variableNum": "1"
+                                },
+                                {
+                                    "operator": "addAfter",
+                                    "processType": "pextractAddConstant",
+                                    "stringValue": "õ"
+                                }
+                            ]
+                        },
+                        {
+                            "GrammaticalFeatures": {
+                                "msd": "plural nominative"
+                            },
+                            "Process": [
+                                {
+                                    "operator": "addAfter",
+                                    "processType": "pextractAddVariable",
+                                    "variableNum": "1"
+                                },
+                                {
+                                    "operator": "addAfter",
+                                    "processType": "pextractAddConstant",
+                                    "stringValue": "õd"
+                                }
+                            ]
+                        },
+                        {
+                            "GrammaticalFeatures": {
+                                "msd": "singular genitive"
+                            },
+                            "Process": [
+                                {
+                                    "operator": "addAfter",
+                                    "processType": "pextractAddVariable",
+                                    "variableNum": "1"
+                                },
+                                {
+                                    "operator": "addAfter",
+                                    "processType": "pextractAddConstant",
+                                    "stringValue": "a"
+                                }
+                            ]
+                        },
+                        {
+                            "GrammaticalFeatures": {
+                                "msd": "plural genitive"
+                            },
+                            "Process": [
+                                {
+                                    "operator": "addAfter",
+                                    "processType": "pextractAddVariable",
+                                    "variableNum": "1"
+                                },
+                                {
+                                    "operator": "addAfter",
+                                    "processType": "pextractAddConstant",
+                                    "stringValue": "oi"
+                                }
+                            ]
+                        },
+                        {
+                            "GrammaticalFeatures": {
+                                "msd": "singular partitive"
+                            },
+                            "Process": [
+                                {
+                                    "operator": "addAfter",
+                                    "processType": "pextractAddVariable",
+                                    "variableNum": "1"
+                                },
+                                {
+                                    "operator": "addAfter",
+                                    "processType": "pextractAddConstant",
+                                    "stringValue": "a"
+                                }
+                            ]
+                        },
+                        {
+                            "GrammaticalFeatures": {
+                                "msd": "plural partitive"
+                            },
+                            "Process": [
+                                {
+                                    "operator": "addAfter",
+                                    "processType": "pextractAddVariable",
+                                    "variableNum": "1"
+                                },
+                                {
+                                    "operator": "addAfter",
+                                    "processType": "pextractAddConstant",
+                                    "stringValue": "oi"
+                                }
+                            ]
+                        },
+                        {
+                            "GrammaticalFeatures": {
+                                "msd": "plural partitive"
+                            },
+                            "Process": [
+                                {
+                                    "operator": "addAfter",
+                                    "processType": "pextractAddVariable",
+                                    "variableNum": "1"
+                                },
+                                {
+                                    "operator": "addAfter",
+                                    "processType": "pextractAddConstant",
+                                    "stringValue": "oitõ"
+                                }
+                            ]
+                        },
+                        {
+                            "GrammaticalFeatures": {
+                                "msd": "singular illative"
+                            },
+                            "Process": [
+                                {
+                                    "operator": "addAfter",
+                                    "processType": "pextractAddVariable",
+                                    "variableNum": "1"
+                                },
+                                {
+                                    "operator": "addAfter",
+                                    "processType": "pextractAddConstant",
+                                    "stringValue": "aa"
+                                }
+                            ]
+                        },
+                        {
+                            "GrammaticalFeatures": {
+                                "msd": "singular illative"
+                            },
+                            "Process": [
+                                {
+                                    "operator": "addAfter",
+                                    "processType": "pextractAddVariable",
+                                    "variableNum": "1"
+                                },
+                                {
+                                    "operator": "addAfter",
+                                    "processType": "pextractAddConstant",
+                                    "stringValue": "asõ"
+                                }
+                            ]
+                        },
+                        {
+                            "GrammaticalFeatures": {
+                                "msd": "plural illative"
+                            },
+                            "Process": [
+                                {
+                                    "operator": "addAfter",
+                                    "processType": "pextractAddVariable",
+                                    "variableNum": "1"
+                                },
+                                {
+                                    "operator": "addAfter",
+                                    "processType": "pextractAddConstant",
+                                    "stringValue": "oisõ"
+                                }
+                            ]
+                        },
+                        {
+                            "GrammaticalFeatures": {
+                                "msd": "singular inessive"
+                            },
+                            "Process": [
+                                {
+                                    "operator": "addAfter",
+                                    "processType": "pextractAddVariable",
+                                    "variableNum": "1"
+                                },
+                                {
+                                    "operator": "addAfter",
+                                    "processType": "pextractAddConstant",
+                                    "stringValue": "az"
+                                }
+                            ]
+                        },
+                        {
+                            "GrammaticalFeatures": {
+                                "msd": "plural inessive"
+                            },
+                            "Process": [
+                                {
+                                    "operator": "addAfter",
+                                    "processType": "pextractAddVariable",
+                                    "variableNum": "1"
+                                },
+                                {
+                                    "operator": "addAfter",
+                                    "processType": "pextractAddConstant",
+                                    "stringValue": "oiz"
+                                }
+                            ]
+                        },
+                        {
+                            "GrammaticalFeatures": {
+                                "msd": "singular elative"
+                            },
+                            "Process": [
+                                {
+                                    "operator": "addAfter",
+                                    "processType": "pextractAddVariable",
+                                    "variableNum": "1"
+                                },
+                                {
+                                    "operator": "addAfter",
+                                    "processType": "pextractAddConstant",
+                                    "stringValue": "õssõ"
+                                }
+                            ]
+                        },
+                        {
+                            "GrammaticalFeatures": {
+                                "msd": "plural elative"
+                            },
+                            "Process": [
+                                {
+                                    "operator": "addAfter",
+                                    "processType": "pextractAddVariable",
+                                    "variableNum": "1"
+                                },
+                                {
+                                    "operator": "addAfter",
+                                    "processType": "pextractAddConstant",
+                                    "stringValue": "oissõ"
+                                }
+                            ]
+                        },
+                        {
+                            "GrammaticalFeatures": {
+                                "msd": "singular allative"
+                            },
+                            "Process": [
+                                {
+                                    "operator": "addAfter",
+                                    "processType": "pextractAddVariable",
+                                    "variableNum": "1"
+                                },
+                                {
+                                    "operator": "addAfter",
+                                    "processType": "pextractAddConstant",
+                                    "stringValue": "õllõ"
+                                }
+                            ]
+                        },
+                        {
+                            "GrammaticalFeatures": {
+                                "msd": "plural allative"
+                            },
+                            "Process": [
+                                {
+                                    "operator": "addAfter",
+                                    "processType": "pextractAddVariable",
+                                    "variableNum": "1"
+                                },
+                                {
+                                    "operator": "addAfter",
+                                    "processType": "pextractAddConstant",
+                                    "stringValue": "oillõ"
+                                }
+                            ]
+                        },
+                        {
+                            "GrammaticalFeatures": {
+                                "msd": "singular adessive"
+                            },
+                            "Process": [
+                                {
+                                    "operator": "addAfter",
+                                    "processType": "pextractAddVariable",
+                                    "variableNum": "1"
+                                },
+                                {
+                                    "operator": "addAfter",
+                                    "processType": "pextractAddConstant",
+                                    "stringValue": "õl"
+                                }
+                            ]
+                        },
+                        {
+                            "GrammaticalFeatures": {
+                                "msd": "plural adessive"
+                            },
+                            "Process": [
+                                {
+                                    "operator": "addAfter",
+                                    "processType": "pextractAddVariable",
+                                    "variableNum": "1"
+                                },
+                                {
+                                    "operator": "addAfter",
+                                    "processType": "pextractAddConstant",
+                                    "stringValue": "oil"
+                                }
+                            ]
+                        },
+                        {
+                            "GrammaticalFeatures": {
+                                "msd": "singular ablative"
+                            },
+                            "Process": [
+                                {
+                                    "operator": "addAfter",
+                                    "processType": "pextractAddVariable",
+                                    "variableNum": "1"
+                                },
+                                {
+                                    "operator": "addAfter",
+                                    "processType": "pextractAddConstant",
+                                    "stringValue": "õssi"
+                                }
+                            ]
+                        },
+                        {
+                            "GrammaticalFeatures": {
+                                "msd": "plural ablative"
+                            },
+                            "Process": [
+                                {
+                                    "operator": "addAfter",
+                                    "processType": "pextractAddVariable",
+                                    "variableNum": "1"
+                                },
+                                {
+                                    "operator": "addAfter",
+                                    "processType": "pextractAddConstant",
+                                    "stringValue": "oissi"
+                                }
+                            ]
+                        },
+                        {
+                            "GrammaticalFeatures": {
+                                "msd": "singular translative"
+                            },
+                            "Process": [
+                                {
+                                    "operator": "addAfter",
+                                    "processType": "pextractAddVariable",
+                                    "variableNum": "1"
+                                },
+                                {
+                                    "operator": "addAfter",
+                                    "processType": "pextractAddConstant",
+                                    "stringValue": "assi"
+                                }
+                            ]
+                        },
+                        {
+                            "GrammaticalFeatures": {
+                                "msd": "plural translative"
+                            },
+                            "Process": [
+                                {
+                                    "operator": "addAfter",
+                                    "processType": "pextractAddVariable",
+                                    "variableNum": "1"
+                                },
+                                {
+                                    "operator": "addAfter",
+                                    "processType": "pextractAddConstant",
+                                    "stringValue": "oissi"
+                                }
+                            ]
+                        },
+                        {
+                            "GrammaticalFeatures": {
+                                "msd": "singular terminative"
+                            },
+                            "Process": [
+                                {
+                                    "operator": "addAfter",
+                                    "processType": "pextractAddVariable",
+                                    "variableNum": "1"
+                                },
+                                {
+                                    "operator": "addAfter",
+                                    "processType": "pextractAddConstant",
+                                    "stringValue": "assaa"
+                                }
+                            ]
+                        },
+                        {
+                            "GrammaticalFeatures": {
+                                "msd": "plural terminative"
+                            },
+                            "Process": [
+                                {
+                                    "operator": "addAfter",
+                                    "processType": "pextractAddVariable",
+                                    "variableNum": "1"
+                                },
+                                {
+                                    "operator": "addAfter",
+                                    "processType": "pextractAddConstant",
+                                    "stringValue": "oissaa"
+                                }
+                            ]
+                        },
+                        {
+                            "GrammaticalFeatures": {
+                                "msd": "singular comitative"
+                            },
+                            "Process": [
+                                {
+                                    "operator": "addAfter",
+                                    "processType": "pextractAddVariable",
+                                    "variableNum": "1"
+                                },
+                                {
+                                    "operator": "addAfter",
+                                    "processType": "pextractAddConstant",
+                                    "stringValue": "aka"
+                                }
+                            ]
+                        },
+                        {
+                            "GrammaticalFeatures": {
+                                "msd": "plural comitative"
+                            },
+                            "Process": [
+                                {
+                                    "operator": "addAfter",
+                                    "processType": "pextractAddVariable",
+                                    "variableNum": "1"
+                                },
+                                {
+                                    "operator": "addAfter",
+                                    "processType": "pextractAddConstant",
+                                    "stringValue": "oika"
+                                }
+                            ]
+                        }
+                    ],
+                    "VariableInstances": [
+                        {
+                            "1": "ahkõr",
+                            "first-attest": "ahkõrõ..nn.1"
+                        },
+                        {
+                            "1": "akkun",
+                            "first-attest": "akkunõ..nn.1"
+                        },
+                        {
+                            "1": "ahav",
+                            "first-attest": "ahavõ..nn.1"
+                        },
+                        {
+                            "1": "tuttav",
+                            "first-attest": "tuttavõ..nn.1"
+                        },
+                        {
+                            "1": "nagl",
+                            "first-attest": "naglõ..nn.1"
+                        },
+                        {
+                            "1": "borkkan",
+                            "first-attest": "borkkanõ..nn.1"
+                        },
+                        {
+                            "1": "bruud",
+                            "first-attest": "bruudõ..nn.1"
+                        },
+                        {
+                            "1": "deel",
+                            "first-attest": "deelõ..nn.1"
+                        },
+                        {
+                            "1": "dobr",
+                            "first-attest": "dobrõ..nn.1"
+                        },
+                        {
+                            "1": "duum",
+                            "first-attest": "duumõ..nn.1"
+                        },
+                        {
+                            "1": "film",
+                            "first-attest": "filmõ..nn.1"
+                        },
+                        {
+                            "1": "gramm",
+                            "first-attest": "grammõ..nn.1"
+                        },
+                        {
+                            "1": "vihm",
+                            "first-attest": "vihmõ..nn.1"
+                        },
+                        {
+                            "1": "iiv",
+                            "first-attest": "iivõ..nn.1"
+                        }
+                    ],
+                    "_entries": 14,
+                    "_lexiconName": "votiskaparadigms",
+                    "_partOfSpeech": "nn",
+                    "_uuid": "5126d4c8-3e77-11e8-b8be-94659c6b3e9c",
+                    "lexiconName": "votiskaparadigms"
+                },
+                "_type": "lexicalentry",
+                "_version": 13,
+                "sort": [
+                    9223372036854775807,
+                    "nn",
+                    "p1_ahkõrõ..nn.1"
+                ]
+            }
+        ],
+        "max_score": null,
+        "total": 1
+    },
+    "timed_out": false,
+    "took": 3
+}
